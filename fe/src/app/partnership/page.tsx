@@ -1,9 +1,9 @@
 import Image from "next/image";
-import Footer from "../components/Footer";
-import Navbar from "../components/Navbar";
-import FadeInUp from "../components/FadeInUp";
-import SpinIn from "../components/SpinIn";
-import FadeInLeft from "../components/FadeInLeft";
+import Footer from "../../components/layout/Footer";
+import Navbar from "../../components/layout/Navbar";
+import FadeInUp from "../../components/animation/FadeInUp";
+import SpinIn from "../../components/animation/SpinIn";
+import FadeInLeft from "../../components/animation/FadeInLeft";
 export default function PartnershipPage() {
   return (
     <main className="min-h-screen bg-[#e8e8e6]">

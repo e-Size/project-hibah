@@ -1,11 +1,11 @@
 import Image from "next/image";
-import Footer from "../components/Footer";
-import Navbar from "../components/Navbar";
-import LocationSection from "../components/LocationSection";
-import SpinIn from "../components/SpinIn";
-import FadeInUp from "../components/FadeInUp";
-import FadeInRight from "../components/FadeInRight";
-import FadeInLeft from "../components/FadeInLeft";
+import Footer from "../../components/layout/Footer";
+import Navbar from "../../components/layout/Navbar";
+import LocationSection from "../../features/about/components/LocationSection";
+import SpinIn from "../../components/animation/SpinIn";
+import FadeInUp from "../../components/animation/FadeInUp";
+import FadeInRight from "../../components/animation/FadeInRight";
+import FadeInLeft from "../../components/animation/FadeInLeft";
 
 export default function AboutPage() {
   return (

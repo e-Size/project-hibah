@@ -2,12 +2,12 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import FadeInUp from "../components/FadeInUp";
-import { pakaian, merch } from "../data/categories";
-import Footer from "../components/Footer";
-import Navbar from "../components/Navbar";
-import JacketModal from "../components/JacketModal";
-import SpinIn from "../components/SpinIn";
+import FadeInUp from "../../components/animation/FadeInUp";
+import { pakaian, merch } from "../../data/categories";
+import Footer from "../../components/layout/Footer";
+import Navbar from "../../components/layout/Navbar";
+import JacketModal from "../../features/category/components/JacketModal";
+import SpinIn from "../../components/animation/SpinIn";
 const labelColors = ["#4a7fc1", "#d4795e", "#4a7fc1", "#d4795e"];
 
 function CategoryGrid({ items, onJacketClick }: { items: { name: string; bg: string }[]; onJacketClick: () => void }) {
