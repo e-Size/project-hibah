@@ -73,7 +73,7 @@ export default function Chatbot() {
       {/* Toggle Button */}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-[#DFAA14] shadow-lg flex items-center justify-center hover:bg-[#c49510] transition-colors"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-[#2b5fd4] shadow-lg flex items-center justify-center hover:bg-[#c49510] transition-colors"
         aria-label="Buka chatbot"
       >
         {open ? (

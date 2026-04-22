@@ -13,7 +13,14 @@ export default function Home() {
     <main className="min-h-screen">
       <Navbar variant="transparent" />
       {/* Hero Section */}
-      <section className="relative h-screen bg-[#F8F3E9] overflow-hidden">
+      <section className="relative h-screen overflow-hidden">
+        <Image
+          src="/bg herokeren.png"
+          alt="Hero background"
+          fill
+          className="object-cover object-center -z-10"
+          priority
+        />
         {/* Left - Text */}
         <div className="relative z-10 flex flex-col max-w-5xl h-full justify-start pt-40 pb-20 px-8 md:px-16 2xl:px-32 ">
           <h1 className="font-[family-name:var(--font-red-rose)] text-5xl md:text-6xl text-black leading-tight mb-8 uppercase">
