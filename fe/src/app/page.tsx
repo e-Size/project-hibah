@@ -3,45 +3,59 @@ import FadeInLeft from "../components/animation/FadeInLeft";
 import FadeInRight from "../components/animation/FadeInRight";
 import SpinIn from "../components/animation/SpinIn";
 import FadeInUp from "../components/animation/FadeInUp";
+import ParallaxScroll from "../components/animation/ParallaxScroll";
 import CategoryCarousel from "../features/home/components/CategoryCarousel";
 import Footer from "../components/layout/Footer";
 import Navbar from "../components/layout/Navbar";
-import HeroMouseEffect from "../features/home/components/HeroMouseEffect";
 
 export default function Home() {
   return (
     <main className="min-h-screen">
       <Navbar variant="transparent" />
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center">
-        <HeroMouseEffect />
-        {/* Background Image */}
-        <Image
-          src="/bg hero section.png"
-          alt="Merchandise background"
-          fill
-          className="object-cover object-center"
-          priority
-        />
-
-
-        {/* Content */}
-        <div data-hero-content className="relative z-10 w-full flex flex-col items-center text-center px-8">
-          <h1 className="text-5xl md:text-6xl font-bold text-black leading-tight mb-15 max-w-3xl">
-            Solusi Terpercaya untuk Merchandise &amp; Promosi
+      <section className="relative h-screen bg-[#F8F3E9] overflow-hidden">
+        {/* Left - Text */}
+        <div className="relative z-10 flex flex-col max-w-5xl h-full justify-start pt-40 pb-20 px-8 md:px-16 2xl:px-32 ">
+          <h1 className="font-[family-name:var(--font-red-rose)] text-5xl md:text-6xl text-black leading-tight mb-8 uppercase">
+            Solusi Terpercaya <br />untuk Merchandise &amp;<br /> Promosi
           </h1>
-          <p className="text-2xl text-black mb-10 max-w-3xl">
-            Custom apparel dan promotional products berkualitas tinggi untuk kebutuhan bisnis Anda
+          <p className="font-[family-name:var(--font-red-rose)] text-sm md:text-base text-black mb-10 max-w-md">
+            Custom apparel dan promotional products <br /> berkualitas tinggi untuk kebutuhan bisnis Anda
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <button className="px-8 py-3 rounded-[16px] bg-white text-gray-900 hover:bg-gray-100 transition-colors border-1 border-[#927615]">
+          <div className="flex flex-wrap gap-4">
+            <button className="px-8 py-3 rounded-full bg-white text-gray-900 hover:bg-gray-100 transition-colors border border-[#C0980D]">
               Lihat Produk
             </button>
-            <button className="px-8 py-3 rounded-[16px] bg-[#927615] text-white hover:bg-[#6a6a2e] transition-colors border-1 border-[#927615]">
+            <button className="px-8 py-3 rounded-full bg-white text-gray-900 hover:bg-gray-100 transition-colors border border-[#C0980D]">
               Pesan Sekarang
             </button>
           </div>
         </div>
+
+        {/* Right - Models (absolute, offset, parallax) */}
+        <ParallaxScroll
+          speed={0.5}
+          className="pointer-events-none absolute inset-y-0 right-0 w-1/2 flex items-end justify-center"
+        >
+          <div className="relative w-53/100 h-[1000px]">
+            <Image
+              src="/gambarcowo.png"
+              alt="Model pria"
+              fill
+              className="object-contain object-bottom"
+              priority
+            />
+          </div>
+          <div className="relative w-43/100 h-[1000px] -translate-x-52 z-10">
+            <Image
+              src="/gambarcewe.png"
+              alt="Model wanita"
+              fill
+              className="object-contain object-bottom"
+              priority
+            />
+          </div>
+        </ParallaxScroll>
       </section>
 
       {/* About Section */}
