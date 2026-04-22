@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { allCategories } from "../data/categories";
+import { allCategories } from "../../../data/categories";
 
 const VISIBLE = 4;
 const GAP = 36; // gap-9 = 36px
