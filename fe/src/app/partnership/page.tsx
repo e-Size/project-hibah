@@ -4,6 +4,7 @@ import Navbar from "../../components/layout/Navbar";
 import FadeInUp from "../../components/animation/FadeInUp";
 import SpinIn from "../../components/animation/SpinIn";
 import FadeInLeft from "../../components/animation/FadeInLeft";
+import InViewVideo from "../../components/ui/InViewVideo";
 export default function PartnershipPage() {
   return (
     <main className="min-h-screen bg-[#e8e8e6]">
@@ -11,7 +12,7 @@ export default function PartnershipPage() {
       <section className="px-16 2xl:px-80 py-20">
 
         {/* Header */}
-        <div className="flex flex-col items-center text-center mb-12">
+        <div className="flex flex-col items-center text-center">
           <div className="bg-[#7C6000] px-35 py-3 mb-4">
             <h1 className="text-white font-bold text-6xl">Building Trust</h1>
           </div>
@@ -24,13 +25,7 @@ export default function PartnershipPage() {
 
         {/* Map */}
         <FadeInLeft className="px-16">
-          <Image
-            src="/peta dunia 1.png"
-            alt="Peta Dunia"
-            width={1200}
-            height={650}
-            className="w-full h-auto"
-          />
+          <InViewVideo src="/petamapanimasi.mp4" className="w-full h-auto" />
         </FadeInLeft>
 
       </section>
