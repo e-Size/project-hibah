@@ -39,6 +39,22 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Bottom-left contact info */}
+        <div className="absolute bottom-13 left-8 md:left-16 2xl:left-32 z-10 flex flex-wrap items-center gap-10 font-[family-name:var(--font-poppins)] font-normal text-xl text-black">
+          <div className="flex items-center gap-3">
+            <Image src="/Vector-2.png" alt="" width={32} height={32} className="h-7 w-auto" />
+            <span>Esize</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Image src="/Vector.png" alt="" width={32} height={32} className="h-7 w-auto" />
+            <span>081223344556</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Image src="/Vector-1.png" alt="" width={32} height={32} className="h-7 w-auto" />
+            <span>Esize</span>
+          </div>
+        </div>
+
         {/* Right - Models (absolute, offset, parallax) */}
         <ParallaxScroll
           speed={0.5}
