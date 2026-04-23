@@ -55,6 +55,7 @@ type CanvasEl = {
   w: number;
   h: number;
   view: ViewType;
+  curve?: number;
 };
 
 function IconProduct({ active }: { active: boolean }) {
@@ -195,6 +196,7 @@ export default function EditorPage() {
   const [tdItalic, setTdItalic] = useState(false);
   const [tdAlign, setTdAlign] = useState<"left" | "center" | "right">("center");
   const [tdFont, setTdFont] = useState("Poppins");
+  const [tdCurve, setTdCurve] = useState(0);
   const tdColors = ["#000000", "#ffffff", "#8b6340", "#f5f0e8", "#2b5fd4", "#7f1d1d", "#1a472a", "#e8734a"];
 
   // When a text element is selected, load its properties into the panel
@@ -210,6 +212,7 @@ export default function EditorPage() {
     setTdItalic(el.fontStyle === "italic");
     setTdAlign(el.textAlign ?? "center");
     setTdFont(el.fontFamily ?? "Poppins");
+    setTdCurve(el.curve ?? 0);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedEl]);
 
@@ -218,11 +221,11 @@ export default function EditorPage() {
     if (!selectedEl) return;
     setElements(prev => prev.map(el =>
       el.id === selectedEl && el.type === "text"
-        ? { ...el, text: tdText, fontSize: tdFontSize, letterSpacing: tdSpacing, color: tdColor, fontWeight: tdBold ? "700" : "400", fontStyle: tdItalic ? "italic" : "normal", textAlign: tdAlign, fontFamily: tdFont }
+        ? { ...el, text: tdText, fontSize: tdFontSize, letterSpacing: tdSpacing, color: tdColor, fontWeight: tdBold ? "700" : "400", fontStyle: tdItalic ? "italic" : "normal", textAlign: tdAlign, fontFamily: tdFont, curve: tdCurve }
         : el
     ));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tdText, tdFontSize, tdSpacing, tdColor, tdBold, tdItalic, tdAlign, tdFont]);
+  }, [tdText, tdFontSize, tdSpacing, tdColor, tdBold, tdItalic, tdAlign, tdFont, tdCurve]);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
@@ -259,6 +262,7 @@ export default function EditorPage() {
       letterSpacing: tdSpacing,
       textAlign: tdAlign,
       color: tdColor,
+      curve: tdCurve,
       x: (zone.x / 100) * CANVAS + 10,
       y: (zone.y / 100) * CANVAS + 10,
       w: (zone.w / 100) * CANVAS - 20,
@@ -412,9 +416,27 @@ export default function EditorPage() {
         });
       } else if (el.type === "text" && el.text) {
         ctx.save();
-        ctx.font = `${el.fontWeight} ${el.fontSize}px Poppins, sans-serif`;
-        ctx.fillStyle = el.color ?? "#111111";
-        ctx.fillText(el.text, el.x, el.y + (el.fontSize ?? 16));
+        const curve = el.curve ?? 0;
+        if (curve !== 0) {
+          const fsz = el.fontSize ?? 16;
+          const absS = Math.abs(curve);
+          const r = (absS * absS + (el.w / 2) * (el.w / 2)) / (2 * absS);
+          const midY = fsz * 0.8; // keep arc midpoint anchored at this y
+          const epY = curve > 0 ? midY + absS : midY - absS;
+          const sweep = curve > 0 ? "0" : "1";
+          const arcD = `M 0,${epY} A ${r},${r} 0 0,${sweep} ${el.w},${epY}`;
+          const svgH = fsz + absS + 10;
+          const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="${el.w}" height="${svgH}" overflow="visible"><defs><path id="arc" d="${arcD}" fill="none"/></defs><text font-family="${el.fontFamily ?? 'Poppins'}, sans-serif" font-size="${fsz}" font-weight="${el.fontWeight ?? '400'}" font-style="${el.fontStyle ?? 'normal'}" fill="${el.color ?? '#111'}" text-anchor="middle" letter-spacing="${el.letterSpacing ?? 0}"><textPath href="#arc" startOffset="50%">${el.text}</textPath></text></svg>`;
+          await new Promise<void>(res => {
+            const img = new window.Image();
+            img.onload = () => { ctx.drawImage(img, el.x, el.y); res(); };
+            img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+          });
+        } else {
+          ctx.font = `${el.fontWeight ?? '400'} ${el.fontSize}px ${el.fontFamily ?? 'Poppins'}, sans-serif`;
+          ctx.fillStyle = el.color ?? "#111111";
+          ctx.fillText(el.text, el.x, el.y + (el.fontSize ?? 16));
+        }
         ctx.restore();
       }
     }
@@ -716,6 +738,20 @@ export default function EditorPage() {
                     />
                   </div>
 
+                  {/* Curve */}
+                  <div className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b6340" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20 Q12 4 20 20"/></svg>
+                        <span className="text-[10px] font-bold text-gray-500 tracking-widest">CURVE</span>
+                      </div>
+                      <span className="bg-gray-800 text-white text-xs font-bold px-2 py-0.5 rounded-full">{tdCurve}px</span>
+                    </div>
+                    <input type="range" min={-100} max={100} value={tdCurve} onChange={e => setTdCurve(Number(e.target.value))}
+                      className="w-full accent-gray-800 h-1.5 rounded-full" />
+                    <div className="flex justify-between text-[10px] text-gray-400 mt-1"><span>↙ Down</span><span>0</span><span>Up ↗</span></div>
+                  </div>
+
                   {/* Style + Align */}
                   <div className="flex gap-3">
                     <div className="flex-1 bg-white rounded-2xl p-3 shadow-sm border border-gray-100">
@@ -903,7 +939,33 @@ export default function EditorPage() {
                           className="bg-transparent outline-none border-none w-full"
                           style={{ fontSize: el.fontSize, fontWeight: el.fontWeight, fontStyle: el.fontStyle, fontFamily: el.fontFamily ?? "var(--font-poppins)", letterSpacing: el.letterSpacing, textAlign: el.textAlign, color: el.color, minWidth: 80, width: "100%" }}
                         />
-                      ) : (
+                      ) : el.curve && el.curve !== 0 ? (() => {
+                          const s = el.curve!;
+                          const fsz = el.fontSize ?? 24;
+                          const absS = Math.abs(s);
+                          const r = (absS * absS + (el.w / 2) * (el.w / 2)) / (2 * absS);
+                          const midY = fsz * 0.8; // consistent anchor: arc midpoint always here
+                          const epY = s > 0 ? midY + absS : midY - absS;
+                          const sweep = s > 0 ? "0" : "1";
+                          const arcD = `M 0,${epY} A ${r},${r} 0 0,${sweep} ${el.w},${epY}`;
+                          const svgH = fsz + absS + 10;
+                          return (
+                            <svg width={el.w} height={svgH} style={{ overflow: "visible" }}>
+                              <defs><path id={`arc-${el.id}`} d={arcD} fill="none" /></defs>
+                              <text
+                                fontFamily={`${el.fontFamily ?? 'Poppins'}, sans-serif`}
+                                fontSize={el.fontSize}
+                                fontWeight={el.fontWeight}
+                                fontStyle={el.fontStyle}
+                                fill={el.color ?? '#111'}
+                                textAnchor="middle"
+                                letterSpacing={el.letterSpacing}
+                              >
+                                <textPath href={`#arc-${el.id}`} startOffset="50%">{el.text}</textPath>
+                              </text>
+                            </svg>
+                          );
+                        })() : (
                         <span style={{ fontSize: el.fontSize, fontWeight: el.fontWeight, fontStyle: el.fontStyle, fontFamily: el.fontFamily ?? "var(--font-poppins)", letterSpacing: el.letterSpacing, textAlign: el.textAlign, color: el.color, whiteSpace: "nowrap", display: "block", width: "100%" }}>
                           {el.text}
                         </span>
