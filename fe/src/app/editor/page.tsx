@@ -527,23 +527,21 @@ export default function EditorPage() {
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z" /></svg>
                     </div>
                     <div>
-                      <h2 className="font-bold text-gray-900 text-sm leading-tight">Premium Cotton Shirt</h2>
+                      <h2 className="font-bold text-gray-900 text-sm leading-tight">Shirt</h2>
                       <p className="text-gray-400 text-xs mt-1 leading-relaxed">Handcrafted quality meets modern design. Ring-spun cotton with superior comfort.</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex gap-2 mb-6">
-                  {(["details", "change"] as ProductTab[]).map(tab => (
-                    <button
-                      key={tab}
-                      ref={tab === "change" ? changeBtnRef : undefined}
-                      onClick={() => setProductTab(tab)}
-                      className={`flex-1 py-2 rounded-full text-sm font-semibold capitalize transition-colors ${productTab === tab ? "bg-[#e8734a] text-white" : "border border-gray-200 text-gray-500 hover:bg-gray-50"}`}
-                    >
-                      {tab === "details" ? "Details" : "Change"}
-                    </button>
-                  ))}
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-semibold text-gray-800">Details</h3>
+                  <button
+                    ref={changeBtnRef}
+                    onClick={() => setProductTab("change")}
+                    className="px-5 py-1.5 rounded-full text-sm font-semibold bg-[#e8734a] text-white hover:bg-[#d4623a] transition-colors"
+                  >
+                    Change
+                  </button>
                 </div>
 
                 <div className="mb-6">

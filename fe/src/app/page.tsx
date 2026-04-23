@@ -169,11 +169,11 @@ export default function Home() {
         <hr className="border-t-2 border-[#c0553a] mb-12 mx-32" />
 
         {/* Stats */}
-        <div className="flex justify-around mb-12 ">
+        <div className="flex justify-around text-center mb-12 mx-30">
           {[
+            { value: "2.000+", label: "Universities" },
             { value: "20.000+", label: "Customer" },
-            { value: "20.000+", label: "Customer" },
-            { value: "20.000+", label: "Customer" },
+            { value: "6+", label: "Years Operating" },
           ].map((stat, i) => (
             <FadeInUp key={i}>
               <div className="relative px-10 py-6">
