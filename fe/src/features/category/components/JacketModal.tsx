@@ -169,9 +169,19 @@ export default function JacketModal({ onClose }: Props) {
 
           {/* Warna */}
           <div>
-            <p className="font-bold text-gray-800 mb-2">
-              Pilih Warna: <span className="text-[#e8734a]">{selectedWarna}</span>
-            </p>
+            <div className="flex items-center justify-between mb-2">
+              <p className="font-bold text-gray-800">
+                Pilih Warna: <span className="text-[#e8734a]">{selectedWarna}</span>
+              </p>
+              <a
+                href="https://drive.google.com/drive/folders/187p1R3KtvCY1RaOvzgsmGMAN0aeDBPFU"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#4273B2] text-sm flex items-center gap-1 hover:underline"
+              >
+                Color Guide →
+              </a>
+            </div>
             <div className="flex gap-3 pl-2 flex-wrap">
               {WARNA.map((w) => (
                 <button

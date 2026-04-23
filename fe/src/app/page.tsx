@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import FadeInLeft from "../components/animation/FadeInLeft";
 import FadeInRight from "../components/animation/FadeInRight";
 import SpinIn from "../components/animation/SpinIn";
@@ -30,12 +31,20 @@ export default function Home() {
             Custom apparel dan promotional products <br /> berkualitas tinggi untuk kebutuhan bisnis Anda
           </p>
           <div className="flex flex-wrap gap-4">
-            <button className="px-8 py-3 rounded-full bg-white text-gray-900 hover:bg-gray-100 transition-colors border border-[#C0980D]">
+            <Link
+              href="/category"
+              className="px-8 py-3 rounded-full bg-white text-gray-900 hover:bg-gray-100 transition-colors border border-[#C0980D]"
+            >
               Lihat Produk
-            </button>
-            <button className="px-8 py-3 rounded-full bg-white text-gray-900 hover:bg-gray-100 transition-colors border border-[#C0980D]">
+            </Link>
+            <a
+              href="https://wa.me/6281223344556"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-8 py-3 rounded-full bg-white text-gray-900 hover:bg-gray-100 transition-colors border border-[#C0980D]"
+            >
               Pesan Sekarang
-            </button>
+            </a>
           </div>
         </div>
 
@@ -100,9 +109,12 @@ export default function Home() {
               terjaga, proses efisien, dan pengiriman tepat waktu dengan harga<br />
               bersahabat.
             </p>
-            <button className="px-6 py-2 rounded-full bg-[#DFAA14] text-white font-light hover:bg-[#7a6210] transition-colors">
+            <Link
+              href="/about"
+              className="px-6 py-2 rounded-full bg-[#DFAA14] text-white font-light hover:bg-[#7a6210] transition-colors"
+            >
               Selengkapnya →
-            </button>
+            </Link>
           </FadeInLeft>
 
           {/* Right - 2x2 Image Grid */}
@@ -210,9 +222,12 @@ export default function Home() {
         </div>
 
         <FadeInUp>
-          <button className="px-8 py-2 rounded-full bg-[#DFAA14] text-white font-light hover:bg-[#c49510] transition-colors mx-6 shadow-lg">
+          <Link
+            href="/about"
+            className="px-8 py-2 rounded-full bg-[#DFAA14] text-white font-light hover:bg-[#c49510] transition-colors mx-6 shadow-lg"
+          >
             Lihat Semua Produk
-          </button>
+          </Link>
         </FadeInUp>
       </section>
 
@@ -261,9 +276,14 @@ export default function Home() {
         </div>
 
         <FadeInUp className="flex justify-center">
-          <button className="px-4 py-3 rounded-full bg-[#DFAA14] text-white font-light hover:bg-[#c49510] transition-colors shadow-lg">
-            Pesan Sekarang
-          </button>
+          <a
+              href="https://wa.me/6281223344556"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-3 rounded-full bg-[#DFAA14] text-white font-light hover:bg-[#c49510] transition-colors shadow-lg"
+            >
+              Pesan Sekarang
+            </a>
         </FadeInUp>
       </section>
       <Footer />

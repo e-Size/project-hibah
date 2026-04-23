@@ -45,7 +45,7 @@ export default function AboutPage() {
           <FadeInUp delay={200}>tahun 2019 kini esize telah bertransformasi menjadi sebuah</FadeInUp>
           <FadeInUp delay={300}>perusahaan yang memiliki kemampuan untuk memproduksi dan</FadeInUp>
           <FadeInUp delay={400}>menyediakan kebutuhan pelanggan dengan kapasitas besar ke</FadeInUp>
-          <FadeInUp delay={500}>seluruh Indonesia dan luar</FadeInUp>
+          <FadeInUp delay={500}>seluruh Indonesia dan luar negeri.</FadeInUp>
         </div>
 
         {/* Bottom divider */}

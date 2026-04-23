@@ -19,7 +19,7 @@ const locations: Location[] = [
   {
     name: "Surakarta",
     address: "Ruko Victoria, Jalan Tentara Pelajar No. 3, Gilingan, Kec. Banjarsari, Kota Surakarta, Jawa Tengah 57134",
-    hours: "10.00 – 19.00 WIB",
+    hours: "08.30 – 16.30 WIB",
     photo: "/lokasi1.png",
     borderColor: "#4273B2",
     titleColor: "#4273B2",
@@ -30,7 +30,7 @@ const locations: Location[] = [
   {
     name: "Bandung",
     address: "Jl. Sukasirna No.30, RT.03/RW.12, Padasuka, Kec. Cibeunying Kidul, Kota Bandung, Jawa Barat 40122",
-    hours: "10.00 – 19.00 WIB",
+    hours: "08.30 – 16.30 WIB",
     photo: "/lokasi2.png",
     borderColor: "#e8734a",
     titleColor: "#e8734a",
