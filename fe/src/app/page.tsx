@@ -55,7 +55,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Right - Models (absolute, offset, parallax) */}
         <ParallaxScroll
           speed={0.5}
           className="pointer-events-none absolute inset-y-0 right-0 w-1/2 flex items-end justify-center"
