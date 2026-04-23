@@ -133,6 +133,7 @@ async function applyShirtColor(src: string, hexColor: string): Promise<string> {
 export default function EditorPage() {
   const [activeTab, setActiveTab] = useState<SidebarTab>(null);
   const [productTab, setProductTab] = useState<ProductTab>("details");
+  const [showChangeModal, setShowChangeModal] = useState(false);
 
   const [selectedColor, setSelectedColor] = useState("#ffffff");
   const [selectedView, setSelectedView] = useState<ViewType>("front");
@@ -468,6 +469,17 @@ export default function EditorPage() {
   const zone = printZone[selectedView];
   const viewElements = elements.filter(el => el.view === selectedView);
 
+  const PRODUCTS = [
+    { name: "T-Shirts",       count: 8, img: "/gambarcowo.png" },
+    { name: "Jacket ", count: 6, img: "/gambarcowo.png" },
+    { name: "Polo T-Shirt",   count: 2, img: "/gambarcowo.png" },
+    { name: "Sport T-Shirts", count: 3, img: "/gambarcowo.png" },
+    { name: "T-Shirts",       count: 8, img: "/gambarcowo.png" },
+    { name: "Jacket ", count: 6, img: "/gambarcowo.png" },
+    { name: "Polo T-Shirt",   count: 2, img: "/gambarcowo.png" },
+    { name: "Sport T-Shirts", count: 3, img: "/gambarcowo.png" }
+  ];
+
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-[#f5f0e8]">
 
@@ -537,7 +549,7 @@ export default function EditorPage() {
                   <h3 className="text-xl font-semibold text-gray-800">Details</h3>
                   <button
                     ref={changeBtnRef}
-                    onClick={() => setProductTab("change")}
+                    onClick={() => setShowChangeModal(true)}
                     className="px-5 py-1.5 rounded-full text-sm font-semibold bg-[#e8734a] text-white hover:bg-[#d4623a] transition-colors"
                   >
                     Change
@@ -938,6 +950,55 @@ export default function EditorPage() {
         </div>
 
       </div>
+
+      {/* Change Product Modal */}
+      {showChangeModal && (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50"
+          onClick={() => setShowChangeModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between mb-1">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 mb-3">Mulai Design Custom</h2>
+                <p className="text-sm text-gray-400 mt-0.5 mb-5">Pilih produk yang ingin kamu custom</p>
+              </div>
+              <button
+                onClick={() => setShowChangeModal(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-4 gap-4">
+              {PRODUCTS.map((p) => (
+                <button
+                  key={p.name}
+                  onClick={() => setShowChangeModal(false)}
+                  className="flex flex-col rounded-2xl border border-gray-100 bg-[#faf8f5] hover:border-[#e8734a] hover:shadow-md transition-all overflow-hidden group"
+                >
+                  <div className="w-full aspect-square bg-[#f0ece6] relative overflow-hidden flex-1">
+                    <Image
+                      src={p.img}
+                      alt={p.name}
+                      fill
+                      className="object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="px-3 py-2 text-left">
+                    <p className="font-semibold text-gray-900 text-sm">{p.name}</p>
+                    <p className="text-xs text-gray-400">{p.count} Produk</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {showTour && (
         <OnboardingTour steps={tourSteps} onClose={() => setShowTour(false)} />
