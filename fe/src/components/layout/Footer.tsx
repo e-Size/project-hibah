@@ -43,10 +43,6 @@ export default function Footer() {
           <div className="flex-1 flex flex-col gap-4">
             <h4 className="font-bold text-base">Hubungi Kami</h4>
             <div className="flex flex-col gap-3">
-              <div className="flex items-start gap-3">
-                <svg className="flex-shrink-0 mt-0.5" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                <p className="text-gray-400 text-sm leading-relaxed">Jl. Raya Bandung No. 123<br />Bandung, Indonesia</p>
-              </div>
               <div className="flex items-center gap-3">
                 <svg className="flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.58 3.49 2 2 0 0 1 3.55 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.78a16 16 0 0 0 6 6l.88-.88a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2z"/></svg>
                 <p className="text-gray-400 text-sm">+62 812-3456-7890</p>

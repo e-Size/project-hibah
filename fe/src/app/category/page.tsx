@@ -26,7 +26,7 @@ function CategoryGrid({ items, onJacketClick }: { items: { name: string; bg: str
             {/* Blue layer - middle, slightly tilted */}
             <div className="absolute top-4 right-2 bottom-6 left-2 rounded-xl bg-[#93B1D8] rotate-3 origin-bottom-left transition-transform duration-300 -translate-x-3 translate-y-3 group-hover:translate-x-2 group-hover:-translate-y-2" />
             {/* Main card */}
-            <div className="relative border-4 border-[#927615] rounded-t-xl overflow-hidden bg-white">
+            <div className="relative border-4 border-[#927615] rounded-t-xl overflow-hidden bg-white transition-transform duration-300 group-hover:scale-105">
               <div className="aspect-square relative overflow-hidden">
                 <Image src="/baju.png" alt={cat.name} fill className="object-cover" />
               </div>

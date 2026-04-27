@@ -1,32 +1,16 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { allCategories } from "../../../data/categories";
+
+const labelColors = ["#4a7fc1", "#d4795e", "#4a7fc1", "#d4795e"];
 
 const VISIBLE = 4;
 const GAP = 36; // gap-9 = 36px
 const total = allCategories.length; // 18
 const items = [...allCategories, ...allCategories]; // duplicate for seamless loop
 
-function CategoryIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="48"
-      height="48"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="#4a7fc1"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-      <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-      <line x1="12" y1="22.08" x2="12" y2="12" />
-    </svg>
-  );
-}
 
 export default function CategoryCarousel() {
   const [cardWidth, setCardWidth] = useState(0);
@@ -50,7 +34,7 @@ export default function CategoryCarousel() {
   const dist = total * step;
 
   return (
-    <div ref={containerRef} className="overflow-hidden w-full">
+    <div ref={containerRef} className="overflow-hidden w-full py-4">
       {cardWidth > 0 && (
         <div
           className="flex"
@@ -67,16 +51,17 @@ export default function CategoryCarousel() {
           {items.map((cat, i) => (
             <div
               key={i}
-              className="flex-none bg-white rounded-2xl shadow-md p-6 transition-transform duration-300 hover:scale-105 hover:shadow-lg"
+              className="flex-none relative transition-transform duration-300 hover:scale-105 hover:shadow-lg hover:z-10"
               style={{ width: cardWidth, marginRight: GAP }}
             >
-              <div
-                className="rounded-xl flex items-center justify-center aspect-square mb-4"
-                style={{ backgroundColor: cat.bg }}
-              >
-                <CategoryIcon />
+              <div className="border-4 border-[#927615] rounded-t-xl overflow-hidden bg-white">
+                <div className="aspect-square relative overflow-hidden">
+                  <Image src="/baju.png" alt={cat.name} fill className="object-cover" />
+                </div>
+                <div className="py-3 text-center" style={{ backgroundColor: labelColors[i % 4] }}>
+                  <p className="text-white font-bold text-lg">{cat.name}</p>
+                </div>
               </div>
-              <p className="text-center text-gray-800 font-light">{cat.name}</p>
             </div>
           ))}
         </div>

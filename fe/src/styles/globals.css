@@ -25,6 +25,29 @@ body {
   padding: 0;
 }
 
+/* Ripple hover effect */
+@property --ripple-size {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+
+.ripple-link {
+  --ripple-x: 50%;
+  --ripple-y: 50%;
+  background-image: radial-gradient(
+    circle at var(--ripple-x) var(--ripple-y),
+    #C39244 calc(var(--ripple-size) - 1%),
+    transparent var(--ripple-size)
+  );
+  background-color: #DFAA14;
+  transition: --ripple-size 1s ease;
+}
+
+.ripple-link.ripple-active {
+  --ripple-size: 120%;
+}
+
 @keyframes spin-in {
   0% { transform: rotate(0deg); opacity: 0; }
   100% { transform: rotate(360deg); opacity: 1; }

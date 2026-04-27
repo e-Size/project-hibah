@@ -205,6 +205,27 @@ export default function EditorPage() {
   const [editingTextId, setEditingTextId] = useState<string | null>(null);
   const dragLayerRef = useRef<string | null>(null);
 
+  const sidebarScrollRef = useRef<HTMLDivElement>(null);
+
+  // Lock body scroll (zoom mismatch makes body scrollable)
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    };
+  }, []);
+
+  // Re-attach wheel stopPropagation whenever sidebar tab changes
+  useEffect(() => {
+    const el = sidebarScrollRef.current;
+    if (!el) return;
+    const stopBubble = (e: WheelEvent) => e.stopPropagation();
+    el.addEventListener("wheel", stopBubble, { passive: false });
+    return () => el.removeEventListener("wheel", stopBubble);
+  }, [activeTab]);
+
   // Onboarding tour
   const [showTour, setShowTour] = useState(true);
   const changeBtnRef = useRef<HTMLButtonElement | null>(null);
@@ -593,7 +614,7 @@ export default function EditorPage() {
 
         {/* Left detail panel */}
         {activeTab && (
-          <div className="w-72 bg-white border-r border-gray-200 flex-shrink-0 overflow-y-auto">
+          <div ref={sidebarScrollRef} className="w-72 bg-white border-r border-gray-200 flex-shrink-0 overflow-y-auto">
 
             {/* PRODUCT */}
             {activeTab === "product" && (
@@ -786,7 +807,28 @@ export default function EditorPage() {
                       className="w-full bg-[#fdf8f4] rounded-xl px-3 py-2 text-sm text-gray-700 placeholder-gray-300 resize-none outline-none border border-[#f0e4d8] focus:border-[#e8734a] transition-colors"
                     />
                   </div>
-
+                  {/* Font Style */}
+                  <div className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-[10px] font-bold text-gray-500 tracking-widest">FONT STYLE</span>
+                    </div>
+                    <FontPicker
+                      defaultValue="Poppins"
+                      autoLoad
+                      value={(font) => setTdFont(font)}
+                    />
+                  </div>
+                  <div className="flex gap-3">
+                    <div className="flex-1 bg-white rounded-2xl p-3 shadow-sm border border-gray-100">
+                      <span className="text-[10px] font-bold text-gray-500 tracking-widest block mb-2">STYLE</span>
+                      <div className="flex gap-2">
+                        <button onClick={() => setTdBold(v => !v)}
+                          className={`flex-1 h-9 rounded-xl font-bold text-base transition-all border ${tdBold ? "bg-gray-800 text-white border-gray-800" : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"}`}>B</button>
+                        <button onClick={() => setTdItalic(v => !v)}
+                          className={`flex-1 h-9 rounded-xl italic text-base transition-all border ${tdItalic ? "bg-gray-800 text-white border-gray-800" : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"}`}><em>I</em></button>
+                      </div>
+                    </div>
+                  </div>
                   {/* Font Size */}
                   <div className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100">
                     <div className="flex items-center justify-between mb-2">
@@ -815,6 +857,19 @@ export default function EditorPage() {
                     <div className="flex justify-between text-[10px] text-gray-400 mt-1"><span>0</span><span>20</span></div>
                   </div>
 
+                  {/* Curve */}
+                  <div className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b6340" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20 Q12 4 20 20"/></svg>
+                        <span className="text-[10px] font-bold text-gray-500 tracking-widest">CURVE</span>
+                      </div>
+                      <span className="bg-gray-800 text-white text-xs font-bold px-2 py-0.5 rounded-full">{tdCurve}px</span>
+                    </div>
+                    <input type="range" min={-100} max={100} value={tdCurve} onChange={e => setTdCurve(Number(e.target.value))}
+                      className="w-full accent-gray-800 h-1.5 rounded-full" />
+                    <div className="flex justify-between text-[10px] text-gray-400 mt-1"><span>↙ Down</span><span>0</span><span>Up ↗</span></div>
+                  </div>
                   {/* Text Color */}
                   <div className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100">
                     <div className="flex items-center gap-2 mb-3">
@@ -840,45 +895,7 @@ export default function EditorPage() {
                       ))}
                     </div>
                   </div>
-
-                  {/* Font Style */}
-                  <div className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-[10px] font-bold text-gray-500 tracking-widest">FONT STYLE</span>
-                    </div>
-                    <FontPicker
-                      defaultValue="Poppins"
-                      autoLoad
-                      value={(font) => setTdFont(font)}
-                    />
-                  </div>
-
-                  {/* Curve */}
-                  <div className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b6340" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20 Q12 4 20 20"/></svg>
-                        <span className="text-[10px] font-bold text-gray-500 tracking-widest">CURVE</span>
-                      </div>
-                      <span className="bg-gray-800 text-white text-xs font-bold px-2 py-0.5 rounded-full">{tdCurve}px</span>
-                    </div>
-                    <input type="range" min={-100} max={100} value={tdCurve} onChange={e => setTdCurve(Number(e.target.value))}
-                      className="w-full accent-gray-800 h-1.5 rounded-full" />
-                    <div className="flex justify-between text-[10px] text-gray-400 mt-1"><span>↙ Down</span><span>0</span><span>Up ↗</span></div>
-                  </div>
-
-                  {/* Style + Align */}
-                  <div className="flex gap-3">
-                    <div className="flex-1 bg-white rounded-2xl p-3 shadow-sm border border-gray-100">
-                      <span className="text-[10px] font-bold text-gray-500 tracking-widest block mb-2">STYLE</span>
-                      <div className="flex gap-2">
-                        <button onClick={() => setTdBold(v => !v)}
-                          className={`flex-1 h-9 rounded-xl font-bold text-base transition-all border ${tdBold ? "bg-gray-800 text-white border-gray-800" : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"}`}>B</button>
-                        <button onClick={() => setTdItalic(v => !v)}
-                          className={`flex-1 h-9 rounded-xl italic text-base transition-all border ${tdItalic ? "bg-gray-800 text-white border-gray-800" : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"}`}><em>I</em></button>
-                      </div>
-                    </div>
-                  </div>
+                  
                 </div>
 
                 {/* Add to Design button */}

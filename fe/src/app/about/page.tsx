@@ -3,10 +3,10 @@ import Footer from "../../components/layout/Footer";
 import Navbar from "../../components/layout/Navbar";
 import LocationSection from "../../features/about/components/LocationSection";
 import SpinIn from "../../components/animation/SpinIn";
-import FadeInUp from "../../components/animation/FadeInUp";
 import FadeInRight from "../../components/animation/FadeInRight";
 import FadeInLeft from "../../components/animation/FadeInLeft";
 import ViewportScaler from "../../components/ui/ViewportScaler";
+import TextType from "../../components/ui/TextType";
 
 export default function AboutPage() {
   return (
@@ -14,13 +14,12 @@ export default function AboutPage() {
     <main className="min-h-screen">
       <Navbar variant="light" />
       {/* Hero Section */}
-      <section className="w-full">
+      <section className="relative w-full" style={{ height: "calc(100vh / var(--page-scale, 1))" }}>
         <Image
-          src="/Hero Sect.png"
+          src="/AboutSec.png"
           alt="About Esize"
-          width={1440}
-          height={600}
-          className="w-full h-auto"
+          fill
+          className="object-cover object-center"
           priority
         />
       </section>
@@ -41,13 +40,21 @@ export default function AboutPage() {
         <div className="w-full h-px bg-[#c0392b] mb-10" />
 
         {/* Text */}
-        <div className="text-center text-[#7C6000] font-semibold text-xl md:text-2xl leading-snug max-w-4xl mx-auto flex flex-col items-center gap-0.5">
-          <FadeInUp delay={0}>Esize adalah sebuah perusahaan yang bergerak di bidang</FadeInUp>
-          <FadeInUp delay={100}>penyediaan barang dan jasa konveksi serta suvenir. Didirikan pada</FadeInUp>
-          <FadeInUp delay={200}>tahun 2019 kini esize telah bertransformasi menjadi sebuah</FadeInUp>
-          <FadeInUp delay={300}>perusahaan yang memiliki kemampuan untuk memproduksi dan</FadeInUp>
-          <FadeInUp delay={400}>menyediakan kebutuhan pelanggan dengan kapasitas besar ke</FadeInUp>
-          <FadeInUp delay={500}>seluruh Indonesia dan luar negeri.</FadeInUp>
+        <div className="text-center text-[#7C6000] font-semibold text-xl md:text-2xl leading-snug max-w-4xl mx-auto">
+          <TextType
+            text={[
+              "Esize adalah sebuah perusahaan yang bergerak di bidang penyediaan barang dan jasa konveksi serta suvenir. Didirikan pada tahun 2019 kini esize telah bertransformasi menjadi sebuah perusahaan yang memiliki kemampuan untuk memproduksi dan menyediakan kebutuhan pelanggan dengan kapasitas besar ke seluruh Indonesia dan luar negeri.",
+            ]}
+            typingSpeed={15}
+            pauseDuration={3000}
+            loop={false}
+            showCursor={true}
+            hideCursorOnComplete={true}
+            cursorCharacter="|"
+            cursorBlinkDuration={0.5}
+            startOnVisible={true}
+            className="text-[#7C6000] font-semibold text-xl md:text-2xl leading-snug"
+          />
         </div>
 
         {/* Bottom divider */}

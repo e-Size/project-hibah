@@ -20,7 +20,7 @@ const locations: Location[] = [
     name: "Surakarta",
     address: "Ruko Victoria, Jalan Tentara Pelajar No. 3, Gilingan, Kec. Banjarsari, Kota Surakarta, Jawa Tengah 57134",
     hours: "08.30 – 16.30 WIB",
-    photo: "/lokasi1.png",
+    photo: "/esizesolo.png",
     borderColor: "#4273B2",
     titleColor: "#4273B2",
     rounded: "rounded-tl-3xl rounded-br-3xl",

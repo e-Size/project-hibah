@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 
 const TIPE = ["Bomber", "Parka", "Coach", "Varsity", "Semi Parka/Trucker"];
@@ -32,6 +32,28 @@ interface Props {
 }
 
 export default function JacketModal({ onClose }: Props) {
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+
+    const overlay = overlayRef.current;
+    const scrollable = scrollRef.current;
+
+    const preventScroll = (e: WheelEvent) => e.preventDefault();
+    const stopBubble = (e: WheelEvent) => e.stopPropagation();
+
+    overlay?.addEventListener("wheel", preventScroll, { passive: false });
+    scrollable?.addEventListener("wheel", stopBubble, { passive: false });
+
+    return () => {
+      document.body.style.overflow = "";
+      overlay?.removeEventListener("wheel", preventScroll);
+      scrollable?.removeEventListener("wheel", stopBubble);
+    };
+  }, []);
+
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const [selectedTipe, setSelectedTipe] = useState("Bomber");
   const [selectedBahan, setSelectedBahan] = useState("Taslan/Soft Parasut");
@@ -50,17 +72,18 @@ export default function JacketModal({ onClose }: Props) {
       </div>
     )}
     <div
+      ref={overlayRef}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
       onClick={onClose}
     >
       <div
-        className="bg-[#fdf6f0] rounded-2xl shadow-2xl w-full max-w-5xl mx-4 p-6 relative flex flex-col md:flex-row gap-6 h-[74vh] 2xl:h-[58vh]"
+        className="bg-[#fdf6f0] rounded-2xl shadow-2xl w-full max-w-5xl mx-4 p-6 relative flex flex-col md:flex-row gap-6 max-h-[60vh]"
         onClick={(e) => e.stopPropagation()}
       >
 
         {/* Left — image carousel (fixed, no scroll) */}
-        <div className="flex flex-col items-center gap-3 md:w-[45%] flex-shrink-0 overflow-hidden">
-          <div className="relative w-full aspect-square bg-[#7a6a30] rounded-xl overflow-hidden flex items-center justify-center mb-5" style={{ minHeight: "380px" }}>
+        <div className="flex flex-col items-center gap-3 md:w-[45%] flex-shrink-0 overflow-hidden min-h-0">
+          <div className="relative w-full aspect-square bg-[#7a6a30] rounded-xl overflow-hidden flex items-center justify-center mb-5">
             <Image src={images[imgIndex]} alt="Jacket" fill className="object-contain p-6 " />
             <button
               onClick={() => setImgIndex((i) => (i - 1 + images.length) % images.length)}
@@ -100,7 +123,7 @@ export default function JacketModal({ onClose }: Props) {
         </div>
 
         {/* Right — scrollable product info */}
-        <div className="flex flex-col gap-4 md:w-[55%] overflow-y-auto pr-1 h-full">
+        <div ref={scrollRef} className="flex flex-col gap-4 md:w-[55%] overflow-y-auto overscroll-contain pr-1 flex-1 min-h-0">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">{selectedTipe} Jacket Premium</h2>
             <p className="text-[#e8734a] font-bold text-2xl mt-1">Rp150.000</p>
