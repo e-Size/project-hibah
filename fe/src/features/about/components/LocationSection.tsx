@@ -46,13 +46,13 @@ export default function LocationSection() {
   return (
     <>
       {/* Location Cards */}
-      <section className="bg-[#f0f0ee] py-16 px-16 2xl:px-80">
+      <section className="bg-[#f0f0ee] py-16 px-16">
         <h2 className="text-center text-[#7C6000] font-semibold text-5xl mb-18">Lokasi Kami</h2>
-        <div className="flex flex-col md:flex-row gap-15">
+        <div className="flex flex-col md:flex-row gap-15 justify-center items-stretch">
           {locations.map((loc) => (
             <div
               key={loc.name}
-              className={`flex-1 border-[6px] bg-[#fdf6f0] flex flex-row p-4 gap-5 ${loc.rounded}`}
+              className={`w-[560px] border-[6px] bg-[#fdf6f0] flex flex-row p-4 gap-5 ${loc.rounded}`}
               style={{ borderColor: loc.borderColor }}
             >
               <div className="relative w-60 h-60 flex-shrink-0 overflow-hidden self-center">

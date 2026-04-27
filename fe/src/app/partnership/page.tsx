@@ -5,11 +5,13 @@ import FadeInUp from "../../components/animation/FadeInUp";
 import SpinIn from "../../components/animation/SpinIn";
 import FadeInLeft from "../../components/animation/FadeInLeft";
 import InViewVideo from "../../components/ui/InViewVideo";
+import ViewportScaler from "../../components/ui/ViewportScaler";
 export default function PartnershipPage() {
   return (
+    <ViewportScaler>
     <main className="min-h-screen bg-[#e8e8e6]">
       <Navbar variant="transparent" />
-      <section className="px-16 2xl:px-80 py-20">
+      <section className="px-16 py-20">
 
         {/* Header */}
         <div className="flex flex-col items-center text-center">
@@ -31,7 +33,7 @@ export default function PartnershipPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="px-16 2xl:px-80 pb-20">
+      <section className="px-16 pb-20">
         <FadeInUp className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {[
             { number: "2.000+", label: "Universities & Institutions", border: "#4273B2", rounded: "rounded-tl-3xl rounded-br-3xl" },
@@ -52,7 +54,7 @@ export default function PartnershipPage() {
       </section>
 
       {/* How to Partnership Section */}
-      <section className="px-16 2xl:px-80 py-16 bg-[#e8e8e6]">
+      <section className="px-16 py-16 bg-[#e8e8e6]">
         <h2 className="text-[#7C6000] font-light text-5xl mb-14">How to do Partnership?</h2>
 
         <FadeInUp className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
@@ -92,7 +94,7 @@ export default function PartnershipPage() {
       </section>
 
       {/* Our Respectable Client Section */}
-      <section className="bg-[#e8e8e6] px-16 2xl:px-80 pt-16 pb-5">
+      <section className="bg-[#e8e8e6] px-16 pt-16 pb-5">
         {/* Icons */}
         <div className="flex justify-center gap-1 mb-6">
           <SpinIn><Image src="/Rectangle 17.png" alt="" width={100} height={100} className="h-24 w-auto" /></SpinIn>
@@ -125,5 +127,6 @@ export default function PartnershipPage() {
 
       <Footer />
     </main>
+    </ViewportScaler>
   );
 }

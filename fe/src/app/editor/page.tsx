@@ -6,6 +6,7 @@ import JSZip from "jszip";
 import FontPicker from "react-fontpicker-ts";
 import "react-fontpicker-ts/dist/index.css";
 import OnboardingTour, { type TourStep } from "@/components/ui/OnboardingTour";
+import ViewportScaler from "@/components/ui/ViewportScaler";
 
 type SidebarTab = "product" | "upload" | "text" | "layers" | null;
 type ProductTab = "details" | "change";
@@ -504,7 +505,8 @@ export default function EditorPage() {
   ];
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-[#f5f0e8]">
+    <ViewportScaler>
+    <div className="flex flex-col overflow-hidden bg-[#f5f0e8]" style={{ height: "calc(100vh / var(--page-scale, 1))" }}>
 
       {/* Header */}
       <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 flex-shrink-0 z-50">
@@ -1169,5 +1171,6 @@ export default function EditorPage() {
         <OnboardingTour steps={tourSteps} onClose={() => setShowTour(false)} />
       )}
     </div>
+    </ViewportScaler>
   );
 }

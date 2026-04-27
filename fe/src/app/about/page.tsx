@@ -6,9 +6,11 @@ import SpinIn from "../../components/animation/SpinIn";
 import FadeInUp from "../../components/animation/FadeInUp";
 import FadeInRight from "../../components/animation/FadeInRight";
 import FadeInLeft from "../../components/animation/FadeInLeft";
+import ViewportScaler from "../../components/ui/ViewportScaler";
 
 export default function AboutPage() {
   return (
+    <ViewportScaler>
     <main className="min-h-screen">
       <Navbar variant="light" />
       {/* Hero Section */}
@@ -24,7 +26,7 @@ export default function AboutPage() {
       </section>
 
       {/* About Section */}
-      <section className="bg-[#f0f0ee] py-16 px-16 2xl:px-80">
+      <section className="bg-[#f0f0ee] py-16 px-16">
         {/* Icons */}
         <div className="flex justify-center gap-1 mb-4">
           <SpinIn>
@@ -53,7 +55,7 @@ export default function AboutPage() {
       </section>
 
       {/* Feature Section */}
-      <section className="px-0 2xl:px-64 bg-[#f0f0ee]">
+      <section className="px-0 bg-[#f0f0ee]">
         {/* Top row: image left, text right */}
         <FadeInRight className="flex flex-col md:flex-row">
           <div className="flex-1 relative min-h-[420px]">
@@ -99,5 +101,6 @@ export default function AboutPage() {
       <LocationSection />
       <Footer />
     </main>
+    </ViewportScaler>
   );
 }

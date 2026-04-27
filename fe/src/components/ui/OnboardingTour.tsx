@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useLayoutEffect, useState, type RefObject } from "react";
+import { createPortal } from "react-dom";
 
 export type TourStep = {
   targetRef: RefObject<HTMLElement | null>;
@@ -90,7 +91,7 @@ export default function OnboardingTour({
   const progress = ((current + 1) / steps.length) * 100;
   const isLast = current === steps.length - 1;
 
-  return (
+  return createPortal(
     <>
       <div
         className="fixed inset-0 z-[9998]"
@@ -151,6 +152,7 @@ export default function OnboardingTour({
           </button>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }

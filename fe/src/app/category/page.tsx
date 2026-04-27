@@ -8,6 +8,7 @@ import Footer from "../../components/layout/Footer";
 import Navbar from "../../components/layout/Navbar";
 import JacketModal from "../../features/category/components/JacketModal";
 import SpinIn from "../../components/animation/SpinIn";
+import ViewportScaler from "../../components/ui/ViewportScaler";
 const labelColors = ["#4a7fc1", "#d4795e", "#4a7fc1", "#d4795e"];
 
 function CategoryGrid({ items, onJacketClick }: { items: { name: string; bg: string }[]; onJacketClick: () => void }) {
@@ -50,6 +51,7 @@ export default function CategoryPage() {
   const hasResults = filteredPakaian.length > 0 || filteredMerch.length > 0;
 
   return (
+    <ViewportScaler>
     <main className="min-h-screen bg-white">
       {jacketOpen && <JacketModal onClose={() => setJacketOpen(false)} />}
       <Navbar variant="transparent" />
@@ -102,7 +104,7 @@ export default function CategoryPage() {
 
       {/* Pakaian Section */}
       {filteredPakaian.length > 0 && (
-        <div className="px-16 2xl:px-80 pt-16 pb-4">
+        <div className="px-16 pt-16 pb-4">
           <FadeInUp>
             <div className="flex flex-col items-center mb-12">
               <div className="flex items-center gap-1 mb-4">
@@ -122,7 +124,7 @@ export default function CategoryPage() {
 
       {/* Merch Section */}
       {filteredMerch.length > 0 && (
-        <div className="px-16 2xl:px-80 pt-16 pb-16">
+        <div className="px-16 pt-16 pb-16">
           <FadeInUp>
             <div className="flex flex-col items-center mb-12">
               <div className="flex items-center gap-1 mb-4">
@@ -142,5 +144,6 @@ export default function CategoryPage() {
 
       <Footer />
     </main>
+    </ViewportScaler>
   );
 }
