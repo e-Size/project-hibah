@@ -150,6 +150,7 @@ export default function EditorPage() {
   const [zoom, setZoom] = useState(100);
   const [elements, setElements] = useState<CanvasEl[]>([]);
   const [selectedEl, setSelectedEl] = useState<string | null>(null);
+  const [showViewsPanel, setShowViewsPanel] = useState(true);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const draggingRef = useRef<{ id: string; startX: number; startY: number; elX: number; elY: number } | null>(null);
@@ -629,19 +630,69 @@ export default function EditorPage() {
             {activeTab === "upload" && (
               <div className="p-4 flex flex-col gap-4">
                 <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFileChange} />
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full border-2 border-dashed border-[#e8734a] rounded-2xl py-8 flex flex-col items-center gap-3 hover:bg-[#fdf6f0] transition-colors"
-                >
-                  <div className="w-12 h-12 rounded-full bg-[#fdf6f0] flex items-center justify-center">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e8734a" strokeWidth="2">
+
+                {/* Header card */}
+                <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-start gap-3">
+                  <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "#e8734a", transform: "rotate(-12deg)" }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: "rotate(12deg)" }}>
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
                     </svg>
                   </div>
-                  <p className="text-sm text-gray-500">Klik untuk upload gambar</p>
-                  <span className="bg-[#e8734a] text-white rounded-full px-5 py-1.5 text-sm font-semibold">Pilih File</span>
-                </button>
-                <p className="text-xs text-gray-400 text-center">Gambar akan muncul di canvas dan bisa digeser bebas</p>
+                  <div>
+                    <p className="font-bold text-gray-900 text-sm leading-tight">Upload Your Art</p>
+                    <p className="text-xs text-gray-400 mt-1 leading-relaxed">Transform your design vision into reality</p>
+                  </div>
+                </div>
+
+                {/* Drop area */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 py-8 flex flex-col items-center gap-3">
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-20 h-20 rounded-3xl flex items-center justify-center hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: "#e8734a", transform: "rotate(-12deg)" }}
+                  >
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: "rotate(12deg)" }}>
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                  </button>
+                  <p className="font-bold text-gray-800 text-base">Drag &amp; Drop</p>
+                  <p className="text-xs text-gray-400">or click below to browse</p>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="mt-1 flex items-center gap-2 px-8 py-3 rounded-2xl text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: "#e8734a" }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
+                    </svg>
+                    Choose File
+                  </button>
+                </div>
+
+                {/* File guidelines */}
+                <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2l1.09 3.26L16 6l-2.91.74L12 10l-1.09-3.26L8 6l2.91-.74L12 2z"/><path d="M19 12l.55 1.64L21 14l-1.45.36L19 16l-.55-1.64L17 14l1.45-.36L19 12z"/><path d="M5 18l.55 1.64L7 20l-1.45.36L5 22l-.55-1.64L3 20l1.45-.36L5 18z"/>
+                      </svg>
+                    </div>
+                    <span className="font-bold text-gray-800 text-xs tracking-widest">FILE GUIDELINES</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { label: "Format", value: "JPG, PNG, SVG" },
+                      { label: "Max Size", value: "10 MB" },
+                      { label: "Resolution", value: "300 DPI" },
+                      { label: "Dimension", value: "3000×3000px" },
+                    ].map(({ label, value }) => (
+                      <div key={label} className="rounded-xl px-3 py-2.5" style={{ backgroundColor: "#fdf6f0" }}>
+                        <p className="text-xs font-bold text-gray-700">{label}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">{value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
                 {/* Uploaded elements list */}
                 {viewElements.filter(el => el.type === "image").length > 0 && (
@@ -1017,37 +1068,51 @@ export default function EditorPage() {
         </div>
 
         {/* Right panel - Views */}
-        <div className="w-28 bg-white border-l border-gray-200 flex flex-col flex-shrink-0 overflow-y-auto">
-          <div className="flex items-center gap-1.5 px-3 py-3 border-b border-gray-100">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
-            <span className="text-xs font-bold text-gray-500 tracking-wider">VIEWS</span>
-          </div>
-          <div className="flex flex-col items-center py-4 relative">
-            <div className="absolute left-1/2 -translate-x-1/2 top-4 bottom-4 w-px bg-gray-200 z-0" />
-            {views.map(({ key, label, src }) => {
-              const active = selectedView === key;
-              return (
-                <button key={key} onClick={() => setSelectedView(key)}
-                  className="relative z-10 flex flex-col items-center w-full px-3 mb-1">
-                  <div
-                    className="w-full rounded-2xl overflow-hidden p-1.5 shadow-sm transition-all"
-                    style={{ backgroundColor: active ? selectedColor : "#ffffff" }}
-                  >
-                    <div className="w-full aspect-square rounded-xl overflow-hidden relative bg-gray-100">
-                      {processedSrc[key] ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={processedSrc[key]} alt={label} style={{ width:"100%", height:"100%", objectFit:"contain" }} />
-                      ) : (
-                        <Image src={src} alt={label} fill className="object-contain" />
-                      )}
+        {showViewsPanel ? (
+          <div className="w-28 bg-white border-l border-gray-200 flex flex-col flex-shrink-0 overflow-y-auto">
+            <div className="flex items-center justify-center px-3 py-3 border-b border-gray-100">
+              <button
+                onClick={() => setShowViewsPanel(false)}
+                className="flex items-center gap-1.5 bg-white rounded-full px-3 py-1.5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8b6340" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                <span className="text-xs font-bold text-[#8b6340] tracking-wider">VIEWS</span>
+              </button>
+            </div>
+            <div className="flex flex-col items-center py-4 relative">
+              <div className="absolute left-1/2 -translate-x-1/2 top-4 bottom-4 w-px bg-gray-200 z-0" />
+              {views.map(({ key, label, src }) => {
+                const active = selectedView === key;
+                return (
+                  <button key={key} onClick={() => setSelectedView(key)}
+                    className="relative z-10 flex flex-col items-center w-full px-3 mb-1">
+                    <div
+                      className="w-full rounded-2xl overflow-hidden p-1.5 shadow-sm transition-all"
+                      style={{ backgroundColor: active ? selectedColor : "#ffffff" }}
+                    >
+                      <div className="w-full aspect-square rounded-xl overflow-hidden relative bg-gray-100">
+                        {processedSrc[key] ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={processedSrc[key]} alt={label} style={{ width:"100%", height:"100%", objectFit:"contain" }} />
+                        ) : (
+                          <Image src={src} alt={label} fill className="object-contain" />
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <p className={`text-[10px] font-semibold tracking-wider mt-1.5 mb-3 ${active ? "text-gray-700" : "text-gray-400"}`}>{label}</p>
-                </button>
-              );
-            })}
+                    <p className={`text-[10px] font-semibold tracking-wider mt-1.5 mb-3 ${active ? "text-gray-700" : "text-gray-400"}`}>{label}</p>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        ) : (
+          <button
+            onClick={() => setShowViewsPanel(true)}
+            className="absolute right-0 top-1/2 -translate-y-1/2 w-5 h-10 bg-white border border-gray-200 border-r-0 rounded-l-xl flex items-center justify-center hover:bg-gray-100 transition-colors shadow-sm z-10"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6" /></svg>
+          </button>
+        )}
 
       </div>
 
