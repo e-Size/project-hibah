@@ -8,13 +8,15 @@ import ParallaxScroll from "../components/animation/ParallaxScroll";
 import CategoryCarousel from "../features/home/components/CategoryCarousel";
 import Footer from "../components/layout/Footer";
 import Navbar from "../components/layout/Navbar";
+import ViewportScaler from "../components/ui/ViewportScaler";
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
+    <ViewportScaler>
+    <main className="min-h-screen" style={{ margin: 0, padding: 0 }}>
       <Navbar variant="transparent" />
       {/* Hero Section */}
-      <section className="relative h-screen overflow-hidden">
+      <section className="relative overflow-hidden" style={{ height: "calc(100vh / var(--page-scale, 1))" }}>
         <Image
           src="/bg herokeren.png"
           alt="Hero background"
@@ -66,7 +68,7 @@ export default function Home() {
 
         <ParallaxScroll
           speed={0.5}
-          className="pointer-events-none absolute inset-y-0 right-0 w-1/2 flex items-end justify-center"
+          className="pointer-events-none absolute inset-y-0 -right-44 w-1/2 flex items-end justify-center"
         >
           <div className="relative w-53/100 h-[1000px]">
             <Image
@@ -91,7 +93,7 @@ export default function Home() {
 
       {/* About Section */}
       <section className="bg-[#f5f5f3] py-20">
-        <div className="w-full flex flex-col md:flex-row items-center gap-16 px-16 2xl:px-80">
+        <div className="w-full flex flex-col md:flex-row items-center gap-16 px-16">
           {/* Left */}
           <FadeInLeft className="flex-1">
             <h2 className="text-5xl font-bold mb-3">
@@ -152,7 +154,7 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="bg-[#f5f5f3] py-8 px-16 2xl:px-80">
+      <section className="bg-[#f5f5f3] py-8 px-16">
         {/* Logo Top */}
         <div className="flex justify-center mb-4">
           <div className="flex items-center gap-1">
@@ -211,7 +213,7 @@ export default function Home() {
         </div>
       </section>
       {/* Kategori Produk Section */}
-      <section className="bg-[#f5f5f3] py-16 px-16 2xl:px-80">
+      <section className="bg-[#f5f5f3] py-16 px-16">
         <FadeInUp>
           <h2 className="text-3xl font-bold text-[#7C6000] mb-2">Kategori Produk</h2>
           <p className="text-gray-500 font-light mb-10">Berbagai pilihan merchandise berkualitas untuk kebutuhan Anda</p>
@@ -232,7 +234,7 @@ export default function Home() {
       </section>
 
       {/* How To Order Section */}
-      <section className="bg-[#f5f5f3] py-16 px-16 2xl:px-80">
+      <section className="bg-[#f5f5f3] py-16 px-16">
         <FadeInUp>
           <h2 className="text-5xl font-semibold text-[#7C6000] mb-2 mx-6">How To Order?</h2>
           <p className="text-black italic font-light mb-12 mx-6">Size the sequence, to your perfect size.</p>
@@ -288,5 +290,6 @@ export default function Home() {
       </section>
       <Footer />
     </main>
+    </ViewportScaler>
   );
 }
