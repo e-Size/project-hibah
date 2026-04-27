@@ -13,11 +13,11 @@ export default function PartnershipPage() {
 
         {/* Header */}
         <div className="flex flex-col items-center text-center">
-          <div className="bg-[#7C6000] px-35 py-3 mb-4">
-            <h1 className="text-white font-bold text-6xl">Building Trust</h1>
+          <div className="bg-[#7C6000] px-35 py-3 mb-4 mt-15">
+            <h1 className="text-white font-bold text-5xl">Building Trust</h1>
           </div>
-          <h2 className="text-[#7C6000] font-bold text-6xl mb-5">Across The Globe</h2>
-          <p className="text-[#7C6000] text-2xl max-w-3xl leading-snug">
+          <h2 className="text-[#7C6000] font-bold text-5xl mb-5">Across The Globe</h2>
+          <p className="text-[#7C6000] text-xl max-w-3xl leading-snug">
             Berkolaborasi dengan berbagai partner terpercaya untuk<br />
             menghadirkan kualitas dan pengalaman terbaik
           </p>

@@ -13,7 +13,7 @@ const labelColors = ["#4a7fc1", "#d4795e", "#4a7fc1", "#d4795e"];
 function CategoryGrid({ items, onJacketClick }: { items: { name: string; bg: string }[]; onJacketClick: () => void }) {
   if (items.length === 0) return null;
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-16">
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-20">
       {items.map((cat, i) => (
         <FadeInUp key={cat.name}>
           <div
@@ -57,7 +57,7 @@ export default function CategoryPage() {
       <div className="relative flex flex-col items-center justify-center text-center pt-20 pb-16 px-8"
         style={{ background: "radial-gradient(ellipse at 50% 40%, #f5d0c0 0%, #fceee8 35%, #ffffff 70%)" }}>
         {/* Title blocks */}
-        <div className="flex flex-col items-center gap-2 mb-6">
+        <div className="flex flex-col items-center gap-2 mb-6 mt-40">
           <span className="bg-[#7C6000] text-white font-bold text-4xl md:text-5xl px-8 py-2">
             Katalog Produk
           </span>
