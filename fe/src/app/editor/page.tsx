@@ -152,6 +152,50 @@ export default function EditorPage() {
   const [elements, setElements] = useState<CanvasEl[]>([]);
   const [selectedEl, setSelectedEl] = useState<string | null>(null);
   const [showViewsPanel, setShowViewsPanel] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Undo/redo history
+  const historyRef = useRef<CanvasEl[][]>([[]]);
+  const historyIndexRef = useRef(0);
+
+  function pushHistory(newElements: CanvasEl[]) {
+    const history = historyRef.current.slice(0, historyIndexRef.current + 1);
+    history.push(newElements);
+    historyRef.current = history;
+    historyIndexRef.current = history.length - 1;
+  }
+
+  function setElementsWithHistory(updater: (prev: CanvasEl[]) => CanvasEl[]) {
+    setElements(prev => {
+      const next = updater(prev);
+      pushHistory(next);
+      return next;
+    });
+  }
+
+  function undo() {
+    if (historyIndexRef.current <= 0) return;
+    historyIndexRef.current -= 1;
+    setElements(historyRef.current[historyIndexRef.current]);
+    setSelectedEl(null);
+  }
+
+  function redo() {
+    if (historyIndexRef.current >= historyRef.current.length - 1) return;
+    historyIndexRef.current += 1;
+    setElements(historyRef.current[historyIndexRef.current]);
+    setSelectedEl(null);
+  }
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  }
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const draggingRef = useRef<{ id: string; startX: number; startY: number; elX: number; elY: number } | null>(null);
@@ -244,7 +288,7 @@ export default function EditorPage() {
         h: (zone.h / 100) * CANVAS,
         view: selectedView,
       };
-      setElements(prev => [...prev, newEl]);
+      setElementsWithHistory(prev => [...prev, newEl]);
       setSelectedEl(newEl.id);
     });
     e.target.value = "";
@@ -271,7 +315,7 @@ export default function EditorPage() {
       h: tdFontSize * 1.4,
       view: selectedView,
     };
-    setElements(prev => [...prev, newEl]);
+    setElementsWithHistory(prev => [...prev, newEl]);
     setSelectedEl(null);
     setTdText("");
   }
@@ -373,7 +417,7 @@ export default function EditorPage() {
 
   function deleteSelected() {
     if (!selectedEl) return;
-    setElements(prev => prev.filter(el => el.id !== selectedEl));
+    setElementsWithHistory(prev => prev.filter(el => el.id !== selectedEl));
     setSelectedEl(null);
   }
 
@@ -896,7 +940,7 @@ export default function EditorPage() {
                         {el.type === "text" ? (el.text || "Text") : `Image ${viewElements.length - i}`}
                       </span>
                       <button
-                        onClick={e => { e.stopPropagation(); setElements(prev => prev.filter(item => item.id !== el.id)); if (selectedEl === el.id) setSelectedEl(null); }}
+                        onClick={e => { e.stopPropagation(); setElementsWithHistory(prev => prev.filter(item => item.id !== el.id)); if (selectedEl === el.id) setSelectedEl(null); }}
                         className="w-6 h-6 rounded-lg flex items-center justify-center text-gray-400 hover:bg-red-50 hover:text-red-400 transition-colors flex-shrink-0">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                       </button>
@@ -913,11 +957,11 @@ export default function EditorPage() {
           {/* Toolbar */}
           <div className="flex items-center justify-center gap-3 py-3 flex-shrink-0 bg-white">
             {/* Undo */}
-            <button className="w-11 h-11 bg-[#FAF3E0] rounded-xl flex items-center justify-center hover:bg-[#ede7dd] transition-colors shadow-sm">
+            <button onClick={undo} className="w-11 h-11 bg-[#FAF3E0] rounded-xl flex items-center justify-center hover:bg-[#ede7dd] transition-colors shadow-sm">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round"><path d="M3 7v6h6" /><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" /></svg>
             </button>
             {/* Redo */}
-            <button className="w-11 h-11 bg-[#FAF3E0] rounded-xl flex items-center justify-center hover:bg-[#ede7dd] transition-colors shadow-sm">
+            <button onClick={redo} className="w-11 h-11 bg-[#FAF3E0] rounded-xl flex items-center justify-center hover:bg-[#ede7dd] transition-colors shadow-sm">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round"><path d="M21 7v6h-6" /><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13" /></svg>
             </button>
 
@@ -941,8 +985,11 @@ export default function EditorPage() {
             </div>
 
             {/* Fullscreen */}
-            <button className="w-11 h-11 bg-[#FAF3E0] rounded-xl flex items-center justify-center hover:bg-[#ede7dd] transition-colors shadow-sm">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" /></svg>
+            <button onClick={toggleFullscreen} className="w-11 h-11 bg-[#FAF3E0] rounded-xl flex items-center justify-center hover:bg-[#ede7dd] transition-colors shadow-sm">
+              {isFullscreen
+                ? <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" /></svg>
+                : <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" /></svg>
+              }
             </button>
 
             {/* Delete selected */}

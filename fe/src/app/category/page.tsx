@@ -14,7 +14,7 @@ const labelColors = ["#4a7fc1", "#d4795e", "#4a7fc1", "#d4795e"];
 function CategoryGrid({ items, onJacketClick }: { items: { name: string; bg: string }[]; onJacketClick: () => void }) {
   if (items.length === 0) return null;
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-20">
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-20 px-16">
       {items.map((cat, i) => (
         <FadeInUp key={cat.name}>
           <div
@@ -93,7 +93,24 @@ export default function CategoryPage() {
         </div>
 
         {/* Chevron */}
-        <Image src="/Line 14.png" alt="scroll down" width={96} height={64} />
+        <button onClick={() => {
+          const target = document.getElementById("section-pakaian");
+          if (!target) return;
+          const start = window.scrollY;
+          const end = target.getBoundingClientRect().top + window.scrollY;
+          const duration = 1200;
+          const startTime = performance.now();
+          const ease = (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+          const step = (now: number) => {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            window.scrollTo(0, start + (end - start) * ease(progress));
+            if (progress < 1) requestAnimationFrame(step);
+          };
+          requestAnimationFrame(step);
+        }} className="cursor-pointer">
+          <Image src="/Line 14.png" alt="scroll down" width={96} height={64} />
+        </button>
       </div>
 
       {!hasResults && (
@@ -104,7 +121,7 @@ export default function CategoryPage() {
 
       {/* Pakaian Section */}
       {filteredPakaian.length > 0 && (
-        <div className="px-16 pt-16 pb-4">
+        <div id="section-pakaian" className="px-16 pt-16 pb-4">
           <FadeInUp>
             <div className="flex flex-col items-center mb-12">
               <div className="flex items-center gap-1 mb-4">
