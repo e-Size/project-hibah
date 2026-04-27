@@ -589,16 +589,36 @@ export default function EditorPage() {
                   <p className="text-sm text-gray-700 font-medium">{sizes.join("-")}</p>
                 </div>
 
-                <div>
+                <div className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100">
                   <div className="flex items-center gap-2 mb-3">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e8734a" strokeWidth="2"><circle cx="13.5" cy="6.5" r=".5" fill="#e8734a" /><circle cx="17.5" cy="10.5" r=".5" fill="#e8734a" /><circle cx="8.5" cy="7.5" r=".5" fill="#e8734a" /><circle cx="6.5" cy="12.5" r=".5" fill="#e8734a" /><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" /></svg>
+                    <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "#F5E6D3" }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b6340" strokeWidth="2"><circle cx="13.5" cy="6.5" r=".5" fill="#8b6340" /><circle cx="17.5" cy="10.5" r=".5" fill="#8b6340" /><circle cx="8.5" cy="7.5" r=".5" fill="#8b6340" /><circle cx="6.5" cy="12.5" r=".5" fill="#8b6340" /><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" /></svg>
+                    </div>
                     <span className="font-bold text-gray-800 text-sm tracking-wide">COLOR PALETTE</span>
                   </div>
-                  <div className="grid grid-cols-7 gap-2">
-                    {colors.map((color) => (
-                      <button key={color} onClick={() => setSelectedColor(color)}
-                        className={`w-8 h-8 rounded-full transition-all border-2 ${selectedColor === color ? "border-[#e8734a] scale-110 shadow-md" : "border-transparent hover:scale-105 hover:border-gray-300"} ${color === "#ffffff" ? "border-gray-200" : ""}`}
-                        style={{ backgroundColor: color }} />
+                  <div className="flex flex-wrap">
+                    {colors.map((color, i) => (
+                      <button
+                        key={color}
+                        onClick={() => setSelectedColor(color)}
+                        className={`w-9 h-9 flex-shrink-0 rounded-xl transition-all relative ${color === "#ffffff" ? "border border-gray-200" : ""}`}
+                        style={{
+                          backgroundColor: color,
+                          marginLeft: "-3px",
+                          marginRight: "-3px",
+                          marginTop: "3px",
+                          marginBottom: "3px",
+                          zIndex: selectedColor === color ? 20 : i,
+                          outline: selectedColor === color ? "2.5px solid #e8734a" : "none",
+                          outlineOffset: "1px",
+                        }}
+                      >
+                        {selectedColor === color && (
+                          <span className="absolute inset-0 flex items-center justify-center">
+                            <span className="w-2 h-2 rounded-full bg-white/80 shadow-sm" />
+                          </span>
+                        )}
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -838,23 +858,40 @@ export default function EditorPage() {
         {/* Canvas area */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Toolbar */}
-          <div className="flex items-center justify-center gap-2 py-3 flex-shrink-0">
-            <button className="w-11 h-11 bg-[#f0ebe2] rounded-xl flex items-center justify-center hover:bg-[#e8e0d4] transition-colors shadow-sm">
+          <div className="flex items-center justify-center gap-3 py-3 flex-shrink-0 bg-white">
+            {/* Undo */}
+            <button className="w-11 h-11 bg-[#FAF3E0] rounded-xl flex items-center justify-center hover:bg-[#ede7dd] transition-colors shadow-sm">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round"><path d="M3 7v6h6" /><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" /></svg>
             </button>
-            <button className="w-11 h-11 bg-[#f0ebe2] rounded-xl flex items-center justify-center hover:bg-[#e8e0d4] transition-colors shadow-sm">
+            {/* Redo */}
+            <button className="w-11 h-11 bg-[#FAF3E0] rounded-xl flex items-center justify-center hover:bg-[#ede7dd] transition-colors shadow-sm">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round"><path d="M21 7v6h-6" /><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13" /></svg>
             </button>
-            <button onClick={() => setZoom(z => Math.max(25, z - 25))} className="w-11 h-11 bg-[#e8e2d8] rounded-xl flex items-center justify-center hover:bg-[#ddd8cc] transition-colors shadow-sm">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="8" y1="11" x2="14" y2="11" /></svg>
-            </button>
-            <div className="w-20 h-11 bg-white rounded-xl flex items-center justify-center text-sm font-semibold text-gray-700 shadow-sm border border-gray-200 select-none">{zoom}%</div>
-            <button onClick={() => setZoom(z => Math.min(200, z + 25))} className="w-11 h-11 bg-[#e8e2d8] rounded-xl flex items-center justify-center hover:bg-[#ddd8cc] transition-colors shadow-sm">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" /></svg>
-            </button>
-            <button className="w-11 h-11 bg-[#e8e2d8] rounded-xl flex items-center justify-center hover:bg-[#ddd8cc] transition-colors shadow-sm">
+
+            {/* Zoom group pill */}
+            <div className="flex items-center bg-[#aeaaa4] rounded-2xl px-1.5 py-1.5 shadow-sm gap-3">
+              <button
+                onClick={() => setZoom(z => Math.max(25, z - 25))}
+                className="w-9 h-9 bg-[#c1c1c1] flex items-center justify-center rounded-xl hover:bg-[#b4b4b4] transition-colors"
+              >
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#4b4f55" strokeWidth="2.5" strokeLinecap="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="8" y1="11" x2="14" y2="11" /></svg>
+              </button>
+              <div className="w-[72px] h-9 bg-white rounded-xl flex items-center justify-center text-sm font-bold text-gray-700 select-none shadow-sm">
+                {zoom}%
+              </div>
+              <button
+                onClick={() => setZoom(z => Math.min(200, z + 25))}
+                className="w-9 h-9 bg-[#c1c1c1] flex items-center justify-center rounded-xl hover:bg-[#b4b4b4] transition-colors"
+              >
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#4b4f55" strokeWidth="2.5" strokeLinecap="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" /></svg>
+              </button>
+            </div>
+
+            {/* Fullscreen */}
+            <button className="w-11 h-11 bg-[#FAF3E0] rounded-xl flex items-center justify-center hover:bg-[#ede7dd] transition-colors shadow-sm">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" /></svg>
             </button>
+
             {/* Delete selected */}
             {selectedEl && (
               <button onClick={deleteSelected} className="w-11 h-11 bg-red-50 rounded-xl flex items-center justify-center hover:bg-red-100 transition-colors shadow-sm border border-red-200">
@@ -865,7 +902,8 @@ export default function EditorPage() {
 
           {/* Canvas */}
           <div
-            className="flex-1 overflow-hidden relative flex items-center justify-center bg-[#e8e4dc]"
+            className="flex-1 overflow-hidden relative flex items-center justify-center"
+            style={{ backgroundColor: "#ebebeb", backgroundImage: "url('/teksturkaineditor.png')", backgroundRepeat: "no-repeat", backgroundSize: "cover", backgroundPosition: "center" }}
             onClick={() => setSelectedEl(null)}
           >
             <div className="absolute top-0 left-0 right-0  bg-[#4a7fc1]" />
