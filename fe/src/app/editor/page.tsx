@@ -9,7 +9,6 @@ import OnboardingTour, { type TourStep } from "@/components/ui/OnboardingTour";
 import ViewportScaler from "@/components/ui/ViewportScaler";
 
 type SidebarTab = "product" | "upload" | "text" | "layers" | null;
-type ProductTab = "details" | "change";
 type ViewType = "front" | "back" | "left" | "right";
 type Size = "S" | "M" | "L" | "XL" | "2XL" | "3XL" | "4XL" | "5XL";
 type ElType = "image" | "text";
@@ -134,7 +133,6 @@ async function applyShirtColor(src: string, hexColor: string): Promise<string> {
 
 export default function EditorPage() {
   const [activeTab, setActiveTab] = useState<SidebarTab>(null);
-  const [productTab, setProductTab] = useState<ProductTab>("details");
   const [showChangeModal, setShowChangeModal] = useState(false);
 
   const [selectedColor, setSelectedColor] = useState("#ffffff");
