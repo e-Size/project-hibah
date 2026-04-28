@@ -11,7 +11,40 @@ import SpinIn from "../../components/animation/SpinIn";
 import ViewportScaler from "../../components/ui/ViewportScaler";
 const labelColors = ["#4a7fc1", "#d4795e", "#4a7fc1", "#d4795e"];
 
-function CategoryGrid({ items, onJacketClick }: { items: { name: string; bg: string }[]; onJacketClick: () => void }) {
+type CategoryItem = {
+  name: string;
+  bg: string;
+  keywords?: string[];
+};
+
+const normalizeSearchText = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+const compactSearchText = (value: string) => normalizeSearchText(value).replace(/\s+/g, "");
+
+const matchesCategory = (category: CategoryItem, rawQuery: string) => {
+  const normalizedQuery = normalizeSearchText(rawQuery);
+  const compactQuery = compactSearchText(rawQuery);
+
+  if (!normalizedQuery) return true;
+
+  return [category.name, ...(category.keywords ?? [])].some((term) => {
+    const normalizedTerm = normalizeSearchText(term);
+    const compactTerm = compactSearchText(term);
+
+    return (
+      normalizedTerm.includes(normalizedQuery) ||
+      normalizedQuery.includes(normalizedTerm) ||
+      compactTerm.includes(compactQuery) ||
+      compactQuery.includes(compactTerm)
+    );
+  });
+};
+
+function CategoryGrid({ items, onJacketClick }: { items: CategoryItem[]; onJacketClick: () => void }) {
   if (items.length === 0) return null;
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-20 px-16">
@@ -45,9 +78,8 @@ export default function CategoryPage() {
   const [jacketOpen, setJacketOpen] = useState(false);
   const [query, setQuery] = useState("");
 
-  const q = query.toLowerCase();
-  const filteredPakaian = pakaian.filter((c) => c.name.toLowerCase().includes(q));
-  const filteredMerch = merch.filter((c) => c.name.toLowerCase().includes(q));
+  const filteredPakaian = pakaian.filter((c) => matchesCategory(c, query));
+  const filteredMerch = merch.filter((c) => matchesCategory(c, query));
   const hasResults = filteredPakaian.length > 0 || filteredMerch.length > 0;
 
   return (
