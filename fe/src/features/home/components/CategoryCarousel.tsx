@@ -6,35 +6,39 @@ import { allCategories } from "../../../data/categories";
 
 const labelColors = ["#4a7fc1", "#d4795e", "#4a7fc1", "#d4795e"];
 
-const VISIBLE = 4;
-const GAP = 36; // gap-9 = 36px
-const total = allCategories.length; // 18
+const total = allCategories.length;
 const items = [...allCategories, ...allCategories]; // duplicate for seamless loop
 
+function getLayout(vw: number): { visible: number; gap: number } {
+  if (vw < 640) return { visible: 2, gap: 12 };
+  if (vw < 1024) return { visible: 3, gap: 20 };
+  return { visible: 4, gap: 36 };
+}
 
 export default function CategoryCarousel() {
   const [cardWidth, setCardWidth] = useState(0);
+  const [gapPx, setGapPx] = useState(36);
   const [paused, setPaused] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const update = () => {
       if (!containerRef.current) return;
-      const w = containerRef.current.offsetWidth;
-      setCardWidth((w - GAP * (VISIBLE - 1)) / VISIBLE);
+      const { visible, gap } = getLayout(window.innerWidth);
+      const containerW = containerRef.current.offsetWidth;
+      setCardWidth((containerW - gap * (visible - 1)) / visible);
+      setGapPx(gap);
     };
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  // step = one card width + one gap (margin-right per card)
-  const step = cardWidth + GAP;
-  // total distance to scroll = first half of the duplicated track
+  const step = cardWidth + gapPx;
   const dist = total * step;
 
   return (
-    <div ref={containerRef} className="overflow-hidden w-full py-4">
+    <div ref={containerRef} className="overflow-hidden w-full py-3">
       {cardWidth > 0 && (
         <div
           className="flex"
@@ -52,14 +56,19 @@ export default function CategoryCarousel() {
             <div
               key={i}
               className="flex-none relative transition-transform duration-300 hover:scale-105 hover:shadow-lg hover:z-10"
-              style={{ width: cardWidth, marginRight: GAP }}
+              style={{ width: cardWidth, marginRight: gapPx }}
             >
-              <div className="border-4 border-[#927615] rounded-t-xl overflow-hidden bg-white">
+              <div className="border-[3px] border-[#927615] rounded-t-xl overflow-hidden bg-white">
                 <div className="aspect-square relative overflow-hidden">
                   <Image src="/baju.png" alt={cat.name} fill className="object-cover" />
                 </div>
-                <div className="py-3 text-center" style={{ backgroundColor: labelColors[i % 4] }}>
-                  <p className="text-white font-bold text-lg">{cat.name}</p>
+                <div
+                  className="py-2 text-center"
+                  style={{ backgroundColor: labelColors[i % 4] }}
+                >
+                  <p className="text-white font-bold text-xs sm:text-sm lg:text-base leading-tight px-1 truncate">
+                    {cat.name}
+                  </p>
                 </div>
               </div>
             </div>

@@ -14,9 +14,12 @@ export default function FadeInRight({
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setInView(entry.isIntersecting);
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
       },
-      { threshold: 0.15 }
+      { threshold: 0, rootMargin: "0px 0px 150px 0px" }
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
