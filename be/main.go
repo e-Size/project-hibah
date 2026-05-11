@@ -26,6 +26,7 @@ func main() {
 		&models.ProductMaterial{},
 		&models.PriceMatrix{},
 		&models.ProductAddon{},
+		&models.ProductImage{},
 	)
 
 	r := gin.Default()

@@ -5,6 +5,7 @@ import (
 	"be/internal/material"
 	"be/internal/product"
 	productaddon "be/internal/product_addon"
+	productimage "be/internal/product_image"
 	pricematrix "be/internal/price_matrix"
 	quantitytier "be/internal/quantity_tier"
 	sizevariant "be/internal/size_variant"
@@ -21,6 +22,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	qt := quantitytier.Wire(db)
 	pm := pricematrix.Wire(db)
 	pa := productaddon.Wire(db)
+	pi := productimage.Wire(db)
 
 	api := r.Group("/api")
 	{
@@ -79,6 +81,14 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 			productAddons.POST("", pa.Create)
 			productAddons.PUT("/:id", pa.Update)
 			productAddons.DELETE("/:id", pa.Delete)
+		}
+
+		productImages := api.Group("/product-images")
+		{
+			productImages.GET("/product/:product_id", pi.GetByProduct)
+			productImages.POST("", pi.Create)
+			productImages.PUT("/:id", pi.Update)
+			productImages.DELETE("/:id", pi.Delete)
 		}
 	}
 }
