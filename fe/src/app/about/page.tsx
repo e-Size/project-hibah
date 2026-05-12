@@ -13,15 +13,12 @@ export default function AboutPage() {
     <ViewportScaler>
     <main className="min-h-screen">
       <Navbar variant="light" />
-      {/* Hero Section */}
-      <section className="relative w-full" style={{ height: "calc(100vh / var(--page-scale, 1))" }}>
-        <Image
-          src="/AboutSec.png"
-          alt="About Esize"
-          fill
-          className="object-cover object-center"
-          priority
-        />
+      {/* Hero Section — landscape on mobile, full-height on desktop */}
+      <section className="relative w-full aspect-video md:hidden">
+        <Image src="/AboutSec.png" alt="About Esize" fill className="object-contain" priority />
+      </section>
+      <section className="relative w-full hidden md:block" style={{ height: "calc(100vh / var(--page-scale, 1))" }}>
+        <Image src="/AboutSec.png" alt="About Esize" fill className="object-cover object-center" priority />
       </section>
 
       {/* About Section */}
@@ -40,7 +37,7 @@ export default function AboutPage() {
         <div className="w-full h-px bg-[#c0392b] mb-6 md:mb-10" />
 
         {/* Text */}
-        <div className="text-center text-[#7C6000] font-semibold text-base sm:text-lg md:text-xl lg:text-2xl leading-snug max-w-4xl mx-auto">
+        <div className="text-center text-[#7C6000] font-semibold text-sm sm:text-lg md:text-xl lg:text-2xl leading-snug max-w-4xl mx-auto">
           <TextType
             text={[
               "Esize adalah sebuah perusahaan yang bergerak di bidang penyediaan barang dan jasa konveksi serta suvenir. Didirikan pada tahun 2019 kini esize telah bertransformasi menjadi sebuah perusahaan yang memiliki kemampuan untuk memproduksi dan menyediakan kebutuhan pelanggan dengan kapasitas besar ke seluruh Indonesia dan luar negeri.",
@@ -53,7 +50,7 @@ export default function AboutPage() {
             cursorCharacter="|"
             cursorBlinkDuration={0.5}
             startOnVisible={true}
-            className="text-[#7C6000] font-semibold text-base sm:text-lg md:text-xl lg:text-2xl leading-snug"
+            className="text-[#7C6000] font-semibold text-sm sm:text-lg md:text-xl lg:text-2xl leading-snug"
           />
         </div>
 
@@ -64,8 +61,8 @@ export default function AboutPage() {
       {/* Feature Section */}
       <section className="px-0 bg-[#f0f0ee] overflow-hidden">
         {/* Top row: image left, text right */}
-        <FadeInRight className="flex flex-col md:flex-row">
-          <div className="flex-1 relative min-h-56 sm:min-h-72 md:min-h-105">
+        <FadeInRight className="flex flex-row">
+          <div className="flex-1 relative min-h-0">
             <Image
               src="/about1.png"
               alt="Fasilitas Produksi"
@@ -73,8 +70,8 @@ export default function AboutPage() {
               className="object-cover"
             />
           </div>
-          <div className="flex-1 bg-[#f5e8e0] flex items-center justify-center px-4 sm:px-8 md:px-12 py-8 sm:py-12 md:py-16">
-            <p className="text-[#7C6000] font-semibold text-lg sm:text-xl md:text-[28px] leading-snug text-start md:text-end">
+          <div className="flex-1 bg-[#f5e8e0] flex items-center justify-center px-3 sm:px-8 md:px-12 py-4 sm:py-12 md:py-16">
+            <p className="text-[#7C6000] font-semibold text-xs sm:text-xl md:text-[28px] leading-snug text-start md:text-end">
               Didukung <span className="bg-[#F8F3E9] px-1">fasilitas produksi modern</span> dan{" "}
               <span className="bg-[#F8F3E9] px-1">tim berpengalaman lebih dari 10 tahun,</span>{" "}
               kami siap memenuhi kebutuhan konveksi
@@ -89,9 +86,9 @@ export default function AboutPage() {
         </FadeInRight>
 
         {/* Bottom row: text left, image right */}
-        <FadeInLeft className="flex flex-col md:flex-row">
-          <div className="flex-1 bg-[#dce8f5] flex items-center justify-center px-4 sm:px-8 md:px-12 py-8 sm:py-12 md:py-16">
-            <p className="text-[#7C6000] font-semibold text-lg sm:text-xl md:text-[28px] leading-snug text-start">
+        <FadeInLeft className="flex flex-row">
+          <div className="flex-1 bg-[#dce8f5] flex items-center justify-center px-3 sm:px-8 md:px-12 py-4 sm:py-12 md:py-16">
+            <p className="text-[#7C6000] font-semibold text-xs sm:text-xl md:text-[28px] leading-snug text-start">
               Kami berkomitmen menghadirkan produk
               berstandar tinggi dengan <span className="bg-[#F8F3E9] px-1">layanan terbaik,</span>{" "}
               <span className="bg-[#F8F3E9] px-1">proses efisien,</span>{" "}
@@ -99,7 +96,7 @@ export default function AboutPage() {
               dan <span className="bg-[#F8F3E9] px-1">harga yang tetap bersahabat.</span>
             </p>
           </div>
-          <div className="flex-1 relative min-h-56 sm:min-h-72 md:min-h-105">
+          <div className="flex-1 relative min-h-0">
             <Image
               src="/about2.png"
               alt="Komitmen Kualitas"

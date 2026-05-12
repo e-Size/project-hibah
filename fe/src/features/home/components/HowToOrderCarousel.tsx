@@ -89,21 +89,21 @@ export default function HowToOrderCarousel() {
             }}
           >
             {steps.map((step) => (
-              <div key={step.num} className="w-full flex-none px-1 select-none">
-                <div className="bg-[#F8F3E9] rounded-2xl shadow-md overflow-hidden flex flex-col">
+              <div key={step.num} className="w-full flex-none px-12 select-none">
+                <div className="bg-[#F8F3E9] rounded-2xl shadow-md overflow-hidden flex flex-col h-[320px]">
                   {/* Image block */}
-                  <div className="relative bg-[#e8e8e8] rounded-xl mx-4 mt-4 mb-4 overflow-hidden">
-                    <span className="absolute top-3 left-3 w-9 h-9 rounded-full bg-[#DFAA14] flex items-center justify-center text-white text-sm font-bold z-10">
+                  <div className="relative bg-[#e8e8e8] rounded-xl mx-4 mt-4 mb-3 overflow-hidden">
+                    <span className="absolute top-3 left-3 w-8 h-8 rounded-full bg-[#DFAA14] flex items-center justify-center text-white text-sm font-bold z-10">
                       {step.num}
                     </span>
-                    <div className="relative w-full h-48">
+                    <div className="relative w-full h-36">
                       <Image src={step.img} alt={step.title} fill className="object-cover pointer-events-none" />
                     </div>
                   </div>
-                  {/* Text block */}
-                  <div className="px-5 pb-5">
-                    <p className="font-bold text-gray-800 mb-2">{step.title}</p>
-                    <p className="text-gray-500 text-sm font-light leading-relaxed">{step.desc}</p>
+                  {/* Text block — flex-1 so all cards fill identically */}
+                  <div className="px-5 pb-4 flex-1 overflow-hidden">
+                    <p className="font-bold text-gray-800 mb-1.5 text-sm">{step.title}</p>
+                    <p className="text-gray-500 text-xs font-light leading-relaxed line-clamp-4">{step.desc}</p>
                   </div>
                   <div className="h-1.5 bg-[#d4795e] rounded-b-2xl" />
                 </div>
@@ -150,9 +150,6 @@ export default function HowToOrderCarousel() {
           </button>
         </div>
 
-        <p className="text-center text-xs text-gray-400 mt-2">
-          Langkah {current + 1} dari {steps.length}
-        </p>
       </div>
 
       {/* ── Desktop flex row (≥ lg) ── */}

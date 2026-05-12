@@ -18,6 +18,11 @@ export default function OnboardingTour({
 }) {
   const [current, setCurrent] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 640);
+  }, []);
 
   useLayoutEffect(() => {
     const update = () => {
@@ -43,9 +48,67 @@ export default function OnboardingTour({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  const step = steps[current];
+  const progress = ((current + 1) / steps.length) * 100;
+  const isLast = current === steps.length - 1;
+  const next = () => {
+    if (current < steps.length - 1) setCurrent(current + 1);
+    else onClose();
+  };
+
+  // Mobile: spotlight overlay + fixed bottom card for content
+  if (isMobile) {
+    return createPortal(
+      <>
+        {/* Dark backdrop */}
+        <div className="fixed inset-0 z-[9998]" onClick={onClose} />
+
+        {/* Spotlight highlight around target */}
+        {rect && (
+          <div
+            className="fixed z-[9999] rounded-xl pointer-events-none"
+            style={{
+              top: rect.top - 6,
+              left: rect.left - 6,
+              width: rect.width + 12,
+              height: rect.height + 12,
+              boxShadow:
+                "0 0 0 9999px rgba(0, 0, 0, 0.55), 0 0 0 3px rgba(255, 255, 255, 0.95), 0 0 24px 6px rgba(255, 255, 255, 0.45)",
+            }}
+          />
+        )}
+
+        {/* Bottom card — always on screen */}
+        <div className="fixed bottom-16 left-3 right-3 z-[10000] bg-white rounded-2xl shadow-2xl p-5 border border-gray-100">
+          <button
+            onClick={onClose}
+            aria-label="Tutup"
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+          <h3 className="font-bold text-base text-gray-900 mb-2 pr-6">{step.title}</h3>
+          <p className="text-sm text-gray-500 mb-4 leading-relaxed">{step.description}</p>
+          <div className="w-full h-1.5 bg-gray-200 rounded-full mb-3 overflow-hidden">
+            <div className="h-full bg-blue-500 rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-gray-500">{current + 1} dari {steps.length}</span>
+            <button onClick={next} className="bg-gray-900 text-white text-xs font-medium px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+              {isLast ? "Selesai" : "Selanjutnya"}
+            </button>
+          </div>
+        </div>
+      </>,
+      document.body
+    );
+  }
+
   if (!rect) return null;
 
-  const step = steps[current];
   const placement = step.placement ?? "right";
   const gap = 24;
   const popupWidth = 320;
@@ -82,14 +145,6 @@ export default function OnboardingTour({
     arrowStyle.left = "50%";
     arrowStyle.transform = "translateX(-50%) rotate(45deg)";
   }
-
-  const next = () => {
-    if (current < steps.length - 1) setCurrent(current + 1);
-    else onClose();
-  };
-
-  const progress = ((current + 1) / steps.length) * 100;
-  const isLast = current === steps.length - 1;
 
   return createPortal(
     <>

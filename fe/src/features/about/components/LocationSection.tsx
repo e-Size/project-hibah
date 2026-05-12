@@ -47,42 +47,42 @@ export default function LocationSection() {
     <>
       {/* Location Cards */}
       <section className="bg-[#f0f0ee] py-12 md:py-16 px-4 sm:px-8 md:px-16">
-        <h2 className="text-center text-[#7C6000] font-semibold text-3xl sm:text-4xl md:text-5xl mb-10 md:mb-18">
+        <h2 className="text-center text-[#7C6000] font-semibold text-xl sm:text-4xl md:text-5xl mb-6 md:mb-18">
           Lokasi Kami
         </h2>
 
-        <div className="flex flex-col md:flex-row gap-6 md:gap-15 justify-center items-stretch">
+        <div className="flex flex-row gap-2 md:gap-15 justify-center items-stretch">
           {locations.map((loc) => (
             <div
               key={loc.name}
-              className={`w-full md:max-w-140 border-[6px] bg-[#fdf6f0] flex flex-col sm:flex-row p-4 gap-4 sm:gap-5 ${loc.rounded}`}
+              className={`flex-1 md:max-w-140 border-[3px] md:border-[6px] bg-[#fdf6f0] flex flex-row p-1.5 md:p-4 gap-1.5 md:gap-5 ${loc.rounded}`}
               style={{ borderColor: loc.borderColor }}
             >
-              {/* Photo */}
-              <div className="relative w-full sm:w-60 h-52 sm:h-60 shrink-0 overflow-hidden rounded-lg sm:rounded-none sm:self-center">
+              {/* Photo — fixed width, stretches to card height */}
+              <div className="relative w-14 md:w-60 md:h-60 shrink-0 self-stretch md:self-center overflow-hidden rounded-md">
                 <Image src={loc.photo} alt={loc.name} fill className="object-cover" />
               </div>
 
               {/* Info */}
-              <div className="flex flex-col justify-center px-2 sm:px-7 py-2 sm:py-7 gap-3 sm:gap-4">
-                <h3 className="font-bold text-2xl sm:text-3xl text-center" style={{ color: loc.titleColor }}>
+              <div className="flex flex-col justify-between min-w-0 gap-1 md:gap-4 md:px-7 md:py-7 py-0.5">
+                <h3 className="font-bold text-xs md:text-3xl text-center" style={{ color: loc.titleColor }}>
                   {loc.name}
                 </h3>
-                <div className="flex items-start gap-3">
-                  <svg className="flex-shrink-0 mt-1" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={loc.borderColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <div className="flex items-start gap-1 md:gap-3">
+                  <svg className="flex-shrink-0 mt-0.5" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={loc.borderColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
                   </svg>
-                  <p className="text-gray-500 text-sm leading-relaxed">{loc.address}</p>
+                  <p className="text-gray-500 text-[9px] md:text-sm leading-snug line-clamp-4">{loc.address}</p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <svg className="flex-shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={loc.borderColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <div className="flex items-center gap-1 md:gap-3">
+                  <svg className="flex-shrink-0" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={loc.borderColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="3" y="4" width="18" height="18" rx="2" /><polyline points="16 2 16 6" /><polyline points="8 2 8 6" /><line x1="3" y1="10" x2="21" y2="10" /><polyline points="9 16 11 18 15 14" />
                   </svg>
-                  <p className="text-gray-500 text-sm">{loc.hours}</p>
+                  <p className="text-gray-500 text-[9px] md:text-sm">{loc.hours}</p>
                 </div>
                 <button
                   onClick={() => setActiveLocation(loc)}
-                  className="bg-[#C8A96E] hover:bg-[#b8973a] text-white font-semibold rounded-full py-3 px-6 transition-colors"
+                  className="w-full bg-[#C8A96E] hover:bg-[#b8973a] text-white font-semibold rounded-full py-1 px-1 text-[9px] md:py-3 md:px-6 md:text-sm transition-colors"
                 >
                   Lihat Lokasi
                 </button>

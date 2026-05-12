@@ -10,7 +10,7 @@ const total = allCategories.length;
 const items = [...allCategories, ...allCategories]; // duplicate for seamless loop
 
 function getLayout(vw: number): { visible: number; gap: number } {
-  if (vw < 640) return { visible: 2, gap: 12 };
+  if (vw < 640) return { visible: 2.5, gap: 8 };
   if (vw < 1024) return { visible: 3, gap: 20 };
   return { visible: 4, gap: 36 };
 }

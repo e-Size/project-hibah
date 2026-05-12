@@ -78,10 +78,6 @@ const sidebarItems = [
   { key: "layers"  as SidebarTab, label: "LAYERS",  Icon: IconLayers  },
 ];
 
-const mobileSidebarItems = [
-  ...sidebarItems,
-  { key: "views" as SidebarTab, label: "VIEWS", Icon: IconViews },
-];
 
 // --- Color utils ---
 function hexToRgb(hex: string) {
@@ -574,7 +570,10 @@ export default function EditorPage() {
 
       {/* ── Header ── */}
       <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-3 sm:px-6 flex-shrink-0 z-50">
-        <div>
+        <div className="flex items-center gap-2">
+          <a href="/" className="lg:hidden w-9 h-9 flex items-center justify-center rounded-lg bg-[#FAF3E0] hover:bg-[#ede7dd] transition-colors flex-shrink-0" title="Kembali ke beranda">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+          </a>
           <a href="/">
             <Image src="/logoesize.png" alt="Esize" width={100} height={36} className="h-9 w-auto cursor-pointer" />
           </a>
@@ -591,12 +590,14 @@ export default function EditorPage() {
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
             Simpan Template
           </button>
-          {/* Mobile: icon only */}
-          <button onClick={downloadPreview} title="Preview 2×2" className="lg:hidden w-9 h-9 flex items-center justify-center rounded-lg bg-white hover:bg-gray-50 transition-colors" style={{ border: "1px solid #D4A373" }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          {/* Mobile: icon + label */}
+          <button onClick={downloadPreview} className="lg:hidden flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 bg-[#FAF3E0] hover:bg-[#ede7dd] transition-colors flex-shrink-0" style={{ border: "1px solid #D4A373" }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            <span className="text-[11px] font-semibold text-gray-700">Preview</span>
           </button>
-          <button onClick={downloadZip} title="Simpan Template" className="lg:hidden w-9 h-9 flex items-center justify-center rounded-lg bg-white hover:bg-gray-50 transition-colors" style={{ border: "1px solid #D4A373" }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
+          <button onClick={downloadZip} className="lg:hidden flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 bg-[#e8734a] hover:bg-[#d4623a] transition-colors flex-shrink-0">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
+            <span className="text-[11px] font-semibold text-white">Simpan</span>
           </button>
         </div>
       </header>
@@ -687,24 +688,21 @@ export default function EditorPage() {
                     </div>
                     <span className="font-bold text-gray-800 text-sm tracking-wide">COLOR PALETTE</span>
                   </div>
-                  <div className="flex flex-wrap">
-                    {colors.map((color, i) => (
+                  <div className="grid grid-cols-7 gap-2">
+                    {colors.map((color) => (
                       <button
                         key={color}
                         onClick={() => setSelectedColor(color)}
-                        className={`w-9 h-9 shrink-0 rounded-xl transition-all relative ${color === "#ffffff" ? "border border-gray-200" : ""}`}
+                        className={`w-7 h-7 rounded-lg transition-all relative shrink-0 ${color === "#ffffff" ? "border border-gray-200" : ""}`}
                         style={{
                           backgroundColor: color,
-                          marginLeft: "-3px", marginRight: "-3px",
-                          marginTop: "3px", marginBottom: "3px",
-                          zIndex: selectedColor === color ? 20 : i,
                           outline: selectedColor === color ? "2.5px solid #e8734a" : "none",
-                          outlineOffset: "1px",
+                          outlineOffset: "2px",
                         }}
                       >
                         {selectedColor === color && (
                           <span className="absolute inset-0 flex items-center justify-center">
-                            <span className="w-2 h-2 rounded-full bg-white/80 shadow-sm" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-white/80 shadow-sm" />
                           </span>
                         )}
                       </button>
@@ -836,20 +834,20 @@ export default function EditorPage() {
                     <span className="text-[10px] font-bold text-gray-500 tracking-widest block mb-2">STYLE</span>
                     <div className="flex gap-1.5">
                       <button onClick={() => setTdBold(v => !v)}
-                        className={`flex-1 h-9 rounded-xl font-bold text-base transition-all border ${tdBold ? "bg-gray-800 text-white border-gray-800" : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"}`}>B</button>
+                        className={`flex-1 h-7 rounded-lg font-bold text-sm transition-all border ${tdBold ? "bg-gray-800 text-white border-gray-800" : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"}`}>B</button>
                       <button onClick={() => setTdItalic(v => !v)}
-                        className={`flex-1 h-9 rounded-xl italic text-base transition-all border ${tdItalic ? "bg-gray-800 text-white border-gray-800" : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"}`}><em>I</em></button>
+                        className={`flex-1 h-7 rounded-lg italic text-sm transition-all border ${tdItalic ? "bg-gray-800 text-white border-gray-800" : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"}`}><em>I</em></button>
                       <button onClick={() => setTdAlign("left")}
-                        className={`flex-1 h-9 rounded-xl flex items-center justify-center transition-all border ${tdAlign === "left" ? "bg-gray-800 text-white border-gray-800" : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"}`}>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>
+                        className={`flex-1 h-7 rounded-lg flex items-center justify-center transition-all border ${tdAlign === "left" ? "bg-gray-800 text-white border-gray-800" : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"}`}>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>
                       </button>
                       <button onClick={() => setTdAlign("center")}
-                        className={`flex-1 h-9 rounded-xl flex items-center justify-center transition-all border ${tdAlign === "center" ? "bg-gray-800 text-white border-gray-800" : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"}`}>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+                        className={`flex-1 h-7 rounded-lg flex items-center justify-center transition-all border ${tdAlign === "center" ? "bg-gray-800 text-white border-gray-800" : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"}`}>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
                       </button>
                       <button onClick={() => setTdAlign("right")}
-                        className={`flex-1 h-9 rounded-xl flex items-center justify-center transition-all border ${tdAlign === "right" ? "bg-gray-800 text-white border-gray-800" : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"}`}>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>
+                        className={`flex-1 h-7 rounded-lg flex items-center justify-center transition-all border ${tdAlign === "right" ? "bg-gray-800 text-white border-gray-800" : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"}`}>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>
                       </button>
                     </div>
                   </div>
@@ -909,10 +907,10 @@ export default function EditorPage() {
                         className="w-0 flex-1 min-w-0 bg-[#fdf8f4] border border-[#f0e4d8] rounded-xl px-3 py-2 text-sm text-gray-600 font-mono outline-none focus:border-[#e8734a] transition-colors"
                       />
                     </div>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-8 gap-1.5">
                       {tdColors.map(c => (
                         <button key={c} onClick={() => setTdColor(c)}
-                          className={`aspect-square rounded-xl border-2 transition-all ${tdColor === c ? "border-[#e8734a] scale-105 shadow-md" : "border-gray-100 hover:scale-105"}`}
+                          className={`w-7 h-7 rounded-lg border-2 transition-all ${tdColor === c ? "border-[#e8734a] scale-105 shadow-md" : "border-gray-100 hover:scale-105"}`}
                           style={{ backgroundColor: c }} />
                       ))}
                     </div>
@@ -921,7 +919,7 @@ export default function EditorPage() {
 
                 <div className="px-4 py-3 border-t border-gray-100 sticky bottom-0 bg-white lg:static">
                   <button onClick={addCustomText}
-                    className="w-full bg-[#8b6340] hover:bg-[#7a5535] text-white rounded-2xl py-3.5 font-bold text-sm tracking-wide transition-colors flex items-center justify-center gap-2">
+                    className="w-full bg-[#8b6340] hover:bg-[#7a5535] text-white rounded-xl py-2.5 font-bold text-xs tracking-wide transition-colors flex items-center justify-center gap-1.5">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
                     ADD TO DESIGN
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
@@ -1067,7 +1065,7 @@ export default function EditorPage() {
                       onPointerDown={(e) => { if (!isEditingText) onPointerDown(e, el.id); }}
                       onClick={(e) => e.stopPropagation()}
                       onDoubleClick={() => { if (el.type === "text") setEditingTextId(el.id); }}
-                      className={`absolute select-none ${isEditingText ? "cursor-text" : "cursor-grab active:cursor-grabbing"} ${isSelected ? "outline outline-2 outline-[#4a7fc1] outline-offset-1" : ""}`}
+                      className={`absolute select-none touch-none ${isEditingText ? "cursor-text" : "cursor-grab active:cursor-grabbing"} ${isSelected ? "outline outline-2 outline-[#4a7fc1] outline-offset-1" : ""}`}
                       style={{ left: el.x, top: el.y, width: el.type === "image" ? el.w : "auto", height: el.type === "image" ? el.h : "auto" }}
                     >
                       {el.type === "image" ? (
@@ -1077,16 +1075,18 @@ export default function EditorPage() {
                           {isSelected && (["nw","ne","sw","se"] as const).map((corner) => (
                             <div
                               key={corner}
-                              onPointerDown={(e) => onResizeHandlePointerDown(e, el.id, corner)}
-                              className="absolute w-4 h-4 bg-white border-2 border-[#4a7fc1] rounded-sm z-10"
+                              onPointerDown={(e) => { e.preventDefault(); onResizeHandlePointerDown(e, el.id, corner); }}
+                              className="absolute w-8 h-8 z-10 touch-none flex items-center justify-center"
                               style={{
-                                top:    corner.startsWith("n") ? -8 : undefined,
-                                bottom: corner.startsWith("s") ? -8 : undefined,
-                                left:   corner.endsWith("w")   ? -8 : undefined,
-                                right:  corner.endsWith("e")   ? -8 : undefined,
+                                top:    corner.startsWith("n") ? -16 : undefined,
+                                bottom: corner.startsWith("s") ? -16 : undefined,
+                                left:   corner.endsWith("w")   ? -16 : undefined,
+                                right:  corner.endsWith("e")   ? -16 : undefined,
                                 cursor: corner === "nw" || corner === "se" ? "nwse-resize" : "nesw-resize",
                               }}
-                            />
+                            >
+                              <div className="w-3 h-3 bg-white border-2 border-[#4a7fc1] rounded-sm pointer-events-none" />
+                            </div>
                           ))}
                         </div>
                       ) : isEditingText ? (
@@ -1178,7 +1178,7 @@ export default function EditorPage() {
 
       {/* ── Mobile bottom tab bar ── */}
       <div className="lg:hidden h-14 bg-white border-t border-gray-200 flex items-center justify-around flex-shrink-0 relative z-30">
-        {mobileSidebarItems.map(({ key, label, Icon }) => {
+        {sidebarItems.map(({ key, label, Icon }) => {
           const active = activeTab === key;
           return (
             <button
@@ -1195,24 +1195,29 @@ export default function EditorPage() {
         })}
       </div>
 
-      {/* ── Mobile views bottom sheet ── */}
+      {/* ── Mobile views sidebar ── */}
       {activeTab === "views" && (
-        <div className="lg:hidden fixed inset-x-0 bottom-14 z-40 bg-white rounded-t-2xl shadow-2xl border-t border-gray-200">
-          <div className="flex justify-center pt-2 pb-1">
-            <div className="w-10 h-1 bg-gray-200 rounded-full" />
+        <div className="lg:hidden fixed right-0 top-14 bottom-14 w-20 z-40 bg-white border-l border-gray-200 flex flex-col shadow-2xl">
+          <div className="flex items-center justify-between px-2 py-2 border-b border-gray-100 flex-shrink-0">
+            <span className="text-[9px] font-bold text-gray-500 tracking-wider">TAMPILAN</span>
+            <button
+              onClick={() => setActiveTab(null)}
+              className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 transition-colors"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
           </div>
-          <p className="text-center text-xs font-bold text-gray-500 tracking-wider py-2">PILIH TAMPILAN</p>
-          <div className="flex items-center justify-center gap-5 px-6 pb-5 flex-wrap">
+          <div className="flex-1 overflow-y-auto flex flex-col items-center py-3 gap-2">
             {views.map(({ key, label }) => {
               const active = selectedView === key;
               return (
                 <button
                   key={key}
-                  onClick={() => { setSelectedView(key); setActiveTab(null); }}
-                  className="flex flex-col items-center gap-1.5"
+                  onClick={() => setSelectedView(key)}
+                  className="flex flex-col items-center w-full px-3"
                 >
                   <div
-                    className="w-16 rounded-xl overflow-hidden p-1.5 transition-all"
+                    className="w-full rounded-xl overflow-hidden p-1.5 transition-all"
                     style={{
                       backgroundColor: active ? selectedColor : "#f5f5f5",
                       border: active ? "2px solid #e8734a" : "2px solid #e5e7eb",
@@ -1227,7 +1232,7 @@ export default function EditorPage() {
                       )}
                     </div>
                   </div>
-                  <p className={`text-[10px] font-semibold tracking-wider ${active ? "text-[#e8734a]" : "text-gray-400"}`}>{label}</p>
+                  <p className={`text-[9px] font-semibold tracking-wider mt-1 ${active ? "text-[#e8734a]" : "text-gray-400"}`}>{label}</p>
                 </button>
               );
             })}

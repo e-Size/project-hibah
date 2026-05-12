@@ -15,14 +15,12 @@ export default function Navbar({ variant = "default" }: { variant?: "default" | 
     : "text-gray-700 text-sm font-medium hover:text-gray-900 transition-colors";
 
   const navClass = isOverlay
-    ? "w-full absolute top-0 left-0 z-20 bg-transparent px-4 sm:px-8 md:px-16 py-3 flex items-center justify-between"
-    : "w-full bg-[#F8F3E9] px-4 sm:px-8 md:px-16 py-3 flex items-center justify-between";
+    ? "w-full fixed md:absolute top-0 left-0 right-0 z-50 md:z-20 bg-white/85 backdrop-blur-sm md:bg-transparent md:backdrop-blur-none px-4 sm:px-8 md:px-16 py-3 flex items-center justify-between"
+    : "w-full fixed md:static top-0 left-0 right-0 z-50 md:z-auto bg-[#F8F3E9] px-4 sm:px-8 md:px-16 py-3 flex items-center justify-between";
 
-  const burgerBar = `block w-6 h-0.5 transition-all duration-300 ${isLight ? "bg-white" : "bg-gray-700"}`;
+  const burgerBar = `block w-6 h-0.5 transition-all duration-300 ${isLight ? "bg-gray-700 md:bg-white" : "bg-gray-700"}`;
 
-  const mobileLinkClass = `text-base font-medium py-3 border-b hover:opacity-75 transition-opacity ${
-    isLight ? "text-white border-white/20" : "text-gray-700 border-gray-200"
-  }`;
+  const mobileLinkClass = "text-[#7C6000] border-[#d4b86a]/30 text-base font-medium py-3 px-3 border-b transition-all duration-150 active:bg-[#f0e5c8] active:scale-[0.98] rounded-sm cursor-pointer";
 
   return (
     <>
@@ -70,11 +68,7 @@ export default function Navbar({ variant = "default" }: { variant?: "default" | 
 
       {/* Mobile Dropdown Menu */}
       {menuOpen && (
-        <div
-          className={`fixed top-14 left-0 right-0 z-50 md:hidden shadow-lg ${
-            isOverlay ? "bg-black/85 backdrop-blur-sm" : "bg-[#F8F3E9]"
-          }`}
-        >
+        <div className="fixed top-14 left-0 right-0 z-50 md:hidden shadow-lg bg-[#F8F3E9]/40 backdrop-blur-md">
           <div className="flex flex-col px-6 py-4 gap-1">
             <Link href="/category" className={mobileLinkClass} onClick={() => setMenuOpen(false)}>
               Katalog Produk

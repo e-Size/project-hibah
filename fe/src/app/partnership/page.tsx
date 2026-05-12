@@ -27,7 +27,7 @@ export default function PartnershipPage() {
         </div>
 
         {/* Map */}
-        <FadeInLeft className="px-0 sm:px-8 md:px-16">
+        <FadeInLeft className="-mx-4 sm:mx-0 sm:px-8 md:px-16">
           <InViewVideo src="/petamapanimasi.mp4" className="w-full h-auto" />
         </FadeInLeft>
 
@@ -35,7 +35,7 @@ export default function PartnershipPage() {
 
       {/* Stats Section */}
       <section className="px-4 sm:px-8 md:px-16 pb-16 md:pb-20">
-        <FadeInUp className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        <FadeInUp className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 px-3 sm:px-0">
           {[
             { number: "2.000+", label: "Universities & Institutions", border: "#4273B2", rounded: "rounded-tl-3xl rounded-br-3xl" },
             { number: "20.000+", label: "Customers",                  border: "#e8734a", rounded: "rounded-tr-3xl rounded-bl-3xl" },
@@ -44,11 +44,11 @@ export default function PartnershipPage() {
           ].map((stat) => (
             <div
               key={stat.label}
-              className={`bg-[#fdf6f0] border-[5px] flex flex-col items-center justify-center py-6 md:py-8 px-3 md:px-6 gap-2 ${stat.rounded}`}
+              className={`bg-[#fdf6f0] border-[3px] md:border-[5px] flex flex-col items-center justify-center py-3 md:py-8 px-2 md:px-6 gap-1 md:gap-2 ${stat.rounded}`}
               style={{ borderColor: stat.border }}
             >
-              <span className="text-[#BE9D2E] font-bold text-3xl sm:text-4xl md:text-5xl">{stat.number}</span>
-              <span className="text-[#7C6000] text-xs sm:text-sm md:text-base text-center">{stat.label}</span>
+              <span className="text-[#BE9D2E] font-bold text-xl sm:text-4xl md:text-5xl">{stat.number}</span>
+              <span className="text-[#7C6000] text-[10px] sm:text-sm md:text-base text-center leading-tight">{stat.label}</span>
             </div>
           ))}
         </FadeInUp>
@@ -56,24 +56,24 @@ export default function PartnershipPage() {
 
       {/* How to Partnership Section */}
       <section className="px-4 sm:px-8 md:px-16 py-12 md:py-16 bg-[#e8e8e6]">
-        <h2 className="text-[#7C6000] font-light text-2xl sm:text-4xl md:text-5xl mb-10 md:mb-14">How to do Partnership?</h2>
+        <h2 className="text-[#7C6000] font-light text-center text-2xl sm:text-4xl md:text-5xl mb-10 md:mb-14">How to do Partnership?</h2>
 
-        <FadeInUp className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-10 md:mb-12">
+        <FadeInUp className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-10 md:mb-12 px-2 sm:px-0">
           {[
             { number: 1, text: "Siapkan proposal partnership" },
             { number: 2, text: "Kirim proposal ke WhatsApp Esize" },
             { number: 3, text: "Diskusi kebutuhan dan penawaran" },
             { number: 4, text: "Deal dan produksi berjalan" },
           ].map((step) => (
-            <div key={step.number} className="relative mt-7">
-              <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-20 w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#4273B2] flex items-center justify-center shadow-md">
-                <span className="text-white font-semibold text-3xl md:text-5xl">{step.number}</span>
+            <div key={step.number} className="relative mt-6">
+              <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-20 w-10 h-10 md:w-20 md:h-20 rounded-full bg-[#4273B2] flex items-center justify-center shadow-md">
+                <span className="text-white font-semibold text-xl md:text-5xl">{step.number}</span>
               </div>
 
               {/* Card */}
-              <div className="overflow-hidden rounded-2xl bg-[#e8734a] mx-3 sm:mx-6">
-                <div className="mt-5 bg-[#fdf6f0] px-4 sm:px-6 pt-12 md:pt-14 pb-8 md:pb-10 text-center border-2 border-[#7C6000] rounded-2xl">
-                  <p className="text-black font-light text-base sm:text-xl leading-snug">{step.text}</p>
+              <div className="overflow-hidden rounded-2xl bg-[#e8734a] mx-1 sm:mx-6">
+                <div className="mt-4 bg-[#fdf6f0] px-2 sm:px-6 pt-8 md:pt-14 pb-4 md:pb-10 text-center border-2 border-[#7C6000] rounded-2xl">
+                  <p className="text-black font-light text-xs sm:text-xl leading-snug">{step.text}</p>
                 </div>
               </div>
             </div>
