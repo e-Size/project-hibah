@@ -15,6 +15,7 @@ import (
 )
 
 func SetupRoutes(r *gin.Engine, db *gorm.DB) {
+	r.Static("/uploads", "./uploads")
 	p := product.Wire(db)
 	mg := materialgroup.Wire(db)
 	m := material.Wire(db)

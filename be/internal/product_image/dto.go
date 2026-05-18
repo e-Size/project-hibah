@@ -3,12 +3,12 @@ package productimage
 import "github.com/google/uuid"
 
 type CreateRequest struct {
-	ProductID uuid.UUID `json:"product_id" binding:"required"`
-	URL       string    `json:"url" binding:"required"`
-	Order     int       `json:"order"`
+	ProductID uuid.UUID
+	FilePath  string
+	Order     int
 }
 
 type UpdateRequest struct {
-	URL   string `json:"url"`
-	Order *int   `json:"order"`
+	FilePath string
+	Order    *int
 }

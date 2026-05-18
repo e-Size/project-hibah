@@ -1,8 +1,8 @@
 services:
   app:
     build: .
-    expose:
-      - "8080"
+    port:
+      - "3000:8080"
     env_file:
       - .env
     environment:
@@ -10,6 +10,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - uploads_data:/app/uploads
     restart: unless-stopped
     networks:
       - app-network
@@ -35,6 +37,7 @@ services:
 
 volumes:
   postgres_data:
+  uploads_data:
 
 networks:
   app-network:
