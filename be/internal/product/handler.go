@@ -13,7 +13,8 @@ type Handler struct {
 }
 
 func (h *Handler) GetAll(c *gin.Context) {
-	list, err := h.service.FindAll()
+	category := c.Query("category") // opsional: "pakaian" atau "merch"
+	list, err := h.service.FindAll(category)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -22,7 +23,7 @@ func (h *Handler) GetAll(c *gin.Context) {
 }
 
 func (h *Handler) GetByID(c *gin.Context) {
-	p, matrix, addons, err := h.service.FindByID(c.Param("id"))
+	p, images, matrix, addons, err := h.service.FindByID(c.Param("id"))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
@@ -31,8 +32,23 @@ func (h *Handler) GetByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	// Hitung range harga dari price_matrix
+	var priceFrom, priceTo int
+	for i, pm := range matrix {
+		if i == 0 || pm.Price < priceFrom {
+			priceFrom = pm.Price
+		}
+		if pm.Price > priceTo {
+			priceTo = pm.Price
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{"data": gin.H{
 		"product":      p,
+		"images":       images,
+		"price_from":   priceFrom,
+		"price_to":     priceTo,
 		"price_matrix": matrix,
 		"addons":       addons,
 	}})

@@ -30,6 +30,9 @@ func (s *Service) Create(req CreateRequest) (*models.ProductAddon, error) {
 		AddonType: req.AddonType,
 		AddonName: req.AddonName,
 		ExtraFee:  req.ExtraFee,
+		ColorHex:  req.ColorHex,
+		ImageURL:  req.ImageURL,
+		Desc:      req.Desc,
 	}
 	err := s.db.Create(&a).Error
 	return &a, err
@@ -49,6 +52,15 @@ func (s *Service) Update(id string, req UpdateRequest) (*models.ProductAddon, er
 	}
 	if req.ExtraFee != nil {
 		updates["extra_fee"] = *req.ExtraFee
+	}
+	if req.ColorHex != "" {
+		updates["color_hex"] = req.ColorHex
+	}
+	if req.ImageURL != "" {
+		updates["image_url"] = req.ImageURL
+	}
+	if req.Desc != "" {
+		updates["desc"] = req.Desc
 	}
 	s.db.Model(&a).Updates(updates)
 	return &a, nil
