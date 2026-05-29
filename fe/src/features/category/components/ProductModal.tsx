@@ -30,31 +30,128 @@ function getPriceLabel(detail: ProductDetail | null) {
   return formatPrice(detail.price_from);
 }
 
-function AddonGroup({ title, items }: { title: string; items: ProductAddon[] }) {
+function getAddonTitle(type: string) {
+  const normalized = type.toLowerCase();
+  if (normalized.includes("tipe")) return "Pilih Tipe";
+  if (normalized.includes("bahan") || normalized.includes("material")) return "Pilih Bahan";
+  if (normalized.includes("warna") || normalized.includes("color")) return "Pilih Warna";
+
+  return `Pilih ${type.replaceAll("_", " ")}`;
+}
+
+function getSelectedExtraFee(selectedAddons: Record<string, ProductAddon | undefined>) {
+  return Object.values(selectedAddons).reduce((total, addon) => total + (addon?.extra_fee ?? 0), 0);
+}
+
+function SelectableAddonGroup({
+  title,
+  type,
+  items,
+  selected,
+  onSelect,
+}: {
+  title: string;
+  type: string;
+  items: ProductAddon[];
+  selected?: ProductAddon;
+  onSelect: (type: string, addon: ProductAddon) => void;
+}) {
   if (items.length === 0) return null;
+
+  const normalizedType = type.toLowerCase();
+  const isColorGroup = normalizedType.includes("warna") || normalizedType.includes("color") || items.some((item) => item.color_hex);
+  const isMaterialGroup =
+    normalizedType.includes("bahan") || normalizedType.includes("material") || items.some((item) => item.image_url || item.desc);
+
+  if (isColorGroup) {
+    return (
+      <div>
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <p className="font-bold text-gray-800">
+            {title}: <span className="text-[#e8734a]">{selected?.addon_name ?? items[0]?.addon_name}</span>
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-3 pl-1">
+          {items.map((item) => {
+            const isSelected = selected?.id === item.id;
+
+            return (
+              <button
+                key={item.id}
+                onClick={() => onSelect(type, item)}
+                title={item.addon_name}
+                className="h-10 w-10 rounded-full border border-gray-200 transition-transform hover:scale-110"
+                style={{
+                  backgroundColor: item.color_hex || "#ffffff",
+                  outline: isSelected ? "3px solid #927615" : "none",
+                  outlineOffset: "2px",
+                }}
+              />
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  if (isMaterialGroup) {
+    return (
+      <div>
+        <p className="mb-2 font-bold text-gray-800">{title}</p>
+        <div className="flex flex-col gap-2">
+          {items.map((item) => {
+            const isSelected = selected?.id === item.id;
+
+            return (
+              <button
+                key={item.id}
+                onClick={() => onSelect(type, item)}
+                className={`flex items-start gap-3 rounded-xl border-2 bg-white p-3 text-left transition-colors ${
+                  isSelected ? "border-[#4273B2]" : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                {item.image_url && (
+                  <span className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                    <Image src={resolveAssetUrl(item.image_url) || "/baju.png"} alt={item.addon_name} fill className="object-cover" />
+                  </span>
+                )}
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center justify-between gap-3">
+                    <span className="text-sm font-semibold text-gray-800">{item.addon_name}</span>
+                    {isSelected && (
+                      <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-[#4273B2] text-xs text-white">
+                        ✓
+                      </span>
+                    )}
+                  </span>
+                  {item.desc && <span className="mt-1 block text-xs leading-relaxed text-gray-500">{item.desc}</span>}
+                  {item.extra_fee > 0 && <span className="mt-1 block text-xs font-semibold text-[#9F7A04]">+{formatPrice(item.extra_fee)}</span>}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
-      <p className="font-bold text-gray-800 mb-2 capitalize">{title.replaceAll("_", " ")}</p>
-      <div className="flex flex-col gap-2">
+      <p className="mb-2 font-bold text-gray-800">{title}</p>
+      <div className="flex flex-wrap gap-2">
         {items.map((item) => (
-          <div key={item.id} className="flex items-start gap-3 rounded-xl border border-gray-200 bg-white p-3">
-            {item.color_hex ? (
-              <span
-                className="mt-1 h-8 w-8 flex-shrink-0 rounded-full border border-gray-200"
-                style={{ backgroundColor: item.color_hex }}
-              />
-            ) : item.image_url ? (
-              <span className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
-                <Image src={resolveAssetUrl(item.image_url) || "/baju.png"} alt={item.addon_name} fill className="object-cover" />
-              </span>
-            ) : null}
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-gray-800">{item.addon_name}</p>
-              {item.desc && <p className="mt-1 text-xs leading-relaxed text-gray-500">{item.desc}</p>}
-              {item.extra_fee > 0 && <p className="mt-1 text-xs font-semibold text-[#9F7A04]">+{formatPrice(item.extra_fee)}</p>}
-            </div>
-          </div>
+          <button
+            key={item.id}
+            onClick={() => onSelect(type, item)}
+            className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
+              selected?.id === item.id
+                ? "border-[#e8734a] bg-[#e8734a] text-white"
+                : "border-gray-300 text-gray-700 hover:border-[#e8734a]"
+            }`}
+          >
+            {item.addon_name}
+            {item.extra_fee > 0 ? ` +${formatPrice(item.extra_fee)}` : ""}
+          </button>
         ))}
       </div>
     </div>
@@ -68,6 +165,7 @@ export default function ProductModal({ product, onClose }: Props) {
   const [isLoading, setIsLoading] = useState(Boolean(product.id));
   const [qty, setQty] = useState(24);
   const [imgIndex, setImgIndex] = useState(0);
+  const [selectedAddons, setSelectedAddons] = useState<Record<string, ProductAddon | undefined>>({});
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -92,6 +190,7 @@ export default function ProductModal({ product, onClose }: Props) {
 
     setDetail(null);
     setImgIndex(0);
+    setSelectedAddons({});
 
     if (!product.id) {
       setIsLoading(false);
@@ -104,6 +203,13 @@ export default function ProductModal({ product, onClose }: Props) {
         if (!ignore) {
           setDetail(data);
           setQty(Math.max(data.product.min_qty || 1, 1));
+          setSelectedAddons(
+            Object.fromEntries(
+              Object.entries(data.addons ?? {})
+                .filter(([, items]) => items.length > 0)
+                .map(([type, items]) => [type, items[0]])
+            )
+          );
         }
       })
       .catch(() => {
@@ -136,9 +242,16 @@ export default function ProductModal({ product, onClose }: Props) {
   }, [detail?.images, product.image]);
 
   const addonEntries = Object.entries(detail?.addons ?? {}).filter(([, items]) => items.length > 0);
+  const selectedExtraFee = getSelectedExtraFee(selectedAddons);
+  const selectedPriceLabel =
+    detail && detail.price_from > 0 && selectedExtraFee > 0 ? `${getPriceLabel(detail)} + ${formatPrice(selectedExtraFee)}` : getPriceLabel(detail);
+  const selectedLines = Object.entries(selectedAddons)
+    .filter(([, addon]) => Boolean(addon))
+    .map(([type, addon]) => `${type}: ${addon?.addon_name}`);
   const whatsappText = encodeURIComponent(
     `Halo Esize! Saya ingin bertanya tentang produk:\n\n` +
       `Produk: ${product.name}\n` +
+      (selectedLines.length > 0 ? `${selectedLines.join("\n")}\n` : "") +
       `Jumlah: ${qty} pcs\n\n` +
       `Mohon info harga dan proses pemesanannya. Terima kasih!`
   );
@@ -206,12 +319,19 @@ export default function ProductModal({ product, onClose }: Props) {
                 {displayProduct?.category || product.category || "produk"}
               </p>
               <h2 className="pr-10 text-2xl font-bold text-gray-900">{product.name}</h2>
-              <p className="mt-1 text-2xl font-bold text-[#e8734a]">{isLoading ? "Memuat..." : getPriceLabel(detail)}</p>
+              <p className="mt-1 text-2xl font-bold text-[#e8734a]">{isLoading ? "Memuat..." : selectedPriceLabel}</p>
               <p className="mt-3 text-sm leading-relaxed text-gray-600">{description}</p>
             </div>
 
             {addonEntries.map(([type, items]) => (
-              <AddonGroup key={type} title={type} items={items} />
+              <SelectableAddonGroup
+                key={type}
+                title={getAddonTitle(type)}
+                type={type}
+                items={items}
+                selected={selectedAddons[type]}
+                onSelect={(addonType, addon) => setSelectedAddons((current) => ({ ...current, [addonType]: addon }))}
+              />
             ))}
 
             <div>
