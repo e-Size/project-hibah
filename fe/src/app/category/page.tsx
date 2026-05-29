@@ -3,19 +3,15 @@
 import Image from "next/image";
 import { useState } from "react";
 import FadeInUp from "../../components/animation/FadeInUp";
-import { pakaian, merch } from "../../data/categories";
 import Footer from "../../components/layout/Footer";
 import Navbar from "../../components/layout/Navbar";
-import JacketModal from "../../features/category/components/JacketModal";
 import SpinIn from "../../components/animation/SpinIn";
 import ViewportScaler from "../../components/ui/ViewportScaler";
-const labelColors = ["#4a7fc1", "#d4795e", "#4a7fc1", "#d4795e"];
+import { useProducts } from "../../hooks/useProducts";
+import type { CategoryItem } from "../../types/product";
+import ProductModal from "../../features/category/components/ProductModal";
 
-type CategoryItem = {
-  name: string;
-  bg: string;
-  keywords?: string[];
-};
+const labelColors = ["#4a7fc1", "#d4795e", "#4a7fc1", "#d4795e"];
 
 const normalizeSearchText = (value: string) =>
   value
@@ -44,15 +40,15 @@ const matchesCategory = (category: CategoryItem, rawQuery: string) => {
   });
 };
 
-function CategoryGrid({ items, onJacketClick }: { items: CategoryItem[]; onJacketClick: () => void }) {
+function CategoryGrid({ items, onProductClick }: { items: CategoryItem[]; onProductClick: (product: CategoryItem) => void }) {
   if (items.length === 0) return null;
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-8 sm:gap-12 md:gap-20 px-4 sm:px-8 md:px-16">
       {items.map((cat, i) => (
-        <FadeInUp key={cat.name}>
+        <FadeInUp key={cat.id ?? cat.name}>
           <div
             className="relative pt-10 pr-4 group cursor-pointer"
-            onClick={cat.name === "Jacket" ? onJacketClick : undefined}
+            onClick={() => onProductClick(cat)}
           >
             {/* Salmon layer - furthest back, more tilted */}
             <div className="absolute top-0 right-0 bottom-10 left-4 rounded-xl bg-[#E6B5A8] rotate-6 origin-bottom-left transition-transform duration-300 -translate-x-4 translate-y-4 group-hover:translate-x-5 group-hover:-translate-y-5" />
@@ -61,9 +57,9 @@ function CategoryGrid({ items, onJacketClick }: { items: CategoryItem[]; onJacke
             {/* Main card */}
             <div className="relative border-4 border-[#927615] rounded-t-xl overflow-hidden bg-white transition-transform duration-300 group-hover:scale-105">
               <div className="aspect-square relative overflow-hidden">
-                <Image src="/baju.png" alt={cat.name} fill className="object-cover" />
+                <Image src={cat.image || "/baju.png"} alt={cat.name} fill className="object-cover" />
               </div>
-              <div className="py-2 md:py-3 text-center" style={{ backgroundColor: labelColors[i % 4] }}>
+              <div className="py-2 md:py-3 text-center" style={{ backgroundColor: cat.bg || labelColors[i % 4] }}>
                 <p className="text-white font-bold text-sm md:text-lg">{cat.name}</p>
               </div>
             </div>
@@ -75,17 +71,20 @@ function CategoryGrid({ items, onJacketClick }: { items: CategoryItem[]; onJacke
 }
 
 export default function CategoryPage() {
-  const [jacketOpen, setJacketOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<CategoryItem | null>(null);
   const [query, setQuery] = useState("");
+  const pakaianProducts = useProducts("pakaian");
+  const merchProducts = useProducts("merch");
 
-  const filteredPakaian = pakaian.filter((c) => matchesCategory(c, query));
-  const filteredMerch = merch.filter((c) => matchesCategory(c, query));
+  const filteredPakaian = pakaianProducts.items.filter((c) => matchesCategory(c, query));
+  const filteredMerch = merchProducts.items.filter((c) => matchesCategory(c, query));
   const hasResults = filteredPakaian.length > 0 || filteredMerch.length > 0;
+  const isLoading = pakaianProducts.isLoading || merchProducts.isLoading;
 
   return (
     <ViewportScaler>
     <main className="min-h-screen bg-white">
-      {jacketOpen && <JacketModal onClose={() => setJacketOpen(false)} />}
+      {selectedProduct && <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
       <Navbar variant="transparent" />
       {/* Hero Header */}
       <div className="relative flex flex-col items-center text-center min-h-screen md:min-h-0 pt-20 md:pb-16 px-4 sm:px-8"
@@ -154,7 +153,7 @@ export default function CategoryPage() {
 
       {!hasResults && (
         <div className="text-center py-16 md:py-24 text-[#7C6000] text-lg md:text-xl px-4">
-          Produk &quot;{query}&quot; tidak ditemukan.
+          {isLoading ? "Memuat produk..." : <>Produk &quot;{query}&quot; tidak ditemukan.</>}
         </div>
       )}
 
@@ -176,7 +175,7 @@ export default function CategoryPage() {
               </div>
             </div>
           </FadeInUp>
-          <CategoryGrid items={filteredPakaian} onJacketClick={() => setJacketOpen(true)} />
+          <CategoryGrid items={filteredPakaian} onProductClick={setSelectedProduct} />
         </div>
       )}
 
@@ -198,7 +197,7 @@ export default function CategoryPage() {
               </div>
             </div>
           </FadeInUp>
-          <CategoryGrid items={filteredMerch} onJacketClick={() => setJacketOpen(true)} />
+          <CategoryGrid items={filteredMerch} onProductClick={setSelectedProduct} />
         </div>
       )}
 
