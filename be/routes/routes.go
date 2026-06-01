@@ -9,6 +9,7 @@ import (
 	pricematrix "be/internal/price_matrix"
 	quantitytier "be/internal/quantity_tier"
 	sizevariant "be/internal/size_variant"
+	"be/internal/upload"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -24,6 +25,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	pm := pricematrix.Wire(db)
 	pa := productaddon.Wire(db)
 	pi := productimage.Wire(db)
+	up := upload.Wire()
 
 	api := r.Group("/api")
 	{
@@ -91,5 +93,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 			productImages.PUT("/:id", pi.Update)
 			productImages.DELETE("/:id", pi.Delete)
 		}
+
+		api.POST("/upload", up.Upload)
 	}
 }
