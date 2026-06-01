@@ -4,8 +4,7 @@ import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useProducts } from "../../../hooks/useProducts";
 import type { CategoryItem } from "../../../types/product";
-
-const labelColors = ["#4a7fc1", "#d4795e", "#4a7fc1", "#d4795e"];
+import { labelColors } from "../../../constants";
 
 function getLayout(vw: number): { visible: number; gap: number } {
   if (vw < 640) return { visible: 2.5, gap: 8 };
