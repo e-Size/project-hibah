@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getProductById, resolveAssetUrl } from "../../../services/api";
-import type { CategoryItem, ProductAddon, ProductDetail } from "../../../types/product";
+import { resolveAssetUrl } from "../../../services/api";
+import type { CategoryItem, ProductAddon } from "../../../types/product";
 import { formatPrice, getPriceLabel } from "../../../utils/format";
+import { useProductDetail } from "../../../hooks/useProductDetail";
 
 type Props = {
   product: CategoryItem;
@@ -145,11 +146,27 @@ function SelectableAddonGroup({
 export default function ProductModal({ product, onClose }: Props) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [detail, setDetail] = useState<ProductDetail | null>(null);
-  const [isLoading, setIsLoading] = useState(Boolean(product.id));
+  const { detail, isLoading } = useProductDetail(product.id);
   const [qty, setQty] = useState(24);
   const [imgIndex, setImgIndex] = useState(0);
   const [selectedAddons, setSelectedAddons] = useState<Record<string, ProductAddon | undefined>>({});
+
+  useEffect(() => {
+    setImgIndex(0);
+    setSelectedAddons({});
+  }, [product.id]);
+
+  useEffect(() => {
+    if (!detail) return;
+    setQty(Math.max(detail.product.min_qty || 1, 1));
+    setSelectedAddons(
+      Object.fromEntries(
+        Object.entries(detail.addons ?? {})
+          .filter(([, items]) => items.length > 0)
+          .map(([type, items]) => [type, items[0]])
+      )
+    );
+  }, [detail]);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -168,45 +185,6 @@ export default function ProductModal({ product, onClose }: Props) {
       scrollable?.removeEventListener("wheel", stopBubble);
     };
   }, []);
-
-  useEffect(() => {
-    let ignore = false;
-
-    setDetail(null);
-    setImgIndex(0);
-    setSelectedAddons({});
-
-    if (!product.id) {
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    getProductById(product.id)
-      .then((data) => {
-        if (!ignore) {
-          setDetail(data);
-          setQty(Math.max(data.product.min_qty || 1, 1));
-          setSelectedAddons(
-            Object.fromEntries(
-              Object.entries(data.addons ?? {})
-                .filter(([, items]) => items.length > 0)
-                .map(([type, items]) => [type, items[0]])
-            )
-          );
-        }
-      })
-      .catch(() => {
-        if (!ignore) setDetail(null);
-      })
-      .finally(() => {
-        if (!ignore) setIsLoading(false);
-      });
-
-    return () => {
-      ignore = true;
-    };
-  }, [product.id]);
 
   const displayProduct = detail?.product;
   const minQty = Math.max(displayProduct?.min_qty || 24, 1);
