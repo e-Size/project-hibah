@@ -10,35 +10,8 @@ import ViewportScaler from "../../components/ui/ViewportScaler";
 import { useProducts } from "../../hooks/useProducts";
 import type { CategoryItem } from "../../types/product";
 import ProductModal from "../../features/category/components/ProductModal";
-
-const labelColors = ["#4a7fc1", "#d4795e", "#4a7fc1", "#d4795e"];
-
-const normalizeSearchText = (value: string) =>
-  value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
-
-const compactSearchText = (value: string) => normalizeSearchText(value).replace(/\s+/g, "");
-
-const matchesCategory = (category: CategoryItem, rawQuery: string) => {
-  const normalizedQuery = normalizeSearchText(rawQuery);
-  const compactQuery = compactSearchText(rawQuery);
-
-  if (!normalizedQuery) return true;
-
-  return [category.name, ...(category.keywords ?? [])].some((term) => {
-    const normalizedTerm = normalizeSearchText(term);
-    const compactTerm = compactSearchText(term);
-
-    return (
-      normalizedTerm.includes(normalizedQuery) ||
-      normalizedQuery.includes(normalizedTerm) ||
-      compactTerm.includes(compactQuery) ||
-      compactQuery.includes(compactTerm)
-    );
-  });
-};
+import { labelColors } from "../../constants";
+import { matchesCategory } from "../../utils/search";
 
 function CategoryGrid({ items, onProductClick }: { items: CategoryItem[]; onProductClick: (product: CategoryItem) => void }) {
   if (items.length === 0) return null;
@@ -67,6 +40,26 @@ function CategoryGrid({ items, onProductClick }: { items: CategoryItem[]; onProd
         </FadeInUp>
       ))}
     </div>
+  );
+}
+
+function SectionHeader({ title, showLogos }: { title: string; showLogos: boolean }) {
+  return (
+    <FadeInUp>
+      <div className="flex flex-col items-center mb-8 md:mb-12">
+        {showLogos && (
+          <div className="flex items-center gap-1 mb-4">
+            <SpinIn><Image src="/Rectangle 17.png" alt="logo" width={100} height={100} /></SpinIn>
+            <SpinIn><Image src="/Rectangle 19.png" alt="logo" width={100} height={100} /></SpinIn>
+          </div>
+        )}
+        <div className="relative px-8 sm:px-16 py-5">
+          <span className="absolute top-0 right-0 w-20 h-12 border-t-6 border-r-6 border-[#fae8e4]" />
+          <span className="absolute bottom-0 left-0 w-20 h-12 border-b-6 border-l-6 border-[#fae8e4]" />
+          <p className="text-[#4a7fc1] text-2xl sm:text-3xl font-bold">{title}</p>
+        </div>
+      </div>
+    </FadeInUp>
   );
 }
 
@@ -160,21 +153,7 @@ export default function CategoryPage() {
       {/* Pakaian Section */}
       {filteredPakaian.length > 0 && (
         <div id="section-pakaian" className="px-0 pt-12 md:pt-16 pb-4">
-          <FadeInUp>
-            <div className="flex flex-col items-center mb-8 md:mb-12">
-              {!query && (
-                <div className="flex items-center gap-1 mb-4">
-                  <SpinIn><Image src="/Rectangle 17.png" alt="logo" width={100} height={100} /></SpinIn>
-                  <SpinIn><Image src="/Rectangle 19.png" alt="logo" width={100} height={100} /></SpinIn>
-                </div>
-              )}
-              <div className="relative px-8 sm:px-16 py-5">
-                <span className="absolute top-0 right-0 w-20 h-12 border-t-6 border-r-6 border-[#fae8e4]" />
-                <span className="absolute bottom-0 left-0 w-20 h-12 border-b-6 border-l-6 border-[#fae8e4]" />
-                <p className="text-[#4a7fc1] text-2xl sm:text-3xl font-bold">Pakaian</p>
-              </div>
-            </div>
-          </FadeInUp>
+          <SectionHeader title="Pakaian" showLogos={!query} />
           <CategoryGrid items={filteredPakaian} onProductClick={setSelectedProduct} />
         </div>
       )}
@@ -182,21 +161,7 @@ export default function CategoryPage() {
       {/* Merch Section */}
       {filteredMerch.length > 0 && (
         <div className="px-0 pt-12 md:pt-16 pb-12 md:pb-16">
-          <FadeInUp>
-            <div className="flex flex-col items-center mb-8 md:mb-12">
-              {!query && (
-                <div className="flex items-center gap-1 mb-4">
-                  <SpinIn><Image src="/Rectangle 17.png" alt="logo" width={100} height={100} /></SpinIn>
-                  <SpinIn><Image src="/Rectangle 19.png" alt="logo" width={100} height={100} /></SpinIn>
-                </div>
-              )}
-              <div className="relative px-8 sm:px-16 py-5">
-                <span className="absolute top-0 right-0 w-20 h-12 border-t-6 border-r-6 border-[#fae8e4]" />
-                <span className="absolute bottom-0 left-0 w-20 h-12 border-b-6 border-l-6 border-[#fae8e4]" />
-                <p className="text-[#4a7fc1] text-2xl sm:text-3xl font-bold">Merch</p>
-              </div>
-            </div>
-          </FadeInUp>
+          <SectionHeader title="Merch" showLogos={!query} />
           <CategoryGrid items={filteredMerch} onProductClick={setSelectedProduct} />
         </div>
       )}
