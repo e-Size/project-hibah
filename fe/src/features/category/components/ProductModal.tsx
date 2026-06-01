@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getProductById, resolveAssetUrl } from "../../../services/api";
 import type { CategoryItem, ProductAddon, ProductDetail } from "../../../types/product";
+import { formatPrice, getPriceLabel } from "../../../utils/format";
 
 type Props = {
   product: CategoryItem;
@@ -12,23 +13,6 @@ type Props = {
 
 const DEFAULT_IMAGES = ["/baju.png"];
 const WHATSAPP_NUMBER = "6281385774811";
-
-function formatPrice(value: number) {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
-
-function getPriceLabel(detail: ProductDetail | null) {
-  if (!detail || detail.price_from <= 0) return "Hubungi admin";
-  if (detail.price_to > detail.price_from) {
-    return `${formatPrice(detail.price_from)} - ${formatPrice(detail.price_to)}`;
-  }
-
-  return formatPrice(detail.price_from);
-}
 
 function getAddonTitle(type: string) {
   const normalized = type.toLowerCase();
