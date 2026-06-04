@@ -162,7 +162,7 @@ export default function ExtraImagesPage() {
                   <div style={{ position: "absolute", top: 8, right: 8, display: "flex", gap: 6 }}>
                     <button
                       onClick={() => handleOpenModal(img)}
-                      style={{ width: 32, height: 32, borderRadius: 8, background: "white", border: "1px solid var(--admin-border)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--admin-primary)", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}
+                      style={{ width: 32, height: 32, borderRadius: 8, background: "white", border: "1px solid var(--admin-border)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#334155", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style={{ width: 16, height: 16 }}>
                         <path d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
@@ -180,8 +180,8 @@ export default function ExtraImagesPage() {
                   </div>
                 </div>
                 <div style={{ padding: "12px 16px" }}>
-                  <div style={{ fontWeight: 500, fontSize: 14 }}>{img.name}</div>
-                  {img.description && <div style={{ fontSize: 12, color: "var(--admin-text-secondary)", marginTop: 4 }}>{img.description}</div>}
+                  <div style={{ fontWeight: 500, fontSize: 14, color: "#1e293b" }}>{img.name}</div>
+                  {img.description && <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>{img.description}</div>}
                 </div>
               </div>
             ))}
