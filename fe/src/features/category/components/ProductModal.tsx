@@ -40,6 +40,8 @@ function getAddonTitle(type: string) {
   if (normalized.includes("tipe")) return "Pilih Tipe";
   if (normalized.includes("bahan") || normalized.includes("material")) return "Pilih Bahan";
   if (normalized.includes("warna") || normalized.includes("color")) return "Pilih Warna";
+  if (normalized === "lebar") return "Pilih Lebar";
+  if (normalized === "extra") return "Pilih Extra";
 
   return `Pilih ${type.replaceAll("_", " ")}`;
 }
@@ -55,7 +57,11 @@ function getSelectedExtraFee(selectedAddons: Record<string, ProductAddon | undef
 }
 
 function shouldShowExtraFee(type: string, item: ProductAddon) {
-  return item.extra_fee > 0 && type !== "jersey_type" && item.addon_name.toLowerCase() !== "jersey stelan";
+  return item.extra_fee !== 0 && type !== "jersey_type" && item.addon_name.toLowerCase() !== "jersey stelan";
+}
+
+function formatExtraFee(value: number) {
+  return value > 0 ? `+${formatPrice(value)}` : formatPrice(value);
 }
 
 function isQuantityInTier(matrix: PriceMatrix, qty: number) {
@@ -93,6 +99,57 @@ function getJacketPrice(matrix: PriceMatrix[], type?: ProductAddon, material?: P
   )?.price ?? 0;
 }
 
+function getTumblerRows(matrix: PriceMatrix[], jenis?: ProductAddon) {
+  if (!jenis) return [];
+  return matrix.filter((item) => item.size_variant?.label === jenis.addon_name);
+}
+
+function getTumblerPrice(matrix: PriceMatrix[], jenis?: ProductAddon, cetak?: ProductAddon) {
+  if (!jenis || !cetak) return 0;
+  return matrix.find(
+    (item) => item.size_variant?.label === jenis.addon_name && item.material_group?.name === cetak.addon_name
+  )?.price ?? 0;
+}
+
+function getFleecePrice(matrix: PriceMatrix[], qty: number, material?: ProductAddon) {
+  if (!material) return 0;
+  const variantCode = material.addon_name === "Fleece PE" ? "STD" : "PREM";
+  return matrix.find((item) => item.size_variant?.code === variantCode && isQuantityInTier(item, qty))?.price ?? 0;
+}
+
+function getMaterialQuantityPrice(matrix: PriceMatrix[], qty: number, material?: ProductAddon) {
+  if (!material) return 0;
+  return matrix.find(
+    (item) => item.material_group?.name === material.addon_name && isQuantityInTier(item, qty)
+  )?.price ?? 0;
+}
+
+function getTypeRows(matrix: PriceMatrix[], type?: ProductAddon) {
+  if (!type) return [];
+  return matrix.filter((item) => item.size_variant?.label === type.addon_name);
+}
+
+function getTypeMaterialPrice(matrix: PriceMatrix[], type?: ProductAddon, material?: ProductAddon) {
+  if (!type || !material) return 0;
+  return matrix.find(
+    (item) => item.size_variant?.label === type.addon_name && item.material_group?.name === material.addon_name
+  )?.price ?? 0;
+}
+
+function getMaterialVariantPrice(matrix: PriceMatrix[], material?: ProductAddon, variant?: ProductAddon) {
+  if (!material || !variant) return 0;
+  return matrix.find(
+    (item) => item.material_group?.name === material.addon_name && item.size_variant?.label === variant.addon_name
+  )?.price ?? 0;
+}
+
+function getVariantQuantityPrice(matrix: PriceMatrix[], qty: number, variant?: ProductAddon) {
+  if (!variant) return 0;
+  return matrix.find(
+    (item) => item.size_variant?.label === variant.addon_name && isQuantityInTier(item, qty)
+  )?.price ?? 0;
+}
+
 function SelectableAddonGroup({
   title,
   type,
@@ -124,6 +181,18 @@ function SelectableAddonGroup({
           </p>
         </div>
         <div className="flex flex-wrap gap-3 pl-1">
+          {onClear && (
+            <button
+              onClick={() => onClear(type)}
+              className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
+                !selected
+                  ? "border-[#e8734a] bg-[#e8734a] text-white"
+                  : "border-gray-300 bg-white text-gray-700 hover:border-[#e8734a]"
+              }`}
+            >
+              Tanpa Tambahan
+            </button>
+          )}
           {items.map((item) => {
             const isSelected = selected?.id === item.id;
 
@@ -157,7 +226,7 @@ function SelectableAddonGroup({
             return (
               <button
                 key={item.id}
-                onClick={() => onSelect(type, item)}
+                onClick={() => isSelected && onClear ? onClear(type) : onSelect(type, item)}
                 className={`flex items-start gap-3 rounded-xl border-2 bg-white p-3 text-left transition-colors ${
                   isSelected ? "border-[#4273B2]" : "border-gray-200 hover:border-gray-300"
                 }`}
@@ -178,7 +247,7 @@ function SelectableAddonGroup({
                   </span>
                   {item.desc && <span className="mt-1 block text-xs leading-relaxed text-gray-500">{item.desc}</span>}
                   {shouldShowExtraFee(type, item) && (
-                    <span className="mt-1 block text-xs font-semibold text-[#9F7A04]">+{formatPrice(item.extra_fee)}</span>
+                    <span className="mt-1 block text-xs font-semibold text-[#9F7A04]">{formatExtraFee(item.extra_fee)}</span>
                   )}
                 </span>
               </button>
@@ -208,7 +277,7 @@ function SelectableAddonGroup({
         {items.map((item) => (
           <button
             key={item.id}
-            onClick={() => onSelect(type, item)}
+            onClick={() => selected?.id === item.id && onClear ? onClear(type) : onSelect(type, item)}
             className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
               selected?.id === item.id
                 ? "border-[#e8734a] bg-[#e8734a] text-white"
@@ -216,8 +285,33 @@ function SelectableAddonGroup({
             }`}
           >
             {item.addon_name}
-            {shouldShowExtraFee(type, item) ? ` +${formatPrice(item.extra_fee)}` : ""}
+            {shouldShowExtraFee(type, item) ? ` ${formatExtraFee(item.extra_fee)}` : ""}
           </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AddonNotes({
+  items,
+  title = "Catatan Model & Ukuran",
+  description = "Biaya tambahan dihitung sesuai jumlah produk pada masing-masing variasi, bukan seluruh jumlah pesanan.",
+}: {
+  items: ProductAddon[];
+  title?: string;
+  description?: string;
+}) {
+  return (
+    <div className="rounded-xl border border-yellow-300 bg-yellow-50 p-4">
+      <p className="font-bold text-gray-800">{title}</p>
+      <p className="mt-1 text-xs leading-relaxed text-gray-500">{description}</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {items.map((item) => (
+          <span key={item.id} className="rounded-full border border-yellow-300 bg-white px-3 py-1.5 text-xs text-gray-700">
+            {item.addon_name}
+            {shouldShowExtraFee(item.addon_type, item) ? ` ${formatExtraFee(item.extra_fee)}` : ""}
+          </span>
         ))}
       </div>
     </div>
@@ -241,24 +335,42 @@ export default function ProductModal({ product, onClose }: Props) {
   useEffect(() => {
     if (!detail) return;
     const isJersey = detail.product.name.trim().toLowerCase() === "jersey";
+    const isTShirt = detail.product.name.trim().toLowerCase() === "t-shirt";
     const jerseyModels = detail.addons?.model ?? [];
     const defaultJerseyType = jerseyModels.find((item) => item.addon_name.toLowerCase().includes("atasan"));
     const defaultJerseyCollar = detail.addons?.model_kerah?.find((item) => item.addon_name === "V-Neck Biasa");
     const isJacket = detail.product.name.trim().toLowerCase() === "jacket";
+    const isPdh = detail.product.name.trim().toLowerCase() === "kemeja / pdh";
+    const isCap = detail.product.name.trim().toLowerCase() === "cap / bucket";
+    const isIdLanyard = detail.product.name.trim().toLowerCase() === "id card & lanyard";
     const defaultJacketType = detail.addons?.tipe?.find((item) => item.addon_name === "Semi Parka / Trucker") ?? detail.addons?.tipe?.[0];
     const defaultJacketMaterialName = getJacketRows(detail.price_matrix, defaultJacketType)[0]?.material_group?.name;
     const defaultJacketMaterial = detail.addons?.bahan?.find((item) => item.addon_name === defaultJacketMaterialName);
+    const defaultCapType = detail.addons?.jenis?.find((item) => item.addon_name === "Baseball Cap") ?? detail.addons?.jenis?.[0];
+    const defaultCapMaterialName = getTypeRows(detail.price_matrix, defaultCapType)[0]?.material_group?.name;
+    const defaultCapMaterial = detail.addons?.bahan?.find((item) => item.addon_name === defaultCapMaterialName);
+    const isTumblerLocal = detail.product.name.trim().toLowerCase() === "tumbler";
+    const defaultTumblerJenis = detail.addons?.jenis?.[0];
+    const defaultTumblerCetakName = getTumblerRows(detail.price_matrix, defaultTumblerJenis)[0]?.material_group?.name;
+    const defaultTumblerCetak = detail.addons?.cetak?.find((item) => item.addon_name === defaultTumblerCetakName);
 
     setQty(Math.max(detail.product.min_qty || 1, 1));
     setSelectedAddons(
       Object.fromEntries(
         Object.entries(detail.addons ?? {})
           .filter(([type]) => !(isJersey && type === "model"))
+          .filter(([type]) => !(isTShirt && (type === "model" || type === "ukuran")))
+          .filter(([type]) => !(isPdh && (type === "model" || type === "warna")))
+          .filter(([type]) => !(isIdLanyard && type === "cetak"))
           .filter(([, items]) => items.length > 0)
           .map(([type, items]) => {
             if (isJersey && type === "model_kerah") return [type, defaultJerseyCollar ?? items[0]];
             if (isJacket && type === "tipe") return [type, defaultJacketType ?? items[0]];
             if (isJacket && type === "bahan") return [type, defaultJacketMaterial ?? items[0]];
+            if (isTumblerLocal && type === "jenis") return [type, defaultTumblerJenis ?? items[0]];
+            if (isTumblerLocal && type === "cetak") return [type, defaultTumblerCetak ?? items[0]];
+            if (isCap && type === "jenis") return [type, defaultCapType ?? items[0]];
+            if (isCap && type === "bahan") return [type, defaultCapMaterial ?? items[0]];
             return [type, items[0]];
           })
           .concat(isJersey && defaultJerseyType ? [["jersey_type", defaultJerseyType]] : [])
@@ -307,6 +419,23 @@ export default function ProductModal({ product, onClose }: Props) {
 
   const isJersey = (displayProduct?.name ?? product.name).trim().toLowerCase() === "jersey";
   const isJacket = (displayProduct?.name ?? product.name).trim().toLowerCase() === "jacket";
+  const normalizedProductName = (displayProduct?.name ?? product.name).trim().toLowerCase();
+  const isTShirt = normalizedProductName === "t-shirt";
+  const isFleeceProduct = normalizedProductName === "hoodie" || normalizedProductName === "sweater" || normalizedProductName === "crewneck";
+  const isPdh = normalizedProductName === "kemeja / pdh";
+  const isCap = normalizedProductName === "cap / bucket";
+  const isToteBag = normalizedProductName === "tote bag";
+  const isIdLanyard = normalizedProductName === "id card & lanyard";
+  const isSticker = normalizedProductName === "sticker";
+  const isKeychain = normalizedProductName === "key chain" || normalizedProductName === "pin";
+  const isWristband = normalizedProductName === "wristband";
+  const isTumbler = normalizedProductName === "tumbler";
+  const tShirtNotes = isTShirt
+    ? [...(detail?.addons?.model ?? []), ...(detail?.addons?.ukuran ?? [])]
+    : [];
+  const pdhNotes = isPdh
+    ? [...(detail?.addons?.model ?? []), ...(detail?.addons?.warna ?? [])]
+    : [];
   const jerseyModels = detail?.addons?.model ?? [];
   const jerseyTypes = jerseyModels.filter((item) => {
     const name = item.addon_name.toLowerCase();
@@ -315,16 +444,38 @@ export default function ProductModal({ product, onClose }: Props) {
   const jerseyModelAddons = jerseyModels.filter((item) => !jerseyTypes.includes(item));
   const jacketRows = isJacket && detail ? getJacketRows(detail.price_matrix, selectedAddons.tipe) : [];
   const jacketMaterialNames = new Set(jacketRows.map((item) => item.material_group?.name).filter(Boolean));
+  const tumblerRows = isTumbler && detail ? getTumblerRows(detail.price_matrix, selectedAddons.jenis) : [];
+  const tumblerCetakNames = new Set(tumblerRows.map((item) => item.material_group?.name).filter(Boolean));
+  const capRows = isCap && detail ? getTypeRows(detail.price_matrix, selectedAddons.jenis) : [];
+  const capMaterialNames = new Set(capRows.map((item) => item.material_group?.name).filter(Boolean));
+  const validIdLanyardPackages = isIdLanyard && detail
+    ? new Set(detail.price_matrix.filter((item) => isQuantityInTier(item, qty)).map((item) => item.size_variant?.label).filter(Boolean))
+    : new Set<string>();
   const addonEntries = Object.entries(detail?.addons ?? {})
-    .filter(([type, items]) => items.length > 0 && !(isJersey && type === "model"))
+    .filter(
+      ([type, items]) =>
+        items.length > 0 &&
+        !(isJersey && type === "model") &&
+        !(isTShirt && (type === "model" || type === "ukuran")) &&
+        !(isPdh && (type === "model" || type === "warna")) &&
+        !(isIdLanyard && type === "cetak")
+    )
     .map(([type, items]) => [
       type,
-      isJacket && type === "bahan" ? items.filter((item) => jacketMaterialNames.has(item.addon_name)) : items,
+      isJacket && type === "bahan"
+        ? items.filter((item) => jacketMaterialNames.has(item.addon_name))
+        : isTumbler && type === "cetak"
+          ? items.filter((item) => tumblerCetakNames.has(item.addon_name))
+        : isCap && type === "bahan"
+          ? items.filter((item) => capMaterialNames.has(item.addon_name))
+          : isIdLanyard && type === "paket"
+            ? items.filter((item) => validIdLanyardPackages.has(item.addon_name))
+          : items,
     ] as const)
     .filter(([, items]) => items.length > 0)
     .sort(([typeA], [typeB]) => {
-      if (!isJacket) return 0;
-      const order = { tipe: 0, bahan: 1 };
+      if (!isJacket && !isCap && !isToteBag && !isTumbler) return 0;
+      const order = { tipe: 0, jenis: 0, bahan: 0, cetak: 1 };
       return (order[typeA as keyof typeof order] ?? 2) - (order[typeB as keyof typeof order] ?? 2);
     });
   const selectedExtraFee = getSelectedExtraFee(
@@ -334,10 +485,26 @@ export default function ProductModal({ product, onClose }: Props) {
       )
     )
   );
-  const isTShirt = displayProduct?.name.trim().toLowerCase() === "t-shirt";
   const quantityPriceRange = isTShirt && detail ? getQuantityPriceRange(detail.price_matrix, qty) : null;
   const jerseyPrice = isJersey && detail ? getJerseyPrice(detail.price_matrix, qty, selectedAddons.jersey_type) : 0;
   const jacketPrice = isJacket && detail ? getJacketPrice(detail.price_matrix, selectedAddons.tipe, selectedAddons.bahan) : 0;
+  const fleecePrice = isFleeceProduct && detail ? getFleecePrice(detail.price_matrix, qty, selectedAddons.bahan) : 0;
+  const pdhPrice = isPdh && detail ? getMaterialQuantityPrice(detail.price_matrix, qty, selectedAddons.bahan) : 0;
+  const capPrice = isCap && detail ? getTypeMaterialPrice(detail.price_matrix, selectedAddons.jenis, selectedAddons.bahan) : 0;
+  const tumblerPrice = isTumbler && detail ? getTumblerPrice(detail.price_matrix, selectedAddons.jenis, selectedAddons.cetak) : 0;
+  const toteBagPrice = isToteBag && detail ? getMaterialVariantPrice(detail.price_matrix, selectedAddons.bahan, selectedAddons.cetak) : 0;
+  const idLanyardPrice = isIdLanyard && detail ? getVariantQuantityPrice(detail.price_matrix, qty, selectedAddons.paket) : 0;
+  const stickerPrice = isSticker && detail ? getVariantQuantityPrice(detail.price_matrix, qty, selectedAddons.bahan) : 0;
+  const keychainPrice = isKeychain && detail ? getVariantQuantityPrice(detail.price_matrix, qty, selectedAddons.bahan) : 0;
+  const wristbandPrice = isWristband && detail ? getVariantQuantityPrice(detail.price_matrix, qty, selectedAddons.tipe) : 0;
+  const wristbandTiers = useMemo(() => {
+    if (!isWristband || !detail) return [] as number[];
+    const seen = new Set<number>();
+    return detail.price_matrix
+      .map((pm) => pm.quantity_tier?.min_qty ?? 0)
+      .filter((v) => v > 0 && !seen.has(v) && seen.add(v))
+      .sort((a, b) => a - b);
+  }, [isWristband, detail]);
   const basePriceLabel =
     isTShirt && detail
       ? quantityPriceRange
@@ -349,15 +516,63 @@ export default function ProductModal({ product, onClose }: Props) {
         ? jacketPrice > 0
           ? `Start From ${formatPrice(jacketPrice)}`
           : "Hubungi admin"
+      : isFleeceProduct
+        ? fleecePrice > 0
+          ? formatPrice(fleecePrice)
+          : selectedAddons.bahan?.addon_name === "Fleece PE"
+            ? "Hubungi admin"
+            : "Nego / Hubungi admin"
+      : isPdh
+        ? getPriceRangeLabel(pdhPrice, pdhPrice)
+      : isCap
+        ? getPriceRangeLabel(capPrice, capPrice)
+      : isTumbler
+        ? tumblerPrice > 0
+          ? formatPrice(tumblerPrice)
+          : "Hubungi admin"
+      : isToteBag
+        ? getPriceRangeLabel(toteBagPrice, toteBagPrice)
+      : isIdLanyard
+        ? getPriceRangeLabel(idLanyardPrice, idLanyardPrice)
+      : isSticker
+        ? stickerPrice > 0
+          ? formatPrice(stickerPrice)
+          : "Hubungi admin"
+      : isKeychain
+        ? keychainPrice > 0
+          ? formatPrice(keychainPrice)
+          : "Hubungi admin"
+      : isWristband
+        ? wristbandPrice > 0
+          ? formatPrice(wristbandPrice)
+          : "Hubungi admin"
       : getPriceLabel(detail);
   const selectedPriceLabel =
     isJersey && jerseyPrice > 0
       ? formatPrice(jerseyPrice + selectedExtraFee)
+      : isPdh && pdhPrice > 0
+        ? formatPrice(pdhPrice + selectedExtraFee)
+      : (isSticker || isKeychain)
+        ? basePriceLabel
+      : isWristband && wristbandPrice > 0
+        ? formatPrice(wristbandPrice + selectedExtraFee)
       : basePriceLabel !== "Hubungi admin" && selectedExtraFee > 0
         ? `${basePriceLabel} + ${formatPrice(selectedExtraFee)}`
         : basePriceLabel;
   const handleAddonSelect = (addonType: string, addon: ProductAddon) => {
     setSelectedAddons((current) => {
+      if (isTumbler && addonType === "jenis" && detail) {
+        const firstCetakName = getTumblerRows(detail.price_matrix, addon)[0]?.material_group?.name;
+        const firstCetak = detail.addons?.cetak?.find((item) => item.addon_name === firstCetakName);
+        return { ...current, jenis: addon, cetak: firstCetak };
+      }
+
+      if (isCap && addonType === "jenis" && detail) {
+        const firstMaterialName = getTypeRows(detail.price_matrix, addon)[0]?.material_group?.name;
+        const firstMaterial = detail.addons?.bahan?.find((item) => item.addon_name === firstMaterialName);
+        return { ...current, jenis: addon, bahan: firstMaterial };
+      }
+
       if (!isJacket || addonType !== "tipe" || !detail) return { ...current, [addonType]: addon };
 
       const firstMaterialName = getJacketRows(detail.price_matrix, addon)[0]?.material_group?.name;
@@ -365,6 +580,14 @@ export default function ProductModal({ product, onClose }: Props) {
       return { ...current, tipe: addon, bahan: firstMaterial };
     });
   };
+  useEffect(() => {
+    if (!isIdLanyard || !detail) return;
+    const validPackages = detail.addons?.paket?.filter((item) =>
+      detail.price_matrix.some((matrix) => matrix.size_variant?.label === item.addon_name && isQuantityInTier(matrix, qty))
+    ) ?? [];
+    if (validPackages.some((item) => item.id === selectedAddons.paket?.id)) return;
+    setSelectedAddons((current) => ({ ...current, paket: validPackages[0] }));
+  }, [detail, isIdLanyard, qty, selectedAddons.paket?.id]);
   const selectedLines = Object.entries(selectedAddons)
     .filter(([, addon]) => Boolean(addon))
     .map(([type, addon]) => `${type}: ${addon?.addon_name}`);
@@ -453,8 +676,58 @@ export default function ProductModal({ product, onClose }: Props) {
                 items={isJersey && type === "model_kerah" ? sortJerseyCollars(items) : items}
                 selected={selectedAddons[type]}
                 onSelect={handleAddonSelect}
+                onClear={
+                  (isPdh && (type === "model" || type === "warna")) ||
+                  (isWristband && (type === "extra" || type === "lebar"))
+                    ? (addonType) => setSelectedAddons((current) => ({ ...current, [addonType]: undefined }))
+                    : undefined
+                }
               />
             ))}
+
+            {isSticker && (
+              <div className="rounded-xl border border-yellow-300 bg-yellow-50 p-4">
+                <p className="font-bold text-gray-800">Harga termasuk:</p>
+                <ul className="mt-2 space-y-1 text-xs leading-relaxed text-gray-600">
+                  <li>• Per 1 A3 dengan area cetak 297 × 448 mm</li>
+                  <li>• Die Cut / Kiss Cut</li>
+                  <li>• Dapat dibuat Sticker Pack</li>
+                  <li>• Laminating tekstur Doff / Glossy / Tidak dilaminating</li>
+                </ul>
+              </div>
+            )}
+
+            {isWristband && wristbandTiers.length > 0 && (
+              <div className="rounded-xl border border-yellow-300 bg-yellow-50 p-4">
+                <p className="font-bold text-gray-800">Catatan Pemesanan</p>
+                <ul className="mt-2 space-y-1 text-xs leading-relaxed text-gray-600">
+                  <li>• Quantity tersedia: {wristbandTiers.map((t) => t.toLocaleString("id-ID")).join(", ")} pcs</li>
+                  <li>• Lebar standar: maks. 1,5 cm (harga di atas sudah termasuk lebar ini)</li>
+                  <li>• Biaya tambahan dikenakan untuk lebar 2 cm, 2,5 cm, atau 3 cm</li>
+                </ul>
+              </div>
+            )}
+
+            {isTShirt && tShirtNotes.length > 0 && <AddonNotes items={tShirtNotes} />}
+
+            {isPdh && pdhNotes.length > 0 && (
+              <AddonNotes
+                items={pdhNotes}
+                title="Catatan Model & Warna"
+                description="Penyesuaian model dan variasi warna akan dihitung sesuai jumlah masing-masing variasi saat konfirmasi pesanan."
+              />
+            )}
+
+            {isIdLanyard && (detail?.addons?.cetak?.length ?? 0) > 0 && (
+              <SelectableAddonGroup
+                title="Pilihan Cetak ID Card"
+                type="cetak"
+                items={detail?.addons?.cetak ?? []}
+                selected={selectedAddons.cetak}
+                onSelect={handleAddonSelect}
+                onClear={(addonType) => setSelectedAddons((current) => ({ ...current, [addonType]: undefined }))}
+              />
+            )}
 
             {isJersey && jerseyTypes.length > 0 && (
               <SelectableAddonGroup
@@ -481,7 +754,16 @@ export default function ProductModal({ product, onClose }: Props) {
               <p className="mb-2 font-bold text-gray-800">Jumlah Pesanan (pcs)</p>
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => setQty((value) => Math.max(minQty, value - 1))}
+                  onClick={() => {
+                    if (isWristband && wristbandTiers.length > 0) {
+                      setQty((value) => {
+                        const idx = wristbandTiers.indexOf(value);
+                        return idx > 0 ? wristbandTiers[idx - 1] : value;
+                      });
+                    } else {
+                      setQty((value) => Math.max(minQty, value - 1));
+                    }
+                  }}
                   className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-xl text-gray-600 hover:bg-gray-100"
                 >
                   -
@@ -490,11 +772,31 @@ export default function ProductModal({ product, onClose }: Props) {
                   type="number"
                   value={qty}
                   onChange={(event) => setQty(event.target.value === "" ? 0 : Number(event.target.value))}
-                  onBlur={() => setQty((value) => (value < minQty ? minQty : value))}
+                  onBlur={() => {
+                    if (isWristband && wristbandTiers.length > 0) {
+                      setQty((value) => {
+                        const nearest = wristbandTiers.reduce((prev, curr) =>
+                          Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
+                        );
+                        return nearest;
+                      });
+                    } else {
+                      setQty((value) => (value < minQty ? minQty : value));
+                    }
+                  }}
                   className="flex-1 rounded-lg border border-gray-300 py-2 text-center text-gray-800 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 />
                 <button
-                  onClick={() => setQty((value) => value + 1)}
+                  onClick={() => {
+                    if (isWristband && wristbandTiers.length > 0) {
+                      setQty((value) => {
+                        const idx = wristbandTiers.indexOf(value);
+                        return idx < wristbandTiers.length - 1 ? wristbandTiers[idx + 1] : value;
+                      });
+                    } else {
+                      setQty((value) => value + 1);
+                    }
+                  }}
                   className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-xl text-gray-600 hover:bg-gray-100"
                 >
                   +
