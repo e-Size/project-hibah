@@ -81,6 +81,18 @@ function getJerseyPrice(matrix: PriceMatrix[], qty: number, type?: ProductAddon)
   return matrix.find((item) => item.size_variant?.code === variantCode && isQuantityInTier(item, qty))?.price ?? 0;
 }
 
+function getJacketRows(matrix: PriceMatrix[], type?: ProductAddon) {
+  if (!type) return [];
+  return matrix.filter((item) => item.size_variant?.label === type.addon_name);
+}
+
+function getJacketPrice(matrix: PriceMatrix[], type?: ProductAddon, material?: ProductAddon) {
+  if (!type || !material) return 0;
+  return matrix.find(
+    (item) => item.size_variant?.label === type.addon_name && item.material_group?.name === material.addon_name
+  )?.price ?? 0;
+}
+
 function SelectableAddonGroup({
   title,
   type,
@@ -232,6 +244,10 @@ export default function ProductModal({ product, onClose }: Props) {
     const jerseyModels = detail.addons?.model ?? [];
     const defaultJerseyType = jerseyModels.find((item) => item.addon_name.toLowerCase().includes("atasan"));
     const defaultJerseyCollar = detail.addons?.model_kerah?.find((item) => item.addon_name === "V-Neck Biasa");
+    const isJacket = detail.product.name.trim().toLowerCase() === "jacket";
+    const defaultJacketType = detail.addons?.tipe?.find((item) => item.addon_name === "Semi Parka / Trucker") ?? detail.addons?.tipe?.[0];
+    const defaultJacketMaterialName = getJacketRows(detail.price_matrix, defaultJacketType)[0]?.material_group?.name;
+    const defaultJacketMaterial = detail.addons?.bahan?.find((item) => item.addon_name === defaultJacketMaterialName);
 
     setQty(Math.max(detail.product.min_qty || 1, 1));
     setSelectedAddons(
@@ -239,7 +255,12 @@ export default function ProductModal({ product, onClose }: Props) {
         Object.entries(detail.addons ?? {})
           .filter(([type]) => !(isJersey && type === "model"))
           .filter(([, items]) => items.length > 0)
-          .map(([type, items]) => [type, isJersey && type === "model_kerah" ? defaultJerseyCollar ?? items[0] : items[0]])
+          .map(([type, items]) => {
+            if (isJersey && type === "model_kerah") return [type, defaultJerseyCollar ?? items[0]];
+            if (isJacket && type === "tipe") return [type, defaultJacketType ?? items[0]];
+            if (isJacket && type === "bahan") return [type, defaultJacketMaterial ?? items[0]];
+            return [type, items[0]];
+          })
           .concat(isJersey && defaultJerseyType ? [["jersey_type", defaultJerseyType]] : [])
       )
     );
@@ -285,13 +306,27 @@ export default function ProductModal({ product, onClose }: Props) {
   }, [detail?.images, product.image]);
 
   const isJersey = (displayProduct?.name ?? product.name).trim().toLowerCase() === "jersey";
+  const isJacket = (displayProduct?.name ?? product.name).trim().toLowerCase() === "jacket";
   const jerseyModels = detail?.addons?.model ?? [];
   const jerseyTypes = jerseyModels.filter((item) => {
     const name = item.addon_name.toLowerCase();
     return name.includes("atasan") || name.includes("stelan");
   });
   const jerseyModelAddons = jerseyModels.filter((item) => !jerseyTypes.includes(item));
-  const addonEntries = Object.entries(detail?.addons ?? {}).filter(([type, items]) => items.length > 0 && !(isJersey && type === "model"));
+  const jacketRows = isJacket && detail ? getJacketRows(detail.price_matrix, selectedAddons.tipe) : [];
+  const jacketMaterialNames = new Set(jacketRows.map((item) => item.material_group?.name).filter(Boolean));
+  const addonEntries = Object.entries(detail?.addons ?? {})
+    .filter(([type, items]) => items.length > 0 && !(isJersey && type === "model"))
+    .map(([type, items]) => [
+      type,
+      isJacket && type === "bahan" ? items.filter((item) => jacketMaterialNames.has(item.addon_name)) : items,
+    ] as const)
+    .filter(([, items]) => items.length > 0)
+    .sort(([typeA], [typeB]) => {
+      if (!isJacket) return 0;
+      const order = { tipe: 0, bahan: 1 };
+      return (order[typeA as keyof typeof order] ?? 2) - (order[typeB as keyof typeof order] ?? 2);
+    });
   const selectedExtraFee = getSelectedExtraFee(
     Object.fromEntries(
       Object.entries(selectedAddons).filter(
@@ -302,6 +337,7 @@ export default function ProductModal({ product, onClose }: Props) {
   const isTShirt = displayProduct?.name.trim().toLowerCase() === "t-shirt";
   const quantityPriceRange = isTShirt && detail ? getQuantityPriceRange(detail.price_matrix, qty) : null;
   const jerseyPrice = isJersey && detail ? getJerseyPrice(detail.price_matrix, qty, selectedAddons.jersey_type) : 0;
+  const jacketPrice = isJacket && detail ? getJacketPrice(detail.price_matrix, selectedAddons.tipe, selectedAddons.bahan) : 0;
   const basePriceLabel =
     isTShirt && detail
       ? quantityPriceRange
@@ -309,6 +345,10 @@ export default function ProductModal({ product, onClose }: Props) {
         : "Hubungi admin"
       : isJersey
         ? getPriceRangeLabel(jerseyPrice, jerseyPrice)
+      : isJacket
+        ? jacketPrice > 0
+          ? `Start From ${formatPrice(jacketPrice)}`
+          : "Hubungi admin"
       : getPriceLabel(detail);
   const selectedPriceLabel =
     isJersey && jerseyPrice > 0
@@ -316,6 +356,15 @@ export default function ProductModal({ product, onClose }: Props) {
       : basePriceLabel !== "Hubungi admin" && selectedExtraFee > 0
         ? `${basePriceLabel} + ${formatPrice(selectedExtraFee)}`
         : basePriceLabel;
+  const handleAddonSelect = (addonType: string, addon: ProductAddon) => {
+    setSelectedAddons((current) => {
+      if (!isJacket || addonType !== "tipe" || !detail) return { ...current, [addonType]: addon };
+
+      const firstMaterialName = getJacketRows(detail.price_matrix, addon)[0]?.material_group?.name;
+      const firstMaterial = detail.addons?.bahan?.find((item) => item.addon_name === firstMaterialName);
+      return { ...current, tipe: addon, bahan: firstMaterial };
+    });
+  };
   const selectedLines = Object.entries(selectedAddons)
     .filter(([, addon]) => Boolean(addon))
     .map(([type, addon]) => `${type}: ${addon?.addon_name}`);
@@ -403,7 +452,7 @@ export default function ProductModal({ product, onClose }: Props) {
                 type={type}
                 items={isJersey && type === "model_kerah" ? sortJerseyCollars(items) : items}
                 selected={selectedAddons[type]}
-                onSelect={(addonType, addon) => setSelectedAddons((current) => ({ ...current, [addonType]: addon }))}
+                onSelect={handleAddonSelect}
               />
             ))}
 
