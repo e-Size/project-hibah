@@ -173,6 +173,9 @@ async function applyShirtColor(src: string, hexColor: string): Promise<string> {
 
 export default function EditorPage() {
   const [activeTab, setActiveTab] = useState<SidebarTab>(null);
+  const [mobileSheetHeight, setMobileSheetHeight] = useState(55);
+  const [isDraggingSheet, setIsDraggingSheet] = useState(false);
+  const sheetDragRef = useRef<{ startY: number; startHeight: number } | null>(null);
   const [showChangeModal, setShowChangeModal] = useState(false);
   const [productTemplates, setProductTemplates] = useState<ProductTemplate[]>([]);
   const [selectedProductName, setSelectedProductName] = useState("");
@@ -184,6 +187,55 @@ export default function EditorPage() {
   const [processedSrc, setProcessedSrc] = useState<Partial<Record<ViewType, string>>>({});
   const selectedProduct = productTemplates.find((product) => product.name === selectedProductName) ?? productTemplates[0];
   const views = useMemo(() => selectedProduct?.views ?? [], [selectedProduct]);
+
+  function getMaxSheetHeight() {
+    return Math.min(88, ((window.innerHeight - 112) / window.innerHeight) * 100);
+  }
+
+  function onSheetHandlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    if (window.innerWidth >= 1024) return;
+    e.preventDefault();
+    e.stopPropagation();
+    sheetDragRef.current = { startY: e.clientY, startHeight: mobileSheetHeight };
+    setIsDraggingSheet(true);
+
+    function onMove(event: PointerEvent) {
+      if (!sheetDragRef.current) return;
+      const deltaPercent = ((sheetDragRef.current.startY - event.clientY) / window.innerHeight) * 100;
+      setMobileSheetHeight(Math.max(18, Math.min(getMaxSheetHeight(), sheetDragRef.current.startHeight + deltaPercent)));
+    }
+
+    function onUp() {
+      const currentHeight = mobileSheetHeightRef.current;
+      sheetDragRef.current = null;
+      setIsDraggingSheet(false);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+
+      if (currentHeight < 25) {
+        setActiveTab(null);
+        return;
+      }
+
+      const snapPoints = [32, 55, getMaxSheetHeight()];
+      setMobileSheetHeight(snapPoints.reduce((closest, point) =>
+        Math.abs(point - currentHeight) < Math.abs(closest - currentHeight) ? point : closest
+      ));
+    }
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  }
+
+  const mobileSheetHeightRef = useRef(mobileSheetHeight);
+  useEffect(() => {
+    mobileSheetHeightRef.current = mobileSheetHeight;
+  }, [mobileSheetHeight]);
+
+  useEffect(() => {
+    if (!activeTab || activeTab === "views" || window.innerWidth >= 1024) return;
+    setMobileSheetHeight(activeTab === "text" ? Math.min(72, getMaxSheetHeight()) : 55);
+  }, [activeTab]);
 
   useEffect(() => {
     let ignore = false;
@@ -703,17 +755,22 @@ export default function EditorPage() {
         {activeTab && activeTab !== "views" && (
           <div
             ref={sidebarScrollRef}
+            style={{ "--mobile-sheet-height": `${mobileSheetHeight}vh` } as React.CSSProperties}
             className={`fixed lg:relative inset-x-0 bottom-14 lg:bottom-auto z-40 lg:z-auto bg-white border-t border-gray-200 lg:border-t-0 lg:border-r rounded-t-2xl lg:rounded-none shadow-2xl lg:shadow-none lg:w-72 lg:flex-shrink-0 ${
               activeTab === "text"
-                ? "top-14 lg:top-auto flex flex-col overflow-hidden lg:max-h-none"
-                : "max-h-[55dvh] overflow-y-auto lg:max-h-none"
-            }`}
+                ? "flex flex-col overflow-hidden"
+                : "overflow-y-auto"
+            } h-[var(--mobile-sheet-height)] max-h-[calc(100vh-7rem)] lg:h-auto lg:max-h-none ${isDraggingSheet ? "" : "transition-[height] duration-300 ease-out"}`}
           >
             {/* Drag handle — mobile only */}
-            <div className="lg:hidden flex items-center justify-between px-4 pt-3 pb-2 sticky top-0 bg-white z-20 border-b border-gray-50 shrink-0">
+            <div
+              onPointerDown={onSheetHandlePointerDown}
+              className="lg:hidden flex items-center justify-between px-4 pt-3 pb-2 sticky top-0 bg-white z-20 border-b border-gray-50 shrink-0 touch-none cursor-ns-resize select-none"
+            >
               <div className="w-8" />
-              <div className="w-10 h-1 bg-gray-200 rounded-full" />
+              <div className={`w-12 h-1.5 rounded-full transition-colors ${isDraggingSheet ? "bg-[#e8734a]" : "bg-gray-300"}`} />
               <button
+                onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => setActiveTab(null)}
                 className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
               >

@@ -15,11 +15,11 @@ import ViewportScaler from "../components/ui/ViewportScaler";
 export default function Home() {
   return (
     <ViewportScaler>
-      <main className="min-h-[100dvh]" style={{ margin: 0, padding: 0 }}>
+      <main className="min-h-screen" style={{ margin: 0, padding: 0 }}>
         <Navbar variant="transparent" />
 
         {/* ── Hero Section ── */}
-        <section className="relative overflow-hidden flex flex-col md:block" style={{ height: "calc(100dvh / var(--page-scale, 1))" }}>
+        <section className="relative overflow-hidden flex flex-col h-screen md:block md:h-[calc(100vh/var(--page-scale,1))]">
           <Image
             src="/bg herokeren.png"
             alt="Hero background"
