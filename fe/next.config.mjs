@@ -1,4 +1,4 @@
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080/api";
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://api.esize.id/api";
 const apiOrigin = new URL(apiBaseUrl).origin;
 
 /** @type {import('next').NextConfig} */

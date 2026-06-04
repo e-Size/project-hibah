@@ -80,7 +80,7 @@ export default function ProductsPage() {
       render: (item) =>
         item.thumbnail ? (
           /* eslint-disable-next-line @next/next/no-img-element */
-          <img src={`${process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "http://localhost:3000"}${item.thumbnail}`} alt="" style={{ width: 40, height: 40, objectFit: "cover", borderRadius: 6 }} />
+          <img src={`${process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "https://api.esize.id"}${item.thumbnail}`} alt="" style={{ width: 40, height: 40, objectFit: "cover", borderRadius: 6 }} />
         ) : (
           <div style={{ width: 40, height: 40, borderRadius: 6, background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: 10 }}>N/A</div>
         ),
