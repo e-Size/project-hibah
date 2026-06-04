@@ -27,13 +27,13 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export async function getProducts(category?: ProductCategory): Promise<Product[]> {
   const params = category ? `?category=${encodeURIComponent(category)}` : "";
-  const response = await request<ApiListResponse<Product[]>>(`/product${params}`);
+  const response = await request<ApiListResponse<Product[]>>(`/products${params}`);
 
   return response.data;
 }
 
 export async function getProductById(id: string): Promise<ProductDetail> {
-  const response = await request<ApiListResponse<ProductDetail>>(`/product/${id}`);
+  const response = await request<ApiListResponse<ProductDetail>>(`/products/${id}`);
 
   return response.data;
 }
