@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"be/internal/extra_image"
 	materialgroup "be/internal/material_group"
 	"be/internal/material"
 	"be/internal/product"
@@ -25,6 +26,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	pm := pricematrix.Wire(db)
 	pa := productaddon.Wire(db)
 	pi := productimage.Wire(db)
+	ei := extra_image.Wire(db)
 	up := upload.Wire()
 
 	api := r.Group("/api")
@@ -92,6 +94,14 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 			productImages.POST("", pi.Create)
 			productImages.PUT("/:id", pi.Update)
 			productImages.DELETE("/:id", pi.Delete)
+		}
+
+		extraImages := api.Group("/extra-images")
+		{
+			extraImages.GET("", ei.GetAll)
+			extraImages.POST("", ei.Create)
+			extraImages.PUT("/:id", ei.Update)
+			extraImages.DELETE("/:id", ei.Delete)
 		}
 
 		api.POST("/upload", up.Upload)

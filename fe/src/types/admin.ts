@@ -176,3 +176,23 @@ export interface ProductImage extends Base {
   url: string;
   order: number;
 }
+
+// ─── Extra Image ────────────────────────────────────────
+export interface ExtraImage extends Base {
+  name: string;
+  description: string;
+  image_url: string;
+}
+
+export interface ExtraImageCreateRequest {
+  name: string;
+  description?: string;
+  image_url: string;
+}
+
+export interface ExtraImageUpdateRequest {
+  name?: string;
+  description?: string;
+  image_url?: string;
+}
+

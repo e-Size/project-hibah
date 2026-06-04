@@ -1,0 +1,64 @@
+package extra_image
+
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
+
+type Handler struct {
+	service *Service
+}
+
+func NewHandler(service *Service) *Handler {
+	return &Handler{service: service}
+}
+
+func (h *Handler) GetAll(c *gin.Context) {
+	images, err := h.service.GetAll()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": images})
+}
+
+func (h *Handler) Create(c *gin.Context) {
+	var req CreateRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	img, err := h.service.Create(req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"data": img})
+}
+
+func (h *Handler) Update(c *gin.Context) {
+	id := c.Param("id")
+	var req UpdateRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	img, err := h.service.Update(id, req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": img})
+}
+
+func (h *Handler) Delete(c *gin.Context) {
+	id := c.Param("id")
+	if err := h.service.Delete(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "deleted successfully"})
+}

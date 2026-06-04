@@ -8,6 +8,7 @@ import type {
   PriceMatrix, PriceMatrixCreateRequest, PriceMatrixUpdateRequest,
   ProductAddon, ProductAddonCreateRequest, ProductAddonUpdateRequest,
   ProductImage,
+  ExtraImage, ExtraImageCreateRequest, ExtraImageUpdateRequest,
 } from "@/types/admin";
 
 type R<T> = { data: T };
@@ -128,3 +129,16 @@ export const uploadService = {
     return apiPostForm<{ url: string }>("/upload", form).then(r => r.url);
   },
 };
+
+// ─── Extra Images ───────────────────────────────────────
+export const extraImageService = {
+  getAll: () =>
+    apiGet<R<ExtraImage[]>>("/extra-images").then(r => r.data),
+  create: (data: ExtraImageCreateRequest) =>
+    apiPost<R<ExtraImage>>("/extra-images", data).then(r => r.data),
+  update: (id: string, data: ExtraImageUpdateRequest) =>
+    apiPut<R<ExtraImage>>(`/extra-images/${id}`, data).then(r => r.data),
+  delete: (id: string) =>
+    apiDelete<Msg>(`/extra-images/${id}`),
+};
+
