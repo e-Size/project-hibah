@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { extraImageService, uploadService } from "@/services/admin-service";
 import type { ExtraImage, ExtraImageUpdateRequest } from "@/types/admin";
+import Modal from "@/components/admin/Modal";
 import DeleteConfirm from "@/components/admin/DeleteConfirm";
 import { showToast } from "@/components/admin/Toast";
 
@@ -76,8 +77,7 @@ export default function ExtraImagesPage() {
     }
   };
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async () => {
     if (!name.trim()) {
       showToast("Nama gambar wajib diisi", "error");
       return;
@@ -130,27 +130,26 @@ export default function ExtraImagesPage() {
   };
 
   return (
-    <div>
-      <div className="admin-header">
-        <div>
-          <h2>Gambar Tambahan</h2>
-          <p className="admin-subtitle">Kelola gambar mandiri yang tidak terhubung ke entitas lain</p>
-        </div>
-        <button className="admin-btn-primary" onClick={() => handleOpenModal()}>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-          </svg>
-          Tambah Gambar
-        </button>
-      </div>
-
+    <>
       <div className="admin-card">
+        <div className="admin-card-header">
+          <div>
+            <h2>Gambar Tambahan</h2>
+            <p style={{ margin: "4px 0 0 0", color: "var(--admin-text-secondary)", fontSize: 14 }}>
+              Kelola gambar mandiri yang tidak terhubung ke entitas lain
+            </p>
+          </div>
+          <button className="admin-btn admin-btn-primary" onClick={() => handleOpenModal()}>
+            + Tambah Gambar
+          </button>
+        </div>
+
         {loading ? (
           <div className="admin-loading">Memuat data...</div>
         ) : images.length === 0 ? (
           <div className="admin-empty">Belum ada gambar tambahan</div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 20 }}>
+          <div style={{ padding: 20, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 20 }}>
             {images.map((img) => (
               <div key={img.id} style={{ border: "1px solid var(--admin-border)", borderRadius: 12, overflow: "hidden", background: "white" }}>
                 <div style={{ position: "relative", height: 160, background: "#f8fafc" }}>
@@ -190,66 +189,60 @@ export default function ExtraImagesPage() {
         )}
       </div>
 
-      {isModalOpen && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal" style={{ maxWidth: 500 }}>
-            <div className="admin-modal-header">
-              <h3>{editingId ? "Edit Gambar" : "Tambah Gambar"}</h3>
-              <button className="admin-modal-close" onClick={handleCloseModal}>&times;</button>
-            </div>
-            <form onSubmit={handleSave}>
-              <div className="admin-modal-body">
-                <div className="admin-form-group">
-                  <label>Nama Gambar</label>
-                  <input
-                    type="text"
-                    className="admin-input"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Contoh: Banner Promo, Panduan Ukuran..."
-                    required
-                  />
-                </div>
-
-                <div className="admin-form-group">
-                  <label>Deskripsi (Opsional)</label>
-                  <textarea
-                    className="admin-input"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Contoh: Digunakan di halaman utama bagian atas"
-                    rows={2}
-                  />
-                </div>
-
-                <div className="admin-form-group">
-                  <label>Upload Gambar</label>
-                  <input
-                    type="file"
-                    className="admin-input"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    ref={fileInputRef}
-                  />
-                </div>
-                
-                {previewUrl && (
-                  <div style={{ marginTop: 16, borderRadius: 8, overflow: "hidden", border: "1px solid var(--admin-border)", background: "#f8fafc" }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={previewUrl} alt="Preview" style={{ width: "100%", maxHeight: 200, objectFit: "contain", display: "block" }} />
-                  </div>
-                )}
-              </div>
-              <div className="admin-modal-footer">
-                <button type="button" className="admin-btn-secondary" onClick={handleCloseModal}>Batal</button>
-                <button type="submit" className="admin-btn-primary" disabled={isSaving}>
-                  {isSaving ? "Menyimpan..." : "Simpan"}
-                </button>
-              </div>
-            </form>
-          </div>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        title={editingId ? "Edit Gambar" : "Tambah Gambar"}
+        footer={
+          <>
+            <button type="button" className="admin-btn admin-btn-secondary" onClick={handleCloseModal}>Batal</button>
+            <button type="button" className="admin-btn admin-btn-primary" onClick={handleSave} disabled={isSaving}>
+              {isSaving ? "Menyimpan..." : "Simpan"}
+            </button>
+          </>
+        }
+      >
+        <div className="admin-form-group">
+          <label className="admin-form-label">Nama Gambar</label>
+          <input
+            type="text"
+            className="admin-form-input"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Contoh: Banner Promo, Panduan Ukuran..."
+            required
+          />
         </div>
-      )}
+
+        <div className="admin-form-group">
+          <label className="admin-form-label">Deskripsi (Opsional)</label>
+          <textarea
+            className="admin-form-textarea"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Contoh: Digunakan di halaman utama bagian atas"
+            rows={2}
+          />
+        </div>
+
+        <div className="admin-form-group">
+          <label className="admin-form-label">Upload Gambar</label>
+          <input
+            type="file"
+            className="admin-form-input"
+            accept="image/*"
+            onChange={handleFileChange}
+            ref={fileInputRef}
+          />
+        </div>
+        
+        {previewUrl && (
+          <div style={{ marginTop: 16, borderRadius: 8, overflow: "hidden", border: "1px solid var(--admin-border)", background: "#f8fafc" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={previewUrl} alt="Preview" style={{ width: "100%", maxHeight: 200, objectFit: "contain", display: "block" }} />
+          </div>
+        )}
+      </Modal>
 
       {deleteTarget && (
         <DeleteConfirm
@@ -259,6 +252,6 @@ export default function ExtraImagesPage() {
           itemName={`gambar "${deleteTarget.name}"`}
         />
       )}
-    </div>
+    </>
   );
 }
