@@ -29,10 +29,16 @@ func (s *Service) Create(req CreateRequest) (models.ExtraImage, error) {
 	return img, err
 }
 
-func (s *Service) Update(id string, req UpdateRequest) (models.ExtraImage, error) {
+func (s *Service) Update(id string, req UpdateRequest) (models.ExtraImage, string, error) {
 	var img models.ExtraImage
 	if err := s.db.First(&img, "id = ?", id).Error; err != nil {
-		return img, err
+		return img, "", err
+	}
+
+	oldPath := ""
+	if req.ImageURL != "" && req.ImageURL != img.ImageURL {
+		oldPath = img.ImageURL
+		img.ImageURL = req.ImageURL
 	}
 
 	if req.Name != "" {
@@ -41,14 +47,15 @@ func (s *Service) Update(id string, req UpdateRequest) (models.ExtraImage, error
 	if req.Description != "" {
 		img.Description = req.Description
 	}
-	if req.ImageURL != "" {
-		img.ImageURL = req.ImageURL
-	}
 
 	err := s.db.Save(&img).Error
-	return img, err
+	return img, oldPath, err
 }
 
-func (s *Service) Delete(id string) error {
-	return s.db.Delete(&models.ExtraImage{}, "id = ?", id).Error
+func (s *Service) Delete(id string) (string, error) {
+	var img models.ExtraImage
+	if err := s.db.First(&img, "id = ?", id).Error; err != nil {
+		return "", err
+	}
+	return img.ImageURL, s.db.Delete(&img).Error
 }

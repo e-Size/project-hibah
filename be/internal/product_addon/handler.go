@@ -3,6 +3,7 @@ package productaddon
 import (
 	"errors"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -41,7 +42,7 @@ func (h *Handler) Update(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	a, err := h.service.Update(c.Param("id"), req)
+	a, oldPath, err := h.service.Update(c.Param("id"), req)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Product addon not found"})
@@ -50,17 +51,24 @@ func (h *Handler) Update(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	if oldPath != "" {
+		os.Remove("." + oldPath)
+	}
 	c.JSON(http.StatusOK, gin.H{"data": a})
 }
 
 func (h *Handler) Delete(c *gin.Context) {
-	if err := h.service.Delete(c.Param("id")); err != nil {
+	filePath, err := h.service.Delete(c.Param("id"))
+	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Product addon not found"})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+	if filePath != "" {
+		os.Remove("." + filePath)
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Product addon deleted"})
 }

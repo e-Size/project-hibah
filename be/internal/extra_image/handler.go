@@ -2,6 +2,7 @@ package extra_image
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -46,19 +47,26 @@ func (h *Handler) Update(c *gin.Context) {
 		return
 	}
 
-	img, err := h.service.Update(id, req)
+	img, oldPath, err := h.service.Update(id, req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+	if oldPath != "" {
+		os.Remove("." + oldPath)
 	}
 	c.JSON(http.StatusOK, gin.H{"data": img})
 }
 
 func (h *Handler) Delete(c *gin.Context) {
 	id := c.Param("id")
-	if err := h.service.Delete(id); err != nil {
+	filePath, err := h.service.Delete(id)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+	if filePath != "" {
+		os.Remove("." + filePath)
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "deleted successfully"})
 }

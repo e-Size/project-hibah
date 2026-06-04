@@ -38,11 +38,17 @@ func (s *Service) Create(req CreateRequest) (*models.ProductAddon, error) {
 	return &a, err
 }
 
-func (s *Service) Update(id string, req UpdateRequest) (*models.ProductAddon, error) {
+func (s *Service) Update(id string, req UpdateRequest) (*models.ProductAddon, string, error) {
 	var a models.ProductAddon
 	if err := s.db.First(&a, "id = ?", id).Error; err != nil {
-		return nil, err
+		return nil, "", err
 	}
+	
+	oldPath := ""
+	if req.ImageURL != "" && req.ImageURL != a.ImageURL {
+		oldPath = a.ImageURL
+	}
+
 	updates := map[string]any{}
 	if req.AddonType != "" {
 		updates["addon_type"] = req.AddonType
@@ -63,13 +69,13 @@ func (s *Service) Update(id string, req UpdateRequest) (*models.ProductAddon, er
 		updates["desc"] = req.Desc
 	}
 	s.db.Model(&a).Updates(updates)
-	return &a, nil
+	return &a, oldPath, nil
 }
 
-func (s *Service) Delete(id string) error {
+func (s *Service) Delete(id string) (string, error) {
 	var a models.ProductAddon
 	if err := s.db.First(&a, "id = ?", id).Error; err != nil {
-		return err
+		return "", err
 	}
-	return s.db.Delete(&a).Error
+	return a.ImageURL, s.db.Delete(&a).Error
 }
