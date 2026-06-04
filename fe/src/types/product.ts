@@ -21,6 +21,15 @@ export type ProductImage = {
   order: number;
 };
 
+export type ExtraImage = {
+  id: string;
+  name: string;
+  description: string;
+  image_url: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
 export type ProductAddon = {
   id: string;
   product_id: string;

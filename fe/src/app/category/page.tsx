@@ -98,26 +98,32 @@ export default function CategoryPage() {
       {selectedProduct && <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
       <Navbar variant="transparent" />
       {/* Hero Header */}
-      <div className="relative flex flex-col items-center text-center min-h-screen md:min-h-0 pt-20 md:pb-16 px-4 sm:px-8"
-        style={{ background: "radial-gradient(ellipse at 50% 40%, #f5d0c0 0%, #fceee8 35%, #ffffff 70%)" }}>
+      <div
+        className={`relative flex flex-col items-center text-center px-4 sm:px-8 transition-all duration-300 ${
+          query
+            ? "pt-20 pb-4"
+            : "pt-20 min-h-screen md:min-h-0 md:pb-16"
+        }`}
+        style={{ background: "radial-gradient(ellipse at 50% 40%, #f5d0c0 0%, #fceee8 35%, #ffffff 70%)" }}
+      >
 
         {/* Main content group */}
         <div className="flex flex-col items-center w-full md:my-auto">
-          {/* Title blocks */}
-          <div className="flex flex-col items-center gap-2 mb-6 mt-16 sm:mt-32 md:mt-40">
-            <span className="bg-[#7C6000] text-white font-bold text-2xl sm:text-4xl md:text-5xl px-4 sm:px-8 py-2">
-              Katalog Produk
-            </span>
-            <span className="bg-[#7C6000] text-white font-bold text-2xl sm:text-4xl md:text-5xl px-4 sm:px-8 py-2 w-full text-center">
-              Apparel &amp; Merchandise
-            </span>
+          {/* Title + subtitle — sembunyikan di mobile saat search aktif */}
+          <div className={`flex flex-col items-center w-full md:contents transition-all duration-200 ${query ? "hidden" : ""}`}>
+            <div className="flex flex-col items-center gap-2 mb-6 mt-16 sm:mt-32 md:mt-40">
+              <span className="bg-[#7C6000] text-white font-bold text-2xl sm:text-4xl md:text-5xl px-4 sm:px-8 py-2">
+                Katalog Produk
+              </span>
+              <span className="bg-[#7C6000] text-white font-bold text-2xl sm:text-4xl md:text-5xl px-4 sm:px-8 py-2 w-full text-center">
+                Apparel &amp; Merchandise
+              </span>
+            </div>
+            <p className="text-[#7C6000] text-sm sm:text-base max-w-2xl mb-8 md:mb-10 leading-snug px-2">
+              Temukan berbagai pilihan pakaian dan merchandise custom untuk
+              kebutuhan event, organisasi, corporate, dan brand kamu
+            </p>
           </div>
-
-          {/* Subtitle */}
-          <p className="text-[#7C6000] text-sm sm:text-base max-w-2xl mb-8 md:mb-10 leading-snug px-2">
-            Temukan berbagai pilihan pakaian dan merchandise custom untuk
-            kebutuhan event, organisasi, corporate, dan brand kamu
-          </p>
 
           {/* Search bar */}
           <div className="flex items-center gap-2 border-2 border-[#7C6000] rounded-full px-4 sm:px-5 py-3 w-full max-w-sm sm:max-w-lg bg-white/80">
@@ -156,7 +162,7 @@ export default function CategoryPage() {
             };
             requestAnimationFrame(step);
           }}
-          className="mt-auto mb-8 md:mb-0 md:mt-6 cursor-pointer"
+          className={`mt-auto mb-8 md:mb-0 md:mt-6 cursor-pointer transition-opacity duration-200 ${query ? "opacity-0 pointer-events-none" : "opacity-100"}`}
         >
           <Image src="/Line 14.png" alt="scroll down" width={96} height={64} />
         </button>
@@ -170,7 +176,7 @@ export default function CategoryPage() {
 
       {/* Pakaian Section */}
       {filteredPakaian.length > 0 && (
-        <div id="section-pakaian" className="px-0 pt-12 md:pt-16 pb-4">
+        <div id="section-pakaian" className={`px-0 pb-4 ${query ? "pt-4" : "pt-12 md:pt-16"}`}>
           <SectionHeader title="Pakaian" showLogos={!query} />
           <CategoryGrid items={filteredPakaian} onProductClick={handleProductClick} />
         </div>
@@ -178,7 +184,7 @@ export default function CategoryPage() {
 
       {/* Merch Section */}
       {filteredMerch.length > 0 && (
-        <div className="px-0 pt-12 md:pt-16 pb-12 md:pb-16">
+        <div className={`px-0 pb-12 md:pb-16 ${query ? "pt-4" : "pt-12 md:pt-16"}`}>
           <SectionHeader title="Merch" showLogos={!query} />
           <CategoryGrid items={filteredMerch} onProductClick={handleProductClick} />
         </div>

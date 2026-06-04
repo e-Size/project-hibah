@@ -1,4 +1,4 @@
-import type { Product, ProductCategory, ProductDetail } from "../types/product";
+import type { ExtraImage, Product, ProductCategory, ProductDetail } from "../types/product";
 
 type ApiListResponse<T> = {
   data: T;
@@ -34,6 +34,12 @@ export async function getProducts(category?: ProductCategory): Promise<Product[]
 
 export async function getProductById(id: string): Promise<ProductDetail> {
   const response = await request<ApiListResponse<ProductDetail>>(`/products/${id}`);
+
+  return response.data;
+}
+
+export async function getExtraImages(): Promise<ExtraImage[]> {
+  const response = await request<ApiListResponse<ExtraImage[]>>("/extra-images");
 
   return response.data;
 }

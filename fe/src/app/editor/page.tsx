@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
 import JSZip from "jszip";
 import FontPicker from "react-fontpicker-ts";
 import "react-fontpicker-ts/dist/index.css";
 import OnboardingTour, { type TourStep } from "@/components/ui/OnboardingTour";
 import ViewportScaler from "@/components/ui/ViewportScaler";
+import { getExtraImages, resolveAssetUrl } from "@/services/api";
+import type { ExtraImage } from "@/types/product";
 
 type SidebarTab = "product" | "upload" | "text" | "layers" | "views" | null;
 type ViewType = "front" | "back" | "left" | "right";
@@ -21,12 +23,49 @@ const colors = [
   "#c0392b", "#4d7c0f", "#7f1d1d", "#c8a96e", "#6b8e6b", "#cd853f", "#ffffff",
 ];
 
-const views: { key: ViewType; label: string; src: string }[] = [
-  { key: "front", label: "FRONT", src: "/19.png" },
-  { key: "back",  label: "BACK",  src: "/20.png" },
-  { key: "left",  label: "LEFT",  src: "/21.png" },
-  { key: "right", label: "RIGHT", src: "/22.png" },
+const viewDefinitions: { key: ViewType; label: string; descriptions: string[] }[] = [
+  { key: "front", label: "FRONT", descriptions: ["depan", "front"] },
+  { key: "back",  label: "BACK",  descriptions: ["belakang", "back"] },
+  { key: "left",  label: "LEFT",  descriptions: ["kiri", "left"] },
+  { key: "right", label: "RIGHT", descriptions: ["kanan", "right"] },
 ];
+
+type ProductTemplate = {
+  name: string;
+  views: { key: ViewType; label: string; src: string }[];
+};
+
+function getViewDefinition(description: string) {
+  const normalized = description.trim().toLowerCase();
+  return viewDefinitions.find((view) => view.descriptions.includes(normalized));
+}
+
+function buildProductTemplates(images: ExtraImage[]): ProductTemplate[] {
+  const products = new Map<string, Map<ViewType, ExtraImage>>();
+
+  images.forEach((image) => {
+    const name = image.name.trim();
+    const view = getViewDefinition(image.description);
+    if (!name || !view || !image.image_url) return;
+
+    const productViews = products.get(name) ?? new Map<ViewType, ExtraImage>();
+    const current = productViews.get(view.key);
+    const currentDate = new Date(current?.updated_at ?? current?.created_at ?? 0).getTime();
+    const imageDate = new Date(image.updated_at ?? image.created_at ?? 0).getTime();
+
+    if (!current || imageDate >= currentDate) productViews.set(view.key, image);
+    products.set(name, productViews);
+  });
+
+  return Array.from(products, ([name, productViews]) => ({
+    name,
+    views: viewDefinitions.flatMap((view) => {
+      const image = productViews.get(view.key);
+      const src = resolveAssetUrl(image?.image_url);
+      return src ? [{ key: view.key, label: view.label, src }] : [];
+    }),
+  })).filter((product) => product.views.length > 0);
+}
 
 const printZone: Record<ViewType, { x: number; y: number; w: number; h: number }> = {
   front: { x: 28, y: 26, w: 44, h: 42 },
@@ -104,24 +143,30 @@ async function applyShirtColor(src: string, hexColor: string): Promise<string> {
   return new Promise((resolve) => {
     const img = new window.Image();
     img.onload = () => {
-      const c = document.createElement("canvas");
-      c.width = img.naturalWidth; c.height = img.naturalHeight;
-      const ctx = c.getContext("2d")!;
-      ctx.drawImage(img, 0, 0);
-      const d = ctx.getImageData(0,0,c.width,c.height);
-      const px = d.data;
-      for (let i=0;i<px.length;i+=4) {
-        if(px[i+3]<10) continue;
-        const [,s,l] = rgbToHsl(px[i],px[i+1],px[i+2]);
-        if(s < 0.5 || l > 0.85) {
-          px[i]   = Math.round(px[i]   * tr / 255);
-          px[i+1] = Math.round(px[i+1] * tg / 255);
-          px[i+2] = Math.round(px[i+2] * tb / 255);
+      try {
+        const c = document.createElement("canvas");
+        c.width = img.naturalWidth; c.height = img.naturalHeight;
+        const ctx = c.getContext("2d")!;
+        ctx.drawImage(img, 0, 0);
+        const d = ctx.getImageData(0,0,c.width,c.height);
+        const px = d.data;
+        for (let i=0;i<px.length;i+=4) {
+          if(px[i+3]<10) continue;
+          const [,s,l] = rgbToHsl(px[i],px[i+1],px[i+2]);
+          if(s < 0.5 || l > 0.85) {
+            px[i]   = Math.round(px[i]   * tr / 255);
+            px[i+1] = Math.round(px[i+1] * tg / 255);
+            px[i+2] = Math.round(px[i+2] * tb / 255);
+          }
         }
+        ctx.putImageData(d,0,0);
+        resolve(c.toDataURL("image/png"));
+      } catch {
+        resolve(src);
       }
-      ctx.putImageData(d,0,0);
-      resolve(c.toDataURL("image/png"));
     };
+    img.onerror = () => resolve(src);
+    img.crossOrigin = "anonymous";
     img.src = src;
   });
 }
@@ -129,18 +174,60 @@ async function applyShirtColor(src: string, hexColor: string): Promise<string> {
 export default function EditorPage() {
   const [activeTab, setActiveTab] = useState<SidebarTab>(null);
   const [showChangeModal, setShowChangeModal] = useState(false);
+  const [productTemplates, setProductTemplates] = useState<ProductTemplate[]>([]);
+  const [selectedProductName, setSelectedProductName] = useState("");
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [productLoadError, setProductLoadError] = useState(false);
 
   const [selectedColor, setSelectedColor] = useState("#ffffff");
   const [selectedView, setSelectedView] = useState<ViewType>("front");
-  const [processedSrc, setProcessedSrc] = useState<Record<ViewType, string>>({ front:"", back:"", left:"", right:"" });
+  const [processedSrc, setProcessedSrc] = useState<Partial<Record<ViewType, string>>>({});
+  const selectedProduct = productTemplates.find((product) => product.name === selectedProductName) ?? productTemplates[0];
+  const views = useMemo(() => selectedProduct?.views ?? [], [selectedProduct]);
 
   useEffect(() => {
+    let ignore = false;
+
+    getExtraImages()
+      .then((images) => {
+        if (ignore) return;
+        const templates = buildProductTemplates(images);
+        const defaultProduct = templates.find((product) => product.name.toLowerCase() === "jersey") ?? templates[0];
+        setProductTemplates(templates);
+        setSelectedProductName((current) => current || defaultProduct?.name || "");
+        setProductLoadError(false);
+      })
+      .catch(() => {
+        if (!ignore) setProductLoadError(true);
+      })
+      .finally(() => {
+        if (!ignore) setIsLoadingProducts(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (views.length > 0 && !views.some((view) => view.key === selectedView)) {
+      setSelectedView(views[0].key);
+    }
+  }, [selectedView, views]);
+
+  useEffect(() => {
+    let ignore = false;
+    setProcessedSrc({});
     views.forEach(v => {
       applyShirtColor(v.src, selectedColor).then(dataUrl => {
-        setProcessedSrc(prev => ({ ...prev, [v.key]: dataUrl }));
+        if (!ignore) setProcessedSrc(prev => ({ ...prev, [v.key]: dataUrl }));
       });
     });
-  }, [selectedColor]);
+
+    return () => {
+      ignore = true;
+    };
+  }, [selectedColor, views]);
 
   const [zoom, setZoom] = useState(100);
   const [elements, setElements] = useState<CanvasEl[]>([]);
@@ -455,6 +542,7 @@ export default function EditorPage() {
         ctx.drawImage(img, dx, dy, dw, dh);
         res();
       };
+      img.crossOrigin = "anonymous";
       img.src = coloredSrc ?? viewSrc;
     });
 
@@ -551,17 +639,6 @@ export default function EditorPage() {
   const zone = printZone[selectedView];
   const viewElements = elements.filter(el => el.view === selectedView);
 
-  const PRODUCTS = [
-    { name: "T-Shirts",       count: 8, img: "/gambarcowo.png" },
-    { name: "Jacket",         count: 6, img: "/gambarcowo.png" },
-    { name: "Polo T-Shirt",   count: 2, img: "/gambarcowo.png" },
-    { name: "Sport T-Shirts", count: 3, img: "/gambarcowo.png" },
-    { name: "T-Shirts",       count: 8, img: "/gambarcowo.png" },
-    { name: "Jacket",         count: 6, img: "/gambarcowo.png" },
-    { name: "Polo T-Shirt",   count: 2, img: "/gambarcowo.png" },
-    { name: "Sport T-Shirts", count: 3, img: "/gambarcowo.png" },
-  ];
-
   return (
     <ViewportScaler>
     <div className="flex flex-col overflow-hidden bg-[#f5f0e8]" style={{ height: "calc(100vh / var(--page-scale, 1))" }}>
@@ -651,7 +728,7 @@ export default function EditorPage() {
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z" /></svg>
                     </div>
                     <div>
-                      <h2 className="font-bold text-gray-900 text-sm leading-tight">Shirt</h2>
+                      <h2 className="font-bold text-gray-900 text-sm leading-tight">{selectedProduct?.name ?? "Produk Custom"}</h2>
                       <p className="text-gray-400 text-xs mt-1 leading-relaxed">Handcrafted quality meets modern design. Ring-spun cotton with superior comfort.</p>
                     </div>
                   </div>
@@ -1278,33 +1355,59 @@ export default function EditorPage() {
 
       {/* Change Product Modal */}
       {showChangeModal && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50" onClick={() => setShowChangeModal(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 p-5 sm:p-6" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-start justify-between mb-1">
+        <div
+          className="fixed inset-0 z-[70] flex items-end sm:items-center sm:justify-center bg-black/50"
+          onClick={() => setShowChangeModal(false)}
+        >
+          <div
+            className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-2xl sm:mx-4 max-h-[85dvh] sm:max-h-[80vh] flex flex-col overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sm:hidden flex justify-center pt-2.5 pb-1 shrink-0">
+              <div className="w-10 h-1 rounded-full bg-gray-200" />
+            </div>
+            <div className="flex items-start justify-between px-4 pt-3 pb-3 sm:px-6 sm:pt-6 sm:pb-4 border-b border-gray-100 shrink-0">
               <div>
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">Mulai Design Custom</h2>
-                <p className="text-sm text-gray-400 mt-0.5 mb-4 sm:mb-5">Pilih produk yang ingin kamu custom</p>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">Ganti Produk</h2>
+                <p className="text-xs sm:text-sm text-gray-400 mt-1">Pilih produk yang ingin kamu custom</p>
               </div>
-              <button onClick={() => setShowChangeModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+              <button onClick={() => setShowChangeModal(false)} className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors shrink-0">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-              {PRODUCTS.map((p, idx) => (
+            <div className="grid grid-cols-2 sm:grid-cols-4 auto-rows-max content-start gap-3 sm:gap-4 overflow-y-auto overscroll-contain min-h-0 px-4 py-4 sm:px-6 sm:pb-6">
+              {isLoadingProducts && (
+                <p className="col-span-full py-8 text-center text-sm text-gray-400">Memuat produk custom...</p>
+              )}
+              {!isLoadingProducts && productLoadError && (
+                <p className="col-span-full py-8 text-center text-sm text-red-400">Gagal memuat produk custom.</p>
+              )}
+              {!isLoadingProducts && !productLoadError && productTemplates.length === 0 && (
+                <p className="col-span-full py-8 text-center text-sm text-gray-400">Belum ada gambar produk custom.</p>
+              )}
+              {productTemplates.map((p) => {
+                const thumbnail = p.views.find((view) => view.key === "front") ?? p.views[0];
+                return (
                 <button
-                  key={`${p.name}-${idx}`}
-                  onClick={() => setShowChangeModal(false)}
-                  className="flex flex-col rounded-2xl border border-gray-100 bg-[#faf8f5] hover:border-[#e8734a] hover:shadow-md transition-all overflow-hidden group"
+                  key={p.name}
+                  onClick={() => {
+                    setSelectedProductName(p.name);
+                    setSelectedView(p.views[0].key);
+                    setShowChangeModal(false);
+                  }}
+                  className={`flex flex-col h-auto rounded-2xl border bg-[#faf8f5] hover:border-[#e8734a] hover:shadow-md transition-all overflow-hidden group ${selectedProduct?.name === p.name ? "border-[#e8734a]" : "border-gray-100"}`}
                 >
-                  <div className="w-full aspect-square bg-[#f0ece6] relative overflow-hidden">
-                    <Image src={p.img} alt={p.name} fill className="object-cover object-top group-hover:scale-105 transition-transform duration-300" />
+                  <div className="w-full aspect-square shrink-0 bg-[#f0ece6] relative overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={thumbnail.src} alt={p.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
                   </div>
-                  <div className="px-3 py-2 text-left">
-                    <p className="font-semibold text-gray-900 text-sm">{p.name}</p>
-                    <p className="text-xs text-gray-400">{p.count} Produk</p>
+                  <div className="px-3 py-2 text-left shrink-0">
+                    <p className="font-semibold text-gray-900 text-sm truncate">{p.name}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{p.views.length} sisi</p>
                   </div>
                 </button>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
