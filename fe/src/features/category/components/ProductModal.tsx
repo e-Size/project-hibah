@@ -401,7 +401,7 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
       overlay?.removeEventListener("wheel", preventScroll);
       scrollable?.removeEventListener("wheel", stopBubble);
     };
-  }, []);
+  }, [asPage]);
 
   const displayProduct = detail?.product;
   const minQty = Math.max(displayProduct?.min_qty || 24, 1);
@@ -464,7 +464,7 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
         !(isIdLanyard && type === "cetak")
     )
     .map(([type, items]) => {
-      let filtered =
+      const filtered =
         isJacket && type === "bahan"
           ? items.filter((item) => jacketMaterialNames.has(item.addon_name))
           : isTumbler && type === "cetak"
