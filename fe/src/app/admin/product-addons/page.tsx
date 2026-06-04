@@ -8,7 +8,7 @@ import { productAddonService, productService, uploadService } from "@/services/a
 import type { ProductAddon, ProductListItem } from "@/types/admin";
 
 const API_HOST = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "https://api.esize.id";
-const addonTypes = ["tipe", "bahan", "warna"];
+const addonTypes = ["ukuran", "tipe", "bahan", "warna"];
 
 export default function ProductAddonsPage() {
   const [data, setData] = useState<ProductAddon[]>([]);
@@ -20,6 +20,7 @@ export default function ProductAddonsPage() {
   const [saving, setSaving] = useState(false);
   const [filterProduct, setFilterProduct] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [viewingImage, setViewingImage] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     product_id: "", addon_type: "tipe", addon_name: "", extra_fee: 0,
@@ -149,10 +150,19 @@ export default function ProductAddonsPage() {
     },
     {
       key: "image_url", label: "Gambar",
-      render: (item) => item.image_url ? (
-        /* eslint-disable-next-line @next/next/no-img-element */
-        <img src={`${API_HOST}${item.image_url}`} alt="" style={{ width: 36, height: 36, objectFit: "cover", borderRadius: 6 }} />
-      ) : "—",
+      render: (item) => (
+        item.image_url ? (
+          <div 
+            style={{ width: 48, height: 48, borderRadius: 8, overflow: "hidden", border: "1px solid var(--admin-border)", cursor: "pointer", background: "white" }}
+            onClick={(e) => { e.stopPropagation(); setViewingImage(`${API_HOST}${item.image_url}`); }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`${API_HOST}${item.image_url}`} alt={item.addon_name} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+          </div>
+        ) : (
+          <div style={{ width: 48, height: 48, borderRadius: 8, background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: 10 }}>No Image</div>
+        )
+      ),
     },
   ];
 
@@ -244,6 +254,30 @@ export default function ProductAddonsPage() {
           <textarea className="admin-form-textarea" value={form.desc} onChange={(e) => setForm({ ...form, desc: e.target.value })} placeholder="Deskripsi addon" />
         </div>
       </Modal>
+
+      {/* View Fullscreen Modal */}
+      {viewingImage && (
+        <div 
+          style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", padding: 40 }}
+          onClick={() => setViewingImage(null)}
+        >
+          <button 
+            style={{ position: "absolute", top: 20, right: 20, background: "white", border: "none", borderRadius: "50%", width: 40, height: 40, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+            onClick={() => setViewingImage(null)}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="24" height="24">
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={viewingImage}
+            alt="View"
+            style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", borderRadius: 8, background: "white" }}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
 
       <DeleteConfirm isOpen={!!deleting} onClose={() => setDeleting(null)} onConfirm={handleDelete} loading={saving} itemName="addon" />
     </>
