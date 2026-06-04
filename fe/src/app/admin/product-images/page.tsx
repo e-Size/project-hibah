@@ -301,6 +301,7 @@ export default function ProductImagesPage() {
           </>
         }
       >
+        <div onKeyDown={(e) => { if (e.key === 'Enter') handleSave(); }}>
         <div className="admin-form-group">
           <label className="admin-form-label">Produk *</label>
           <select 
@@ -337,6 +338,7 @@ export default function ProductImagesPage() {
           <label className="admin-form-label">Order</label>
           <input className="admin-form-input" type="number" min={0} value={uploadOrder} onChange={(e) => setUploadOrder(Number(e.target.value))} />
           <p className="admin-form-hint">Urutan gambar (0 = pertama / thumbnail)</p>
+        </div>
         </div>
       </Modal>
 

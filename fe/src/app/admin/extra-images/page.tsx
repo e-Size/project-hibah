@@ -293,6 +293,7 @@ export default function ExtraImagesPage() {
           </>
         }
       >
+        <div onKeyDown={(e) => { if (e.key === 'Enter') handleSave(); }}>
         <div className="admin-form-group">
           <label className="admin-form-label">Nama Gambar *</label>
           <input
@@ -334,6 +335,7 @@ export default function ExtraImagesPage() {
             <img src={previewUrl} alt="Preview" style={{ width: "100%", maxHeight: 200, objectFit: "contain", display: "block" }} />
           </div>
         )}
+        </div>
       </Modal>
 
       {/* View Fullscreen Modal */}
