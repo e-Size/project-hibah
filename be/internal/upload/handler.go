@@ -1,13 +1,12 @@
 package upload
 
 import (
+	"be/internal/imgutil"
 	"fmt"
 	"net/http"
-	"os"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 const uploadDir = "./uploads/general"
@@ -32,15 +31,10 @@ func (h *Handler) Upload(c *gin.Context) {
 		return
 	}
 
-	if err := os.MkdirAll(uploadDir, 0755); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create upload dir"})
-		return
-	}
-
-	filename := uuid.New().String() + ext
-	savePath := filepath.Join(uploadDir, filename)
-	if err := c.SaveUploadedFile(file, savePath); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save file"})
+	// Compress and save as JPEG
+	filename, err := imgutil.CompressAndSave(file, uploadDir)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to compress and save file"})
 		return
 	}
 

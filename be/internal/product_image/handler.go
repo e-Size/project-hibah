@@ -1,6 +1,7 @@
 package productimage
 
 import (
+	"be/internal/imgutil"
 	"errors"
 	"fmt"
 	"net/http"
@@ -9,7 +10,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -47,16 +47,13 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
-	if err := os.MkdirAll(uploadDir, 0755); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create upload dir"})
+	// Compress and save as JPEG
+	filename, err := imgutil.CompressAndSave(file, uploadDir)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to compress and save file"})
 		return
 	}
-	filename := uuid.New().String() + ext
 	savePath := filepath.Join(uploadDir, filename)
-	if err := c.SaveUploadedFile(file, savePath); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save file"})
-		return
-	}
 
 	img, err := h.service.Create(CreateRequest{
 		ProductID: productID,
@@ -90,16 +87,13 @@ func (h *Handler) Update(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "only jpg, jpeg, png, webp allowed"})
 			return
 		}
-		if err := os.MkdirAll(uploadDir, 0755); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create upload dir"})
+		// Compress and save as JPEG
+		filename, compErr := imgutil.CompressAndSave(file, uploadDir)
+		if compErr != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to compress and save file"})
 			return
 		}
-		filename := uuid.New().String() + ext
 		newSavePath = filepath.Join(uploadDir, filename)
-		if err := c.SaveUploadedFile(file, newSavePath); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save file"})
-			return
-		}
 		req.FilePath = fmt.Sprintf("/uploads/products/%s", filename)
 	}
 
