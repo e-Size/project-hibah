@@ -3,5 +3,5 @@ package models
 type MaterialGroup struct {
 	Base
 	Name      string     `json:"name"`
-	Materials []Material `json:"materials,omitempty"`
+	ImageURL string `json:"image_url"`
 }

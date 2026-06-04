@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { productService, materialGroupService, materialService, sizeVariantService, quantityTierService, priceMatrixService, productAddonService } from "@/services/admin-service";
+import { productService, materialGroupService, sizeVariantService, quantityTierService, priceMatrixService, productAddonService } from "@/services/admin-service";
 
 interface Stat {
   label: string;
@@ -19,10 +19,9 @@ export default function AdminDashboard() {
   useEffect(() => {
     async function load() {
       try {
-        const [products, matGroups, materials, sizes, tiers, matrix, addons] = await Promise.all([
+        const [products, matGroups, sizes, tiers, matrix, addons] = await Promise.all([
           productService.getAll().catch(() => []),
           materialGroupService.getAll().catch(() => []),
-          materialService.getAll().catch(() => []),
           sizeVariantService.getAll().catch(() => []),
           quantityTierService.getAll().catch(() => []),
           priceMatrixService.getAll().catch(() => []),
@@ -34,12 +33,8 @@ export default function AdminDashboard() {
             icon: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M6 5v1H4.667a1.75 1.75 0 00-1.743 1.598l-.826 9.5A1.75 1.75 0 003.84 19H16.16a1.75 1.75 0 001.743-1.902l-.826-9.5A1.75 1.75 0 0015.333 6H14V5a4 4 0 00-8 0zm4-2.5A2.5 2.5 0 007.5 5v1h5V5A2.5 2.5 0 0010 2.5z" clipRule="evenodd" /></svg>,
           },
           {
-            label: "Grup Material", value: matGroups.length, color: "#3b82f6", bg: "rgba(59,130,246,0.1)", href: "/admin/material-groups",
+            label: "Material", value: matGroups.length, color: "#3b82f6", bg: "rgba(59,130,246,0.1)", href: "/admin/materials",
             icon: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M3.75 3A1.75 1.75 0 002 4.75v3.26a3.235 3.235 0 011.75-.51h12.5c.644 0 1.245.188 1.75.51V6.75A1.75 1.75 0 0016.25 5h-4.836a.25.25 0 01-.177-.073L9.823 3.513A1.75 1.75 0 008.586 3H3.75zM3.75 9A1.75 1.75 0 002 10.75v4.5c0 .966.784 1.75 1.75 1.75h12.5A1.75 1.75 0 0018 15.25v-4.5A1.75 1.75 0 0016.25 9H3.75z" /></svg>,
-          },
-          {
-            label: "Material", value: materials.length, color: "#10b981", bg: "rgba(16,185,129,0.1)", href: "/admin/materials",
-            icon: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M2 3.75A.75.75 0 012.75 3h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 3.75zm0 4.167a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75zm0 4.166a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75zm0 4.167a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z" clipRule="evenodd" /></svg>,
           },
           {
             label: "Size Variant", value: sizes.length, color: "#8b5cf6", bg: "rgba(139,92,246,0.1)", href: "/admin/size-variants",

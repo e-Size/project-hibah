@@ -174,7 +174,7 @@ export default function PriceMatrixPage() {
         </div>
         <div className="admin-form-row">
           <div className="admin-form-group">
-            <label className="admin-form-label">Material Group</label>
+            <label className="admin-form-label">Material</label>
             <select className="admin-form-select" value={form.material_group_id} onChange={(e) => setForm({ ...form, material_group_id: e.target.value })}>
               <option value="">— Semua —</option>
               {matGroups.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}

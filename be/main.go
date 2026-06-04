@@ -34,10 +34,8 @@ func main() {
 	config.DB.AutoMigrate(
 		&models.Product{},
 		&models.MaterialGroup{},
-		&models.Material{},
 		&models.SizeVariant{},
 		&models.QuantityTier{},
-		&models.ProductMaterial{},
 		&models.PriceMatrix{},
 		&models.ProductAddon{},
 		&models.ProductImage{},

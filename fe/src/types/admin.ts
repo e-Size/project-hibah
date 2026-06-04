@@ -44,35 +44,17 @@ export interface ProductUpdateRequest {
 // ─── Material Group ─────────────────────────────────────
 export interface MaterialGroup extends Base {
   name: string;
-  materials?: Material[];
+  image_url?: string;
 }
 
 export interface MaterialGroupCreateRequest {
   name: string;
+  image_url?: string;
 }
 
 export interface MaterialGroupUpdateRequest {
   name?: string;
-}
-
-// ─── Material ───────────────────────────────────────────
-export interface Material extends Base {
-  material_group_id: string | null;
-  name: string;
-  description: string;
-  material_group?: MaterialGroup;
-}
-
-export interface MaterialCreateRequest {
-  material_group_id?: string | null;
-  name: string;
-  description?: string;
-}
-
-export interface MaterialUpdateRequest {
-  material_group_id?: string | null;
-  name?: string;
-  description?: string;
+  image_url?: string;
 }
 
 // ─── Size Variant ───────────────────────────────────────

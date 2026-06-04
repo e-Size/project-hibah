@@ -3,7 +3,6 @@ package routes
 import (
 	"be/internal/extra_image"
 	materialgroup "be/internal/material_group"
-	"be/internal/material"
 	"be/internal/product"
 	productaddon "be/internal/product_addon"
 	productimage "be/internal/product_image"
@@ -20,7 +19,6 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	r.Static("/uploads", "./uploads")
 	p := product.Wire(db)
 	mg := materialgroup.Wire(db)
-	m := material.Wire(db)
 	sv := sizevariant.Wire(db)
 	qt := quantitytier.Wire(db)
 	pm := pricematrix.Wire(db)
@@ -48,13 +46,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 			materialGroups.DELETE("/:id", mg.Delete)
 		}
 
-		materials := api.Group("/materials")
-		{
-			materials.GET("", m.GetAll)
-			materials.POST("", m.Create)
-			materials.PUT("/:id", m.Update)
-			materials.DELETE("/:id", m.Delete)
-		}
+
 
 		sizeVariants := api.Group("/size-variants")
 		{

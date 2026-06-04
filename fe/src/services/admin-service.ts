@@ -2,7 +2,6 @@ import { apiGet, apiPost, apiPut, apiDelete, apiPostForm, apiPutForm } from "@/l
 import type {
   Product, ProductListItem, ProductCreateRequest, ProductUpdateRequest,
   MaterialGroup, MaterialGroupCreateRequest, MaterialGroupUpdateRequest,
-  Material, MaterialCreateRequest, MaterialUpdateRequest,
   SizeVariant, SizeVariantCreateRequest, SizeVariantUpdateRequest,
   QuantityTier, QuantityTierCreateRequest, QuantityTierUpdateRequest,
   PriceMatrix, PriceMatrixCreateRequest, PriceMatrixUpdateRequest,
@@ -38,18 +37,6 @@ export const materialGroupService = {
     apiPut<R<MaterialGroup>>(`/material-groups/${id}`, data).then(r => r.data),
   delete: (id: string) =>
     apiDelete<Msg>(`/material-groups/${id}`),
-};
-
-// ─── Materials ──────────────────────────────────────────
-export const materialService = {
-  getAll: () =>
-    apiGet<R<Material[]>>("/materials").then(r => r.data),
-  create: (data: MaterialCreateRequest) =>
-    apiPost<R<Material>>("/materials", data).then(r => r.data),
-  update: (id: string, data: MaterialUpdateRequest) =>
-    apiPut<R<Material>>(`/materials/${id}`, data).then(r => r.data),
-  delete: (id: string) =>
-    apiDelete<Msg>(`/materials/${id}`),
 };
 
 // ─── Size Variants ──────────────────────────────────────
