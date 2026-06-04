@@ -29,7 +29,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 
 	api := r.Group("/api")
 	{
-		products := api.Group("/products")
+		products := api.Group("/product")
 		{
 			products.GET("", p.GetAll)
 			products.GET("/:id", p.GetByID)
