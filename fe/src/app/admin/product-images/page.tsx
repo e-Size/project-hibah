@@ -120,6 +120,7 @@ export default function ProductImagesPage() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 16 }}>
               {images.map((img) => (
                 <div key={img.id} style={{ position: "relative", borderRadius: 12, overflow: "hidden", border: "1px solid var(--admin-border)", background: "#f8fafc" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={`${API_HOST}${img.url}`}
                     alt=""
@@ -178,6 +179,7 @@ export default function ProductImagesPage() {
         </div>
         {previewUrl && (
           <div style={{ marginBottom: 16, borderRadius: 8, overflow: "hidden", border: "1px solid var(--admin-border)" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={previewUrl} alt="Preview" style={{ width: "100%", maxHeight: 200, objectFit: "cover", display: "block" }} />
           </div>
         )}

@@ -67,9 +67,7 @@ function IconText({ active }: { active: boolean }) {
 function IconLayers({ active }: { active: boolean }) {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? "white" : "#6b7280"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2" /><polyline points="2 17 12 22 22 17" /><polyline points="2 12 12 17 22 12" /></svg>;
 }
-function IconViews({ active }: { active: boolean }) {
-  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? "white" : "#6b7280"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="9" height="9" rx="1" /><rect x="13" y="2" width="9" height="9" rx="1" /><rect x="2" y="13" width="9" height="9" rx="1" /><rect x="13" y="13" width="9" height="9" rx="1" /></svg>;
-}
+
 
 const sidebarItems = [
   { key: "product" as SidebarTab, label: "PRODUCT", Icon: IconProduct },

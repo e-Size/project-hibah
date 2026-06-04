@@ -150,6 +150,7 @@ export default function ProductAddonsPage() {
     {
       key: "image_url", label: "Gambar",
       render: (item) => item.image_url ? (
+        /* eslint-disable-next-line @next/next/no-img-element */
         <img src={`${API_HOST}${item.image_url}`} alt="" style={{ width: 36, height: 36, objectFit: "cover", borderRadius: 6 }} />
       ) : "—",
     },
@@ -234,6 +235,7 @@ export default function ProductAddonsPage() {
         </div>
         {previewUrl && (
           <div style={{ marginBottom: 16, borderRadius: 8, overflow: "hidden", border: "1px solid var(--admin-border)" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={previewUrl} alt="Preview" style={{ width: "100%", maxHeight: 160, objectFit: "cover", display: "block" }} />
           </div>
         )}
