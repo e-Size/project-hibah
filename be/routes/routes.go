@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"be/internal/auth"
 	"be/internal/extra_image"
 	materialgroup "be/internal/material_group"
 	"be/internal/product"
@@ -29,74 +30,61 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 
 	api := r.Group("/api")
 	{
-		products := api.Group("/products")
+		// ─── Auth (public) ──────────────────────────────
+		api.POST("/auth/login", auth.Login)
+		api.POST("/auth/logout", auth.Logout)
+		api.GET("/auth/verify", auth.Verify)
+
+		// ─── Public GET endpoints ───────────────────────
+		api.GET("/products", p.GetAll)
+		api.GET("/products/:id", p.GetByID)
+		api.GET("/material-groups", mg.GetAll)
+		api.GET("/size-variants", sv.GetAll)
+		api.GET("/quantity-tiers", qt.GetAll)
+		api.GET("/price-matrix", pm.GetAll)
+		api.GET("/product-addons", pa.GetAll)
+		api.GET("/product-images", pi.GetAll)
+		api.GET("/product-images/product/:product_id", pi.GetByProduct)
+		api.GET("/extra-images", ei.GetAll)
+
+		// ─── Protected (admin) endpoints ────────────────
+		admin := api.Group("")
+		admin.Use(auth.AuthMiddleware())
 		{
-			products.GET("", p.GetAll)
-			products.GET("/:id", p.GetByID)
-			products.POST("", p.Create)
-			products.PUT("/:id", p.Update)
-			products.DELETE("/:id", p.Delete)
+			admin.POST("/products", p.Create)
+			admin.PUT("/products/:id", p.Update)
+			admin.DELETE("/products/:id", p.Delete)
+
+			admin.POST("/material-groups", mg.Create)
+			admin.PUT("/material-groups/:id", mg.Update)
+			admin.DELETE("/material-groups/:id", mg.Delete)
+
+			admin.POST("/size-variants", sv.Create)
+			admin.PUT("/size-variants/:id", sv.Update)
+			admin.DELETE("/size-variants/:id", sv.Delete)
+
+			admin.POST("/quantity-tiers", qt.Create)
+			admin.PUT("/quantity-tiers/:id", qt.Update)
+			admin.DELETE("/quantity-tiers/:id", qt.Delete)
+
+			admin.POST("/price-matrix", pm.Create)
+			admin.PUT("/price-matrix/:id", pm.Update)
+			admin.DELETE("/price-matrix/:id", pm.Delete)
+
+			admin.POST("/product-addons", pa.Create)
+			admin.PUT("/product-addons/:id", pa.Update)
+			admin.DELETE("/product-addons/:id", pa.Delete)
+
+			admin.POST("/product-images", pi.Create)
+			admin.PUT("/product-images/:id", pi.Update)
+			admin.DELETE("/product-images/:id", pi.Delete)
+
+			admin.POST("/extra-images", ei.Create)
+			admin.PUT("/extra-images/:id", ei.Update)
+			admin.DELETE("/extra-images/:id", ei.Delete)
+
+			admin.POST("/upload", up.Upload)
 		}
-
-		materialGroups := api.Group("/material-groups")
-		{
-			materialGroups.GET("", mg.GetAll)
-			materialGroups.POST("", mg.Create)
-			materialGroups.PUT("/:id", mg.Update)
-			materialGroups.DELETE("/:id", mg.Delete)
-		}
-
-
-
-		sizeVariants := api.Group("/size-variants")
-		{
-			sizeVariants.GET("", sv.GetAll)
-			sizeVariants.POST("", sv.Create)
-			sizeVariants.PUT("/:id", sv.Update)
-			sizeVariants.DELETE("/:id", sv.Delete)
-		}
-
-		quantityTiers := api.Group("/quantity-tiers")
-		{
-			quantityTiers.GET("", qt.GetAll)
-			quantityTiers.POST("", qt.Create)
-			quantityTiers.PUT("/:id", qt.Update)
-			quantityTiers.DELETE("/:id", qt.Delete)
-		}
-
-		priceMatrix := api.Group("/price-matrix")
-		{
-			priceMatrix.GET("", pm.GetAll)
-			priceMatrix.POST("", pm.Create)
-			priceMatrix.PUT("/:id", pm.Update)
-			priceMatrix.DELETE("/:id", pm.Delete)
-		}
-
-		productAddons := api.Group("/product-addons")
-		{
-			productAddons.GET("", pa.GetAll)
-			productAddons.POST("", pa.Create)
-			productAddons.PUT("/:id", pa.Update)
-			productAddons.DELETE("/:id", pa.Delete)
-		}
-
-		productImages := api.Group("/product-images")
-		{
-			productImages.GET("", pi.GetAll)
-			productImages.GET("/product/:product_id", pi.GetByProduct)
-			productImages.POST("", pi.Create)
-			productImages.PUT("/:id", pi.Update)
-			productImages.DELETE("/:id", pi.Delete)
-		}
-
-		extraImages := api.Group("/extra-images")
-		{
-			extraImages.GET("", ei.GetAll)
-			extraImages.POST("", ei.Create)
-			extraImages.PUT("/:id", ei.Update)
-			extraImages.DELETE("/:id", ei.Delete)
-		}
-
-		api.POST("/upload", up.Upload)
 	}
 }
+
