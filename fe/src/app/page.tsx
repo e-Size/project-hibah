@@ -15,11 +15,11 @@ import ViewportScaler from "../components/ui/ViewportScaler";
 export default function Home() {
   return (
     <ViewportScaler>
-      <main className="min-h-screen" style={{ margin: 0, padding: 0 }}>
+      <main className="min-h-[100dvh]" style={{ margin: 0, padding: 0 }}>
         <Navbar variant="transparent" />
 
         {/* ── Hero Section ── */}
-        <section className="relative overflow-hidden flex flex-col md:block" style={{ height: "calc(100vh / var(--page-scale, 1))" }}>
+        <section className="relative overflow-hidden flex flex-col md:block" style={{ height: "calc(100dvh / var(--page-scale, 1))" }}>
           <Image
             src="/bg herokeren.png"
             alt="Hero background"
@@ -33,7 +33,7 @@ export default function Home() {
           <div className="absolute inset-0 hidden md:block bg-linear-to-r from-white/65 via-white/35 to-transparent" />
 
           {/* Hero content */}
-          <div className="relative z-10 flex flex-col w-full md:max-w-5xl md:h-full items-start md:justify-start text-left pt-16 sm:pt-20 md:pt-40 pb-4 md:pb-20 px-6 sm:px-8 md:px-16 2xl:px-32">
+          <div className="relative z-10 flex flex-col shrink-0 w-full md:max-w-5xl md:h-full items-start md:justify-start text-left pt-16 sm:pt-20 md:pt-40 pb-3 md:pb-20 px-6 sm:px-8 md:px-16 2xl:px-32">
             <h1 className="font-(family-name:--font-red-rose) text-2xl md:text-3xl xl:text-6xl text-black leading-tight mb-3 md:mb-8 uppercase">
               Solusi Terpercaya{" "}
               <br className="hidden sm:block" />
@@ -89,7 +89,7 @@ export default function Home() {
           </div>
 
           {/* Decorative models — mobile only, in-flow below content */}
-          <div className="md:hidden flex-1 relative z-5 flex items-end justify-center">
+          <div className="md:hidden flex-1 min-h-0 relative z-5 flex items-end justify-center overflow-hidden">
             <div className="relative w-[52%] h-full">
               <Image
                 src="/gambarcowo.png"
