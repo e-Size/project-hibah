@@ -11,6 +11,7 @@ import { useProductDetail } from "../../../hooks/useProductDetail";
 type Props = {
   product: CategoryItem;
   onClose: () => void;
+  asPage?: boolean;
 };
 
 const DEFAULT_IMAGES = ["/baju.png"];
@@ -318,7 +319,7 @@ function AddonNotes({
   );
 }
 
-export default function ProductModal({ product, onClose }: Props) {
+export default function ProductModal({ product, onClose, asPage = false }: Props) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { detail, isLoading } = useProductDetail(product.id);
@@ -475,7 +476,7 @@ export default function ProductModal({ product, onClose }: Props) {
     .filter(([, items]) => items.length > 0)
     .sort(([typeA], [typeB]) => {
       if (!isJacket && !isCap && !isToteBag && !isTumbler) return 0;
-      const order = { tipe: 0, jenis: 0, bahan: 0, cetak: 1 };
+      const order = { tipe: 0, jenis: 0, bahan: 1, cetak: 2 };
       return (order[typeA as keyof typeof order] ?? 2) - (order[typeB as keyof typeof order] ?? 2);
     });
   const selectedExtraFee = getSelectedExtraFee(
@@ -599,27 +600,11 @@ export default function ProductModal({ product, onClose }: Props) {
       `Mohon info harga dan proses pemesanannya. Terima kasih!`
   );
 
-  if (!isMounted) return null;
+  if (!asPage && !isMounted) return null;
 
-  return createPortal(
-    <div
-      ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 sm:p-6 md:p-8"
-      onClick={onClose}
-    >
-      <div
-        className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-5xl flex-col gap-6 overflow-hidden rounded-2xl bg-[#fdf6f0] p-4 shadow-2xl sm:max-h-[calc(100dvh-3rem)] md:max-h-[78dvh] md:flex-row md:p-6"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <button
-          onClick={onClose}
-          aria-label="Tutup modal"
-          className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white text-xl leading-none text-gray-700 shadow hover:bg-gray-100"
-        >
-          x
-        </button>
-
-        <div className="flex flex-shrink-0 flex-col items-center gap-3 md:w-[45%]">
+  const sharedPanels = (
+    <>
+      <div className="flex flex-shrink-0 flex-col items-center gap-3 md:w-[45%]">
           <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl bg-[#7a6a30]">
             <Image src={images[imgIndex]} alt={product.name} fill className="object-contain p-6" />
             {images.length > 1 && (
@@ -819,6 +804,45 @@ export default function ProductModal({ product, onClose }: Props) {
             </div>
           </div>
         </div>
+    </>
+  );
+
+  if (asPage) {
+    return (
+      <div className="min-h-screen bg-[#fdf6f0] px-4 py-6 md:px-8 md:py-10">
+        <div className="mx-auto max-w-5xl">
+          <button
+            onClick={onClose}
+            className="mb-4 flex items-center gap-2 text-sm font-semibold text-[#9F7A04] hover:underline"
+          >
+            ← Kembali
+          </button>
+          <div className="flex flex-col gap-6 md:flex-row">
+            {sharedPanels}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return createPortal(
+    <div
+      ref={overlayRef}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 sm:p-6 md:p-8"
+      onClick={onClose}
+    >
+      <div
+        className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-5xl flex-col gap-6 overflow-hidden rounded-2xl bg-[#fdf6f0] p-4 shadow-2xl sm:max-h-[calc(100dvh-3rem)] md:max-h-[78dvh] md:flex-row md:p-6"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          aria-label="Tutup modal"
+          className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white text-xl leading-none text-gray-700 shadow hover:bg-gray-100"
+        >
+          x
+        </button>
+        {sharedPanels}
       </div>
     </div>,
     document.body

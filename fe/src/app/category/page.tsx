@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import FadeInUp from "../../components/animation/FadeInUp";
 import Footer from "../../components/layout/Footer";
 import Navbar from "../../components/layout/Navbar";
@@ -64,8 +65,25 @@ function SectionHeader({ title, showLogos }: { title: string; showLogos: boolean
 }
 
 export default function CategoryPage() {
+  const router = useRouter();
   const [selectedProduct, setSelectedProduct] = useState<CategoryItem | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
   const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  const handleProductClick = (cat: CategoryItem) => {
+    if (isMobile && cat.id) {
+      router.push(`/product/${cat.id}`);
+    } else {
+      setSelectedProduct(cat);
+    }
+  };
   const pakaianProducts = useProducts("pakaian");
   const merchProducts = useProducts("merch");
 
@@ -154,7 +172,7 @@ export default function CategoryPage() {
       {filteredPakaian.length > 0 && (
         <div id="section-pakaian" className="px-0 pt-12 md:pt-16 pb-4">
           <SectionHeader title="Pakaian" showLogos={!query} />
-          <CategoryGrid items={filteredPakaian} onProductClick={setSelectedProduct} />
+          <CategoryGrid items={filteredPakaian} onProductClick={handleProductClick} />
         </div>
       )}
 
@@ -162,7 +180,7 @@ export default function CategoryPage() {
       {filteredMerch.length > 0 && (
         <div className="px-0 pt-12 md:pt-16 pb-12 md:pb-16">
           <SectionHeader title="Merch" showLogos={!query} />
-          <CategoryGrid items={filteredMerch} onProductClick={setSelectedProduct} />
+          <CategoryGrid items={filteredMerch} onProductClick={handleProductClick} />
         </div>
       )}
 
