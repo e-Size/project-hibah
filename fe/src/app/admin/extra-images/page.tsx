@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
 import { extraImageService, uploadService } from "@/services/admin-service";
-import type { ExtraImage } from "@/types/admin";
+import type { ExtraImage, ExtraImageUpdateRequest } from "@/types/admin";
 import DeleteConfirm from "@/components/admin/DeleteConfirm";
 import { showToast } from "@/components/admin/Toast";
 
@@ -34,7 +34,7 @@ export default function ExtraImagesPage() {
       setLoading(true);
       const data = await extraImageService.getAll();
       setImages(data);
-    } catch (error) {
+    } catch {
       showToast("Gagal mengambil data gambar tambahan", "error");
     } finally {
       setLoading(false);
@@ -98,7 +98,7 @@ export default function ExtraImagesPage() {
 
       if (editingId) {
         // Update
-        const payload: any = { name, description };
+        const payload: ExtraImageUpdateRequest = { name, description };
         if (uploadedUrl) payload.image_url = uploadedUrl;
         await extraImageService.update(editingId, payload);
         showToast("Gambar berhasil diupdate", "success");
@@ -110,7 +110,7 @@ export default function ExtraImagesPage() {
       
       handleCloseModal();
       fetchImages();
-    } catch (error) {
+    } catch {
       showToast("Gagal menyimpan gambar", "error");
     } finally {
       setIsSaving(false);
@@ -124,7 +124,7 @@ export default function ExtraImagesPage() {
       showToast("Gambar berhasil dihapus", "success");
       setDeleteTarget(null);
       fetchImages();
-    } catch (error) {
+    } catch {
       showToast("Gagal menghapus gambar", "error");
     }
   };
@@ -253,10 +253,10 @@ export default function ExtraImagesPage() {
 
       {deleteTarget && (
         <DeleteConfirm
-          title="Hapus Gambar"
-          message={`Yakin ingin menghapus gambar "${deleteTarget.name}"? Data yang sudah dihapus tidak dapat dikembalikan.`}
+          isOpen={!!deleteTarget}
+          onClose={() => setDeleteTarget(null)}
           onConfirm={handleDelete}
-          onCancel={() => setDeleteTarget(null)}
+          itemName={`gambar "${deleteTarget.name}"`}
         />
       )}
     </div>
