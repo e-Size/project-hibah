@@ -1,0 +1,2 @@
+# Production env (contains secrets)
+.env.production

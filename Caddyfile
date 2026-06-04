@@ -1,0 +1,14 @@
+# =============================================
+# GANTI domainmu.com dengan domain kamu yang asli
+# Kalau belum punya domain, ganti dengan:
+#   :80 { ... }
+# untuk akses via IP tanpa HTTPS
+# =============================================
+
+domainmu.com {
+    reverse_proxy frontend:3000
+}
+
+api.domainmu.com {
+    reverse_proxy backend:8080
+}
