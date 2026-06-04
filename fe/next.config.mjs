@@ -3,6 +3,7 @@ const apiOrigin = new URL(apiBaseUrl).origin;
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone",
   images: {
     remotePatterns: [
       {

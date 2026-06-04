@@ -10,7 +10,7 @@ RUN apk --no-cache add ca-certificates tzdata
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 WORKDIR /app
 COPY --from=builder /app/main .
-RUN chown appuser:appgroup main
+RUN mkdir -p /app/uploads && chown -R appuser:appgroup /app
 USER appuser
 EXPOSE 8080
 CMD ["./main"]
