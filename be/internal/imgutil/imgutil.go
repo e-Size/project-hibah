@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/jpeg"
-	_ "image/png" // register PNG decoder
+	"image/png" // register PNG decoder and use for encode
 	"mime/multipart"
 	"os"
 
@@ -26,7 +26,7 @@ func CompressAndSave(fh *multipart.FileHeader, destDir string) (string, error) {
 	defer src.Close()
 
 	// Decode the image (supports JPEG, PNG, WebP via registered decoders)
-	img, _, err := image.Decode(src)
+	img, format, err := image.Decode(src)
 	if err != nil {
 		return "", fmt.Errorf("decode image: %w", err)
 	}
@@ -36,8 +36,13 @@ func CompressAndSave(fh *multipart.FileHeader, destDir string) (string, error) {
 		return "", fmt.Errorf("create dir: %w", err)
 	}
 
-	// Generate a unique .jpg filename
-	filename := uuid.New().String() + ".jpg"
+	// Determine output extension and encoder
+	ext := ".jpg"
+	if format == "png" {
+		ext = ".png"
+	}
+
+	filename := uuid.New().String() + ext
 	savePath := destDir + "/" + filename
 
 	// Create output file
@@ -47,10 +52,19 @@ func CompressAndSave(fh *multipart.FileHeader, destDir string) (string, error) {
 	}
 	defer out.Close()
 
-	// Encode as JPEG with quality setting (compress file size, keep original dimensions)
-	if err := jpeg.Encode(out, img, &jpeg.Options{Quality: jpegQual}); err != nil {
-		os.Remove(savePath)
-		return "", fmt.Errorf("encode jpeg: %w", err)
+	// Encode preserving format
+	if format == "png" {
+		// For PNG, we don't have quality settings in standard library, but we preserve transparency
+		if err := png.Encode(out, img); err != nil {
+			os.Remove(savePath)
+			return "", fmt.Errorf("encode png: %w", err)
+		}
+	} else {
+		// For JPEG, WebP, etc., encode as JPEG with quality setting
+		if err := jpeg.Encode(out, img, &jpeg.Options{Quality: jpegQual}); err != nil {
+			os.Remove(savePath)
+			return "", fmt.Errorf("encode jpeg: %w", err)
+		}
 	}
 
 	return filename, nil
