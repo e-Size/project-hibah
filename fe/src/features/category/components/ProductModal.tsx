@@ -384,6 +384,8 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
   }, []);
 
   useEffect(() => {
+    if (asPage) return;
+
     document.body.style.overflow = "hidden";
 
     const overlay = overlayRef.current;
@@ -642,7 +644,7 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
           )}
         </div>
 
-        <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1">
+        <div ref={scrollRef} className="min-h-0 flex-1 overflow-visible pr-1 md:overflow-y-auto md:overscroll-contain">
           <div className="flex flex-col gap-5">
             <div>
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#9F7A04]">
@@ -832,7 +834,7 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
       onClick={onClose}
     >
       <div
-        className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-5xl flex-col gap-6 overflow-hidden rounded-2xl bg-[#fdf6f0] p-4 shadow-2xl sm:max-h-[calc(100dvh-3rem)] md:max-h-[78dvh] md:flex-row md:p-6"
+        className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-5xl touch-pan-y flex-col gap-6 overflow-y-auto overscroll-contain rounded-2xl bg-[#fdf6f0] p-4 shadow-2xl sm:max-h-[calc(100dvh-3rem)] md:max-h-[78dvh] md:flex-row md:overflow-hidden md:p-6"
         onClick={(event) => event.stopPropagation()}
       >
         <button
