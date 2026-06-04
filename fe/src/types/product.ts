@@ -58,6 +58,7 @@ export type SizeVariant = {
 export type MaterialGroup = {
   id: string;
   name: string;
+  image_url?: string;
 };
 
 export type PriceMatrix = {

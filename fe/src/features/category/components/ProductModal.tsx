@@ -233,7 +233,7 @@ function SelectableAddonGroup({
                 }`}
               >
                 {item.image_url && (
-                  <span className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                  <span className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
                     <Image src={resolveAssetUrl(item.image_url) || "/baju.png"} alt={item.addon_name} fill className="object-cover" />
                   </span>
                 )}
@@ -433,6 +433,16 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
   const isKeychain = normalizedProductName === "key chain" || normalizedProductName === "pin";
   const isWristband = normalizedProductName === "wristband";
   const isTumbler = normalizedProductName === "tumbler";
+  const materialGroupImageMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    detail?.price_matrix.forEach((pm) => {
+      if (pm.material_group?.name && pm.material_group.image_url) {
+        map[pm.material_group.name] = pm.material_group.image_url;
+      }
+    });
+    return map;
+  }, [detail?.price_matrix]);
+
   const tShirtNotes = isTShirt
     ? [...(detail?.addons?.model ?? []), ...(detail?.addons?.ukuran ?? [])]
     : [];
@@ -463,18 +473,24 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
         !(isPdh && (type === "model" || type === "warna")) &&
         !(isIdLanyard && type === "cetak")
     )
-    .map(([type, items]) => [
-      type,
-      isJacket && type === "bahan"
-        ? items.filter((item) => jacketMaterialNames.has(item.addon_name))
-        : isTumbler && type === "cetak"
-          ? items.filter((item) => tumblerCetakNames.has(item.addon_name))
-        : isCap && type === "bahan"
-          ? items.filter((item) => capMaterialNames.has(item.addon_name))
+    .map(([type, items]) => {
+      let filtered =
+        isJacket && type === "bahan"
+          ? items.filter((item) => jacketMaterialNames.has(item.addon_name))
+          : isTumbler && type === "cetak"
+            ? items.filter((item) => tumblerCetakNames.has(item.addon_name))
+          : isCap && type === "bahan"
+            ? items.filter((item) => capMaterialNames.has(item.addon_name))
           : isIdLanyard && type === "paket"
             ? items.filter((item) => validIdLanyardPackages.has(item.addon_name))
-          : items,
-    ] as const)
+          : items;
+      filtered = filtered.map((item) =>
+        materialGroupImageMap[item.addon_name] && !item.image_url
+          ? { ...item, image_url: materialGroupImageMap[item.addon_name] }
+          : item
+      );
+      return [type, filtered] as const;
+    })
     .filter(([, items]) => items.length > 0)
     .sort(([typeA], [typeB]) => {
       if (!isJacket && !isCap && !isToteBag && !isTumbler) return 0;
