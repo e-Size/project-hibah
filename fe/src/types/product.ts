@@ -32,12 +32,34 @@ export type ProductAddon = {
   desc: string;
 };
 
+export type QuantityTier = {
+  id: string;
+  min_qty: number;
+  max_qty: number;
+  label: string;
+};
+
+export type SizeVariant = {
+  id: string;
+  code: string;
+  label: string;
+  variant_type: string;
+};
+
+export type PriceMatrix = {
+  id: string;
+  product_id: string;
+  price: number;
+  size_variant?: SizeVariant | null;
+  quantity_tier?: QuantityTier | null;
+};
+
 export type ProductDetail = {
   product: Product;
   images: ProductImage[];
   price_from: number;
   price_to: number;
-  price_matrix: unknown[];
+  price_matrix: PriceMatrix[];
   addons: Record<string, ProductAddon[]>;
 };
 

@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { resolveAssetUrl } from "../../../services/api";
-import type { CategoryItem, ProductAddon } from "../../../types/product";
-import { formatPrice, getPriceLabel } from "../../../utils/format";
+import type { CategoryItem, PriceMatrix, ProductAddon } from "../../../types/product";
+import { formatPrice, getPriceLabel, getPriceRangeLabel } from "../../../utils/format";
 import { useProductDetail } from "../../../hooks/useProductDetail";
 
 type Props = {
@@ -14,9 +15,28 @@ type Props = {
 
 const DEFAULT_IMAGES = ["/baju.png"];
 const WHATSAPP_NUMBER = "6281385774811";
+const JERSEY_COLLAR_ORDER = [
+  "V-Neck Biasa",
+  "V-Neck Variasi",
+  "V-Neck Variasi Kecil",
+  "V-Neck Madrid",
+  "V-Neck Tumpuk",
+  "O-Neck Biasa",
+  "O-Neck Variasi",
+  "Polo Biasa",
+  "Polo V-Neck Tumpuk",
+  "Polo V-Neck Biasa",
+  "Polo Resleting",
+  "Koko Biasa",
+  "Koko Resleting",
+  "Hoodie Biasa",
+  "Hoodie Resleting",
+  "Hoodie Stand Up-Collar",
+];
 
 function getAddonTitle(type: string) {
   const normalized = type.toLowerCase();
+  if (normalized === "model_kerah") return "Pilih Model Kerah";
   if (normalized.includes("tipe")) return "Pilih Tipe";
   if (normalized.includes("bahan") || normalized.includes("material")) return "Pilih Bahan";
   if (normalized.includes("warna") || normalized.includes("color")) return "Pilih Warna";
@@ -24,8 +44,41 @@ function getAddonTitle(type: string) {
   return `Pilih ${type.replaceAll("_", " ")}`;
 }
 
+function sortJerseyCollars(items: ProductAddon[]) {
+  return [...items].sort(
+    (a, b) => JERSEY_COLLAR_ORDER.indexOf(a.addon_name) - JERSEY_COLLAR_ORDER.indexOf(b.addon_name)
+  );
+}
+
 function getSelectedExtraFee(selectedAddons: Record<string, ProductAddon | undefined>) {
   return Object.values(selectedAddons).reduce((total, addon) => total + (addon?.extra_fee ?? 0), 0);
+}
+
+function shouldShowExtraFee(type: string, item: ProductAddon) {
+  return item.extra_fee > 0 && type !== "jersey_type" && item.addon_name.toLowerCase() !== "jersey stelan";
+}
+
+function isQuantityInTier(matrix: PriceMatrix, qty: number) {
+  const tier = matrix.quantity_tier;
+  return Boolean(tier && qty >= tier.min_qty && (tier.max_qty === 0 || qty <= tier.max_qty));
+}
+
+function getQuantityPriceRange(matrix: PriceMatrix[], qty: number) {
+  const prices = matrix
+    .filter((item) => isQuantityInTier(item, qty))
+    .map((item) => item.price);
+
+  if (prices.length === 0) return null;
+
+  return {
+    priceFrom: Math.min(...prices),
+    priceTo: Math.max(...prices),
+  };
+}
+
+function getJerseyPrice(matrix: PriceMatrix[], qty: number, type?: ProductAddon) {
+  const variantCode = type?.addon_name.toLowerCase().includes("stelan") ? "PREM" : "STD";
+  return matrix.find((item) => item.size_variant?.code === variantCode && isQuantityInTier(item, qty))?.price ?? 0;
 }
 
 function SelectableAddonGroup({
@@ -34,19 +87,21 @@ function SelectableAddonGroup({
   items,
   selected,
   onSelect,
+  onClear,
 }: {
   title: string;
   type: string;
   items: ProductAddon[];
   selected?: ProductAddon;
   onSelect: (type: string, addon: ProductAddon) => void;
+  onClear?: (type: string) => void;
 }) {
   if (items.length === 0) return null;
 
   const normalizedType = type.toLowerCase();
   const isColorGroup = normalizedType.includes("warna") || normalizedType.includes("color") || items.some((item) => item.color_hex);
   const isMaterialGroup =
-    normalizedType.includes("bahan") || normalizedType.includes("material") || items.some((item) => item.image_url || item.desc);
+    normalizedType.includes("bahan") || normalizedType.includes("material") || (normalizedType !== "model_kerah" && items.some((item) => item.image_url));
 
   if (isColorGroup) {
     return (
@@ -110,7 +165,9 @@ function SelectableAddonGroup({
                     )}
                   </span>
                   {item.desc && <span className="mt-1 block text-xs leading-relaxed text-gray-500">{item.desc}</span>}
-                  {item.extra_fee > 0 && <span className="mt-1 block text-xs font-semibold text-[#9F7A04]">+{formatPrice(item.extra_fee)}</span>}
+                  {shouldShowExtraFee(type, item) && (
+                    <span className="mt-1 block text-xs font-semibold text-[#9F7A04]">+{formatPrice(item.extra_fee)}</span>
+                  )}
                 </span>
               </button>
             );
@@ -124,6 +181,18 @@ function SelectableAddonGroup({
     <div>
       <p className="mb-2 font-bold text-gray-800">{title}</p>
       <div className="flex flex-wrap gap-2">
+        {onClear && (
+          <button
+            onClick={() => onClear(type)}
+            className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
+              !selected
+                ? "border-[#e8734a] bg-[#e8734a] text-white"
+                : "border-gray-300 text-gray-700 hover:border-[#e8734a]"
+            }`}
+          >
+            Tanpa Tambahan
+          </button>
+        )}
         {items.map((item) => (
           <button
             key={item.id}
@@ -135,7 +204,7 @@ function SelectableAddonGroup({
             }`}
           >
             {item.addon_name}
-            {item.extra_fee > 0 ? ` +${formatPrice(item.extra_fee)}` : ""}
+            {shouldShowExtraFee(type, item) ? ` +${formatPrice(item.extra_fee)}` : ""}
           </button>
         ))}
       </div>
@@ -147,6 +216,7 @@ export default function ProductModal({ product, onClose }: Props) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { detail, isLoading } = useProductDetail(product.id);
+  const [isMounted, setIsMounted] = useState(false);
   const [qty, setQty] = useState(24);
   const [imgIndex, setImgIndex] = useState(0);
   const [selectedAddons, setSelectedAddons] = useState<Record<string, ProductAddon | undefined>>({});
@@ -158,15 +228,26 @@ export default function ProductModal({ product, onClose }: Props) {
 
   useEffect(() => {
     if (!detail) return;
+    const isJersey = detail.product.name.trim().toLowerCase() === "jersey";
+    const jerseyModels = detail.addons?.model ?? [];
+    const defaultJerseyType = jerseyModels.find((item) => item.addon_name.toLowerCase().includes("atasan"));
+    const defaultJerseyCollar = detail.addons?.model_kerah?.find((item) => item.addon_name === "V-Neck Biasa");
+
     setQty(Math.max(detail.product.min_qty || 1, 1));
     setSelectedAddons(
       Object.fromEntries(
         Object.entries(detail.addons ?? {})
+          .filter(([type]) => !(isJersey && type === "model"))
           .filter(([, items]) => items.length > 0)
-          .map(([type, items]) => [type, items[0]])
+          .map(([type, items]) => [type, isJersey && type === "model_kerah" ? defaultJerseyCollar ?? items[0] : items[0]])
+          .concat(isJersey && defaultJerseyType ? [["jersey_type", defaultJerseyType]] : [])
       )
     );
   }, [detail]);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -203,10 +284,38 @@ export default function ProductModal({ product, onClose }: Props) {
     return DEFAULT_IMAGES;
   }, [detail?.images, product.image]);
 
-  const addonEntries = Object.entries(detail?.addons ?? {}).filter(([, items]) => items.length > 0);
-  const selectedExtraFee = getSelectedExtraFee(selectedAddons);
+  const isJersey = (displayProduct?.name ?? product.name).trim().toLowerCase() === "jersey";
+  const jerseyModels = detail?.addons?.model ?? [];
+  const jerseyTypes = jerseyModels.filter((item) => {
+    const name = item.addon_name.toLowerCase();
+    return name.includes("atasan") || name.includes("stelan");
+  });
+  const jerseyModelAddons = jerseyModels.filter((item) => !jerseyTypes.includes(item));
+  const addonEntries = Object.entries(detail?.addons ?? {}).filter(([type, items]) => items.length > 0 && !(isJersey && type === "model"));
+  const selectedExtraFee = getSelectedExtraFee(
+    Object.fromEntries(
+      Object.entries(selectedAddons).filter(
+        ([type, addon]) => type !== "jersey_type" && addon?.addon_name.toLowerCase() !== "jersey stelan"
+      )
+    )
+  );
+  const isTShirt = displayProduct?.name.trim().toLowerCase() === "t-shirt";
+  const quantityPriceRange = isTShirt && detail ? getQuantityPriceRange(detail.price_matrix, qty) : null;
+  const jerseyPrice = isJersey && detail ? getJerseyPrice(detail.price_matrix, qty, selectedAddons.jersey_type) : 0;
+  const basePriceLabel =
+    isTShirt && detail
+      ? quantityPriceRange
+        ? getPriceRangeLabel(quantityPriceRange.priceFrom, quantityPriceRange.priceTo)
+        : "Hubungi admin"
+      : isJersey
+        ? getPriceRangeLabel(jerseyPrice, jerseyPrice)
+      : getPriceLabel(detail);
   const selectedPriceLabel =
-    detail && detail.price_from > 0 && selectedExtraFee > 0 ? `${getPriceLabel(detail)} + ${formatPrice(selectedExtraFee)}` : getPriceLabel(detail);
+    isJersey && jerseyPrice > 0
+      ? formatPrice(jerseyPrice + selectedExtraFee)
+      : basePriceLabel !== "Hubungi admin" && selectedExtraFee > 0
+        ? `${basePriceLabel} + ${formatPrice(selectedExtraFee)}`
+        : basePriceLabel;
   const selectedLines = Object.entries(selectedAddons)
     .filter(([, addon]) => Boolean(addon))
     .map(([type, addon]) => `${type}: ${addon?.addon_name}`);
@@ -218,14 +327,16 @@ export default function ProductModal({ product, onClose }: Props) {
       `Mohon info harga dan proses pemesanannya. Terima kasih!`
   );
 
-  return (
+  if (!isMounted) return null;
+
+  return createPortal(
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 sm:p-6 md:p-8"
       onClick={onClose}
     >
       <div
-        className="relative flex max-h-[82vh] w-full max-w-5xl flex-col gap-6 rounded-2xl bg-[#fdf6f0] p-4 shadow-2xl md:flex-row md:p-6"
+        className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-5xl flex-col gap-6 overflow-hidden rounded-2xl bg-[#fdf6f0] p-4 shadow-2xl sm:max-h-[calc(100dvh-3rem)] md:max-h-[78dvh] md:flex-row md:p-6"
         onClick={(event) => event.stopPropagation()}
       >
         <button
@@ -290,11 +401,32 @@ export default function ProductModal({ product, onClose }: Props) {
                 key={type}
                 title={getAddonTitle(type)}
                 type={type}
-                items={items}
+                items={isJersey && type === "model_kerah" ? sortJerseyCollars(items) : items}
                 selected={selectedAddons[type]}
                 onSelect={(addonType, addon) => setSelectedAddons((current) => ({ ...current, [addonType]: addon }))}
               />
             ))}
+
+            {isJersey && jerseyTypes.length > 0 && (
+              <SelectableAddonGroup
+                title="Pilih Jenis Jersey"
+                type="jersey_type"
+                items={jerseyTypes}
+                selected={selectedAddons.jersey_type}
+                onSelect={(addonType, addon) => setSelectedAddons((current) => ({ ...current, [addonType]: addon }))}
+              />
+            )}
+
+            {isJersey && jerseyModelAddons.length > 0 && (
+              <SelectableAddonGroup
+                title="Pilih Model Tambahan"
+                type="model"
+                items={jerseyModelAddons}
+                selected={selectedAddons.model}
+                onSelect={(addonType, addon) => setSelectedAddons((current) => ({ ...current, [addonType]: addon }))}
+                onClear={(addonType) => setSelectedAddons((current) => ({ ...current, [addonType]: undefined }))}
+              />
+            )}
 
             <div>
               <p className="mb-2 font-bold text-gray-800">Jumlah Pesanan (pcs)</p>
@@ -337,6 +469,7 @@ export default function ProductModal({ product, onClose }: Props) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -8,11 +8,16 @@ export function formatPrice(value: number) {
   }).format(value);
 }
 
-export function getPriceLabel(detail: ProductDetail | null) {
-  if (!detail || detail.price_from <= 0) return "Hubungi admin";
-  if (detail.price_to > detail.price_from) {
-    return `${formatPrice(detail.price_from)} - ${formatPrice(detail.price_to)}`;
+export function getPriceRangeLabel(priceFrom: number, priceTo: number) {
+  if (priceFrom <= 0) return "Hubungi admin";
+  if (priceTo > priceFrom) {
+    return `${formatPrice(priceFrom)} - ${formatPrice(priceTo)}`;
   }
 
-  return formatPrice(detail.price_from);
+  return formatPrice(priceFrom);
+}
+
+export function getPriceLabel(detail: ProductDetail | null) {
+  if (!detail) return "Hubungi admin";
+  return getPriceRangeLabel(detail.price_from, detail.price_to);
 }
