@@ -182,6 +182,9 @@ export default function ExtraImagesPage() {
                 <div style={{ padding: "12px 16px" }}>
                   <div style={{ fontWeight: 500, fontSize: 14, color: "#1e293b" }}>{img.name}</div>
                   {img.description && <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>{img.description}</div>}
+                  <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 8, fontFamily: "monospace", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span>ID: {img.id}</span>
+                  </div>
                 </div>
               </div>
             ))}

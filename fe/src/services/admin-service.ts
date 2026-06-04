@@ -102,6 +102,8 @@ export const productAddonService = {
 
 // ─── Product Images ─────────────────────────────────────
 export const productImageService = {
+  getAll: () =>
+    apiGet<R<ProductImage[]>>("/product-images").then(r => r.data),
   getByProduct: (productId: string) =>
     apiGet<R<ProductImage[]>>(`/product-images/product/${productId}`).then(r => r.data),
   create: (productId: string, file: File, order: number) => {

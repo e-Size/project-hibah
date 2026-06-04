@@ -20,6 +20,15 @@ type Handler struct {
 	service *Service
 }
 
+func (h *Handler) GetAll(c *gin.Context) {
+	list, err := h.service.GetAll()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": list})
+}
+
 func (h *Handler) GetByProduct(c *gin.Context) {
 	list, err := h.service.FindByProduct(c.Param("product_id"))
 	if err != nil {

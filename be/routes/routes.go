@@ -90,6 +90,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 
 		productImages := api.Group("/product-images")
 		{
+			productImages.GET("", pi.GetAll)
 			productImages.GET("/product/:product_id", pi.GetByProduct)
 			productImages.POST("", pi.Create)
 			productImages.PUT("/:id", pi.Update)

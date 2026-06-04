@@ -14,6 +14,12 @@ func NewService(db *gorm.DB) *Service {
 	return &Service{db: db}
 }
 
+func (s *Service) GetAll() ([]models.ProductImage, error) {
+	var list []models.ProductImage
+	err := s.db.Order("product_id asc, \"order\" asc").Find(&list).Error
+	return list, err
+}
+
 func (s *Service) FindByProduct(productID string) ([]models.ProductImage, error) {
 	var list []models.ProductImage
 	err := s.db.Where("product_id = ?", productID).Order("\"order\" asc").Find(&list).Error
