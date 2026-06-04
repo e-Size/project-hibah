@@ -641,7 +641,7 @@ export default function EditorPage() {
 
   return (
     <ViewportScaler>
-    <div className="flex flex-col overflow-hidden bg-[#f5f0e8]" style={{ height: "calc(100vh / var(--page-scale, 1))" }}>
+    <div className="flex flex-col overflow-hidden bg-[#f5f0e8]" style={{ height: "calc(100dvh / var(--page-scale, 1))" }}>
 
       {/* ── Header ── */}
       <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-3 sm:px-6 flex-shrink-0 z-50">
@@ -703,10 +703,14 @@ export default function EditorPage() {
         {activeTab && activeTab !== "views" && (
           <div
             ref={sidebarScrollRef}
-            className="fixed lg:relative inset-x-0 bottom-14 lg:bottom-auto z-40 lg:z-auto bg-white border-t border-gray-200 lg:border-t-0 lg:border-r rounded-t-2xl lg:rounded-none shadow-2xl lg:shadow-none max-h-[55vh] lg:max-h-none overflow-y-auto lg:w-72 lg:flex-shrink-0"
+            className={`fixed lg:relative inset-x-0 bottom-14 lg:bottom-auto z-40 lg:z-auto bg-white border-t border-gray-200 lg:border-t-0 lg:border-r rounded-t-2xl lg:rounded-none shadow-2xl lg:shadow-none lg:w-72 lg:flex-shrink-0 ${
+              activeTab === "text"
+                ? "top-14 lg:top-auto flex flex-col overflow-hidden lg:max-h-none"
+                : "max-h-[55dvh] overflow-y-auto lg:max-h-none"
+            }`}
           >
             {/* Drag handle — mobile only */}
-            <div className="lg:hidden flex items-center justify-between px-4 pt-3 pb-2 sticky top-0 bg-white z-10 border-b border-gray-50">
+            <div className="lg:hidden flex items-center justify-between px-4 pt-3 pb-2 sticky top-0 bg-white z-20 border-b border-gray-50 shrink-0">
               <div className="w-8" />
               <div className="w-10 h-1 bg-gray-200 rounded-full" />
               <button
@@ -870,8 +874,8 @@ export default function EditorPage() {
 
             {/* TEXT */}
             {activeTab === "text" && (
-              <div className="flex flex-col lg:h-full">
-                <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-100 sticky top-0 bg-white z-10 lg:static">
+              <div className="flex flex-col flex-1 min-h-0 lg:h-full">
+                <div className="flex items-center gap-3 px-4 py-3 lg:py-4 border-b border-gray-100 bg-white shrink-0">
                   <div className="w-10 h-10 bg-[#e8734a] rounded-xl flex items-center justify-center shrink-0">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
                   </div>
@@ -881,7 +885,7 @@ export default function EditorPage() {
                   </div>
                 </div>
 
-                <div className="lg:flex-1 lg:overflow-y-auto px-4 py-3 flex flex-col gap-4">
+                <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-3 flex flex-col gap-4">
                   <div className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-6 h-6 bg-[#f5ede5] rounded-lg flex items-center justify-center">
@@ -992,7 +996,7 @@ export default function EditorPage() {
                   </div>
                 </div>
 
-                <div className="px-4 py-3 border-t border-gray-100 sticky bottom-0 bg-white lg:static">
+                <div className="px-4 py-3 border-t border-gray-100 bg-white shrink-0">
                   <button onClick={addCustomText}
                     className="w-full bg-[#8b6340] hover:bg-[#7a5535] text-white rounded-xl py-2.5 font-bold text-xs tracking-wide transition-colors flex items-center justify-center gap-1.5">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
