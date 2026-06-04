@@ -433,16 +433,6 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
   const isKeychain = normalizedProductName === "key chain" || normalizedProductName === "pin";
   const isWristband = normalizedProductName === "wristband";
   const isTumbler = normalizedProductName === "tumbler";
-  const materialGroupImageMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    detail?.price_matrix.forEach((pm) => {
-      if (pm.material_group?.name && pm.material_group.image_url) {
-        map[pm.material_group.name] = pm.material_group.image_url;
-      }
-    });
-    return map;
-  }, [detail?.price_matrix]);
-
   const tShirtNotes = isTShirt
     ? [...(detail?.addons?.model ?? []), ...(detail?.addons?.ukuran ?? [])]
     : [];
@@ -484,11 +474,6 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
           : isIdLanyard && type === "paket"
             ? items.filter((item) => validIdLanyardPackages.has(item.addon_name))
           : items;
-      filtered = filtered.map((item) =>
-        materialGroupImageMap[item.addon_name] && !item.image_url
-          ? { ...item, image_url: materialGroupImageMap[item.addon_name] }
-          : item
-      );
       return [type, filtered] as const;
     })
     .filter(([, items]) => items.length > 0)
