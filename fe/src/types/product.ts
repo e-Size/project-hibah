@@ -46,12 +46,18 @@ export type SizeVariant = {
   variant_type: string;
 };
 
+export type MaterialGroup = {
+  id: string;
+  name: string;
+};
+
 export type PriceMatrix = {
   id: string;
   product_id: string;
   price: number;
   size_variant?: SizeVariant | null;
   quantity_tier?: QuantityTier | null;
+  material_group?: MaterialGroup | null;
 };
 
 export type ProductDetail = {
