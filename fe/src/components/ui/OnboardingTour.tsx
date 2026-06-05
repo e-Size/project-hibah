@@ -89,10 +89,10 @@ export default function OnboardingTour({
 
     return createPortal(
       <>
-        <div className="fixed inset-0 z-[9998]" onClick={onClose} />
+        <div className="fixed inset-0 z-9998" onClick={onClose} />
 
         <div
-          className="fixed z-[9999] rounded-xl pointer-events-none"
+          className="fixed z-9999 rounded-xl pointer-events-none"
           style={{
             top: rect.top - 6,
             left: rect.left - 6,
@@ -104,7 +104,7 @@ export default function OnboardingTour({
         />
 
         <div
-          className="fixed z-[10000] bg-white rounded-2xl shadow-2xl p-5 border border-gray-100"
+          className="fixed z-10000 bg-white rounded-2xl shadow-2xl p-5 border border-gray-100"
           style={{
             top,
             left,
@@ -187,12 +187,12 @@ export default function OnboardingTour({
   return createPortal(
     <>
       <div
-        className="fixed inset-0 z-[9998]"
+        className="fixed inset-0 z-9998"
         onClick={onClose}
       />
 
       <div
-        className="fixed z-[9999] rounded-xl pointer-events-none"
+        className="fixed z-9999 rounded-xl pointer-events-none"
         style={{
           top: rect.top - 6,
           left: rect.left - 6,
@@ -204,7 +204,7 @@ export default function OnboardingTour({
       />
 
       <div
-        className="fixed z-[10000] bg-white rounded-2xl shadow-2xl p-6"
+        className="fixed z-10000 bg-white rounded-2xl shadow-2xl p-6"
         style={{ ...popupStyle, width: popupWidth }}
       >
         <div

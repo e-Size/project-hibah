@@ -136,75 +136,8 @@ export default function CategoryPage() {
         <Navbar variant="transparent" />
         {/* Hero Header */}
         <div
-          className={`relative flex flex-col items-center justify-center md:justify-start text-center px-4 sm:px-8 transition-all duration-300 ${query
-            ? "pt-20 pb-4"
-<<<<<<< Updated upstream
-            : "pt-20 min-h-screen md:min-h-0 md:pb-16"
-        }`}
-        style={{ background: "radial-gradient(ellipse at 50% 40%, #f5d0c0 0%, #fceee8 35%, #ffffff 70%)" }}
-      >
-
-        {/* Main content group */}
-        <div className="flex flex-col items-center w-full md:my-auto">
-          {/* Title + subtitle — sembunyikan di mobile saat search aktif */}
-          <div className={`flex flex-col items-center w-full md:contents transition-all duration-200 ${query ? "hidden" : ""}`}>
-            <div className="flex flex-col items-center gap-2 mb-6 mt-16 sm:mt-32 md:mt-40">
-              <span className="bg-[#7C6000] text-white font-bold text-2xl sm:text-4xl md:text-5xl px-4 sm:px-8 py-2">
-                Katalog Produk
-              </span>
-              <span className="bg-[#7C6000] text-white font-bold text-2xl sm:text-4xl md:text-5xl px-4 sm:px-8 py-2 w-full text-center">
-                Apparel &amp; Merchandise
-              </span>
-            </div>
-            <p className="text-[#7C6000] text-sm sm:text-base max-w-2xl mb-8 md:mb-10 leading-snug px-2">
-              Temukan berbagai pilihan pakaian dan merchandise custom untuk
-              kebutuhan event, organisasi, corporate, dan brand kamu.
-            </p>
-          </div>
-
-          {/* Search bar */}
-          <div className="flex items-center gap-2 border-2 border-[#7C6000] rounded-full px-4 sm:px-5 py-3 w-full max-w-sm sm:max-w-lg bg-white/80">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Cari produk..."
-              className="flex-1 bg-transparent outline-none text-base md:text-sm text-gray-700 placeholder-gray-400"
-            />
-            {query && (
-              <button onClick={() => setQuery("")} className="text-gray-400 hover:text-gray-600 text-lg leading-none">✕</button>
-            )}
-          </div>
-        </div>
-
-        {/* Chevron — pinned to bottom of viewport on mobile via mt-auto */}
-        <button
-          onClick={() => {
-            const target = document.getElementById("section-pakaian");
-            if (!target) return;
-            const start = window.scrollY;
-            const end = target.getBoundingClientRect().top + window.scrollY;
-            const duration = 1200;
-            const startTime = performance.now();
-            const ease = (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-            const step = (now: number) => {
-              const elapsed = now - startTime;
-              const progress = Math.min(elapsed / duration, 1);
-              window.scrollTo(0, start + (end - start) * ease(progress));
-              if (progress < 1) requestAnimationFrame(step);
-            };
-            requestAnimationFrame(step);
-          }}
-          className={`mt-auto mb-8 md:mb-0 md:mt-6 cursor-pointer transition-opacity duration-200 ${query ? "opacity-0 pointer-events-none" : "opacity-100"}`}
-=======
-            : "pt-0 min-h-screen md:pt-20 md:min-h-0 md:pb-16"
-            }`}
+          className={`relative flex flex-col items-center justify-center md:justify-start text-center px-4 sm:px-8 transition-all duration-300 ${query ? "pt-20 pb-4" : "pt-0 min-h-screen md:pt-20 md:min-h-0 md:pb-16"}`}
           style={{ background: "radial-gradient(ellipse at 50% 40%, #f5d0c0 0%, #fceee8 35%, #ffffff 70%)" }}
->>>>>>> Stashed changes
         >
 
           {/* Main content group */}

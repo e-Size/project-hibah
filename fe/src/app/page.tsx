@@ -19,7 +19,7 @@ export default function Home() {
         <Navbar variant="transparent" />
 
         {/* ── Hero Section ── */}
-        <section className="relative overflow-hidden flex flex-col justify-center h-[100svh] md:block md:justify-start md:h-[calc(100vh/var(--page-scale,1))]">
+        <section className="relative overflow-hidden flex flex-col justify-start h-[100svh] md:block md:justify-start md:h-[calc(100vh/var(--page-scale,1))]">
           <Image
             src="/bg herokeren.png"
             alt="Hero background"
@@ -33,7 +33,7 @@ export default function Home() {
           <div className="absolute inset-0 hidden md:block bg-linear-to-r from-white/65 via-white/35 to-transparent" />
 
           {/* Hero content */}
-          <div className="relative z-10 flex flex-col shrink-0 w-full md:max-w-5xl md:h-full items-center md:items-start md:justify-start text-center md:text-left pt-16 sm:pt-20 md:pt-40 pb-1 md:pb-20 px-6 sm:px-8 md:px-16 2xl:px-32 transform translate-y-20 md:translate-y-0">
+          <div className="relative z-10 flex flex-col shrink-0 w-full md:max-w-5xl md:h-full items-center md:items-start md:justify-start text-center md:text-left pt-[clamp(4rem,9svh,5rem)] md:pt-40 pb-0 md:pb-20 px-5 sm:px-8 md:px-16 2xl:px-32 transform translate-y-[clamp(1.75rem,7svh,4rem)] md:translate-y-0">
             <h1 className="font-(family-name:--font-red-rose) text-2xl sm:text-3xl md:text-3xl xl:text-6xl text-black leading-tight mb-3 md:mb-8 uppercase">
               Solusi Terpercaya{" "}
               <br className="hidden sm:block" />
@@ -41,7 +41,7 @@ export default function Home() {
               <br className="hidden sm:block" /> Promosi
             </h1>
 
-            <p className="font-(family-name:--font-red-rose) text-sm sm:text-base md:text-base text-black mb-6 md:mb-10 max-w-sm md:max-w-md">
+            <p className="font-(family-name:--font-red-rose) text-sm sm:text-base md:text-base text-black mb-4 md:mb-10 max-w-sm md:max-w-md">
               Custom apparel dan promotional products berkualitas tinggi untuk kebutuhan bisnis Anda
             </p>
 
@@ -64,7 +64,7 @@ export default function Home() {
             </div>
 
             {/* Contact info — inline below CTAs on mobile only */}
-            <div className="flex flex-wrap justify-center gap-4 mt-6 md:hidden font-(family-name:--font-poppins) font-normal text-sm text-gray-600">
+            <div className="flex flex-wrap justify-center gap-3 mt-4 md:hidden font-(family-name:--font-poppins) font-normal text-xs sm:text-sm text-gray-600">
               <div className="flex items-center gap-1.5">
                 <Image src="/Vector-2.png" alt="" width={20} height={20} className="h-4 w-auto" />
                 <span>esize.id</span>
@@ -80,7 +80,7 @@ export default function Home() {
             </div>
 
             {/* Scroll hint — mobile only */}
-            <div className="flex flex-col items-center gap-1 mt-8 md:hidden animate-bounce opacity-60">
+            <div className="flex flex-col items-center gap-1 mt-3 md:hidden animate-bounce opacity-60 max-[380px]:hidden max-h-[680px]:hidden">
               <span className="text-xs text-gray-500 font-light">Scroll ke bawah</span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
                 <polyline points="6 9 12 15 18 9" />
@@ -89,22 +89,22 @@ export default function Home() {
           </div>
 
           {/* Decorative models — mobile only, in-flow below content */}
-          <div className="md:hidden flex-1 min-h-[50vh] relative z-5 flex items-end justify-center overflow-visible">
-            <div className="relative w-[90%] h-full z-0">
+          <div className="md:hidden relative z-5 flex flex-1 min-h-0 -mt-[clamp(1.25rem,5svh,3rem)] max-[380px]:-mt-5 items-end justify-center overflow-visible">
+            <div className="relative h-[clamp(250px,calc(100svh-310px),470px)] w-[96vw] max-w-[430px] translate-x-[clamp(2.25rem,12vw,3rem)] z-0">
               <Image
                 src="/gambarcowo.png"
                 alt="Model pria"
                 fill
-                className="object-contain object-bottom"
+                className="object-cover object-bottom"
                 priority
               />
             </div>
-            <div className="relative w-[72%] h-full -translate-x-15 z-10 pointer-events-none">
+            <div className="relative h-[clamp(245px,calc(100svh-320px),455px)] w-[76vw] max-w-[340px] -translate-x-[clamp(3rem,16vw,4rem)] z-10 pointer-events-none">
               <Image
                 src="/gambarcewe.png"
                 alt="Model wanita"
                 fill
-                className="object-contain object-bottom"
+                className="object-cover object-bottom"
                 priority
               />
             </div>
@@ -154,7 +154,7 @@ export default function Home() {
         </section>
 
         {/* About Section */}
-        <section className="bg-[#f5f5f3] py-10 md:py-20 overflow-hidden">
+        <section className="bg-[#f5f5f3] pt-10 pb-9 md:py-20 overflow-hidden">
           <div className="w-full flex flex-col md:flex-row items-center gap-8 md:gap-16 px-5 sm:px-8 md:px-16">
             <FadeInLeft className="flex-1 w-full">
               <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-3">
@@ -199,7 +199,7 @@ export default function Home() {
                 terjaga, proses efisien, dan pengiriman tepat waktu dengan harga
                 bersahabat.
               </p>
-              <RippleLink href="/about" className="px-6 py-2 rounded-full text-white font-light">
+              <RippleLink href="/about" className="px-4 py-2 md:px-8 md:py-3 rounded-full text-white hover:bg-[#a07a0b] transition-colors text-xs md:text-sm font-medium text-center shadow-md">
                 Selengkapnya →
               </RippleLink>
             </FadeInLeft>
@@ -239,7 +239,7 @@ export default function Home() {
         </section>
 
         {/* Stats Section */}
-        <section className="bg-[#f5f5f3] py-8 px-5 sm:px-8 md:px-16">
+        <section className="bg-[#f5f5f3] -mt-px pt-8 pb-[31px] px-5 sm:px-8 md:mt-0 md:py-8 md:px-16">
           <div className="flex justify-center mb-4">
             <div className="flex items-center gap-1">
               <SpinIn><Image src="/Rectangle 17.png" alt="logo" width={80} height={80} className="rotate-180" /></SpinIn>
@@ -257,11 +257,7 @@ export default function Home() {
               { value: "6+", label: "Years Operating" },
             ].map((stat, i) => (
               <FadeInUp key={i}>
-<<<<<<< Updated upstream
-                <div className="relative px-6 py-5 bg-transparent md:px-10 md:py-6">
-=======
                 <div className="relative px-6 py-5 bg-transparent shadow-none rounded-none md:bg-transparent md:shadow-none md:rounded-none md:px-10 md:py-6">
->>>>>>> Stashed changes
                   <span className="absolute top-0 right-0 w-8 h-8 md:w-12 md:h-12 border-t-4 border-r-4 md:border-t-6 md:border-r-6 border-[#fae8e4]" />
                   <span className="absolute bottom-0 left-0 w-8 h-8 md:w-12 md:h-12 border-b-4 border-l-4 md:border-b-6 md:border-l-6 border-[#fae8e4]" />
                   <p className="text-2xl md:text-3xl font-bold text-[#927615]">{stat.value}</p>
@@ -288,7 +284,7 @@ export default function Home() {
         </section>
 
         {/* Kategori Produk Section */}
-        <section className="bg-[#f5f5f3] py-12 md:py-16 px-5 sm:px-8 md:px-16">
+        <section className="bg-[#f5f5f3] -mt-px py-12 md:mt-0 md:py-16 px-5 sm:px-8 md:px-16">
           <FadeInUp>
             <h2 className="text-2xl sm:text-3xl font-bold text-[#7C6000] mb-2">Kategori Produk</h2>
             <p className="text-sm text-gray-500 font-light mb-8 md:mb-10">Berbagai pilihan merchandise berkualitas untuk kebutuhan Anda</p>
@@ -297,7 +293,7 @@ export default function Home() {
             <CategoryCarousel />
           </div>
           <FadeInUp>
-            <RippleLink href="/category" className="px-8 py-2 rounded-full text-white font-light mx-0 sm:mx-6 shadow-lg">
+            <RippleLink href="/category" className="px-4 py-2 md:px-8 md:py-3 rounded-full text-white hover:bg-[#a07a0b] transition-colors text-xs md:text-sm font-medium text-center shadow-md">
               Lihat Semua Produk
             </RippleLink>
           </FadeInUp>
@@ -317,7 +313,7 @@ export default function Home() {
               href="https://wa.me/6281223344556"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-3 rounded-full text-white font-light shadow-lg"
+              className="px-4 py-2 md:px-8 md:py-3 rounded-full text-white hover:bg-[#a07a0b] transition-colors text-xs md:text-sm font-medium text-center shadow-md"
             >
               Pesan Sekarang
             </RippleLink>
