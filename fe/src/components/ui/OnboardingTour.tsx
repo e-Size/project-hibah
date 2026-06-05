@@ -19,9 +19,16 @@ export default function OnboardingTour({
   const [current, setCurrent] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [viewport, setViewport] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
-    setIsMobile(window.innerWidth < 640);
+    const updateViewport = () => {
+      setIsMobile(window.innerWidth < 640);
+      setViewport({ width: window.innerWidth, height: window.innerHeight });
+    };
+    updateViewport();
+    window.addEventListener("resize", updateViewport);
+    return () => window.removeEventListener("resize", updateViewport);
   }, []);
 
   useLayoutEffect(() => {
@@ -56,30 +63,58 @@ export default function OnboardingTour({
     else onClose();
   };
 
-  // Mobile: spotlight overlay + fixed bottom card for content
+  if (!rect) return null;
+
+  const gap = isMobile ? 14 : 24;
+  const margin = isMobile ? 12 : 16;
+  const popupWidth = isMobile ? Math.min(320, viewport.width - margin * 2) : 320;
+
   if (isMobile) {
+    const estimatedHeight = 220;
+    const enoughBelow = rect.bottom + gap + estimatedHeight <= viewport.height - margin;
+    const enoughAbove = rect.top - gap - estimatedHeight >= margin;
+    const placeBelow = enoughBelow || !enoughAbove;
+    const top = placeBelow
+      ? Math.min(rect.bottom + gap, viewport.height - margin - estimatedHeight)
+      : Math.max(margin, rect.top - gap - estimatedHeight);
+    const left = Math.min(
+      Math.max(rect.left + rect.width / 2 - popupWidth / 2, margin),
+      viewport.width - margin - popupWidth
+    );
+    const arrowLeft = Math.min(
+      Math.max(rect.left + rect.width / 2 - left - 6, 18),
+      popupWidth - 30
+    );
+
     return createPortal(
       <>
-        {/* Dark backdrop */}
         <div className="fixed inset-0 z-[9998]" onClick={onClose} />
 
-        {/* Spotlight highlight around target */}
-        {rect && (
+        <div
+          className="fixed z-[9999] rounded-xl pointer-events-none"
+          style={{
+            top: rect.top - 6,
+            left: rect.left - 6,
+            width: rect.width + 12,
+            height: rect.height + 12,
+            boxShadow:
+              "0 0 0 9999px rgba(0, 0, 0, 0.55), 0 0 0 3px rgba(255, 255, 255, 0.95), 0 0 24px 6px rgba(255, 255, 255, 0.45)",
+          }}
+        />
+
+        <div
+          className="fixed z-[10000] bg-white rounded-2xl shadow-2xl p-5 border border-gray-100"
+          style={{ top, left, width: popupWidth, maxHeight: `calc(100dvh - ${margin * 2}px)`, overflowY: "auto" }}
+        >
           <div
-            className="fixed z-[9999] rounded-xl pointer-events-none"
+            className="absolute w-3 h-3 bg-white"
             style={{
-              top: rect.top - 6,
-              left: rect.left - 6,
-              width: rect.width + 12,
-              height: rect.height + 12,
-              boxShadow:
-                "0 0 0 9999px rgba(0, 0, 0, 0.55), 0 0 0 3px rgba(255, 255, 255, 0.95), 0 0 24px 6px rgba(255, 255, 255, 0.45)",
+              left: arrowLeft,
+              top: placeBelow ? -6 : undefined,
+              bottom: placeBelow ? undefined : -6,
+              transform: "rotate(45deg)",
             }}
           />
-        )}
-
-        {/* Bottom card — always on screen */}
-        <div className="fixed bottom-16 left-3 right-3 z-[10000] bg-white rounded-2xl shadow-2xl p-5 border border-gray-100">
           <button
             onClick={onClose}
             aria-label="Tutup"
@@ -107,11 +142,7 @@ export default function OnboardingTour({
     );
   }
 
-  if (!rect) return null;
-
   const placement = step.placement ?? "right";
-  const gap = 24;
-  const popupWidth = 320;
 
   const popupStyle: React.CSSProperties = {};
   const arrowStyle: React.CSSProperties = {};

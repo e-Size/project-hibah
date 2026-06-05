@@ -35,6 +35,15 @@ type ProductTemplate = {
   views: { key: ViewType; label: string; src: string }[];
 };
 
+function getSheetViewportHeight() {
+  return window.visualViewport?.height ?? window.innerHeight;
+}
+
+function getMaxSheetHeight() {
+  const viewportHeight = getSheetViewportHeight();
+  return Math.min(88, ((viewportHeight - 112) / viewportHeight) * 100);
+}
+
 function getViewDefinition(description: string) {
   const normalized = description.trim().toLowerCase();
   return viewDefinitions.find((view) => view.descriptions.includes(normalized));
@@ -174,6 +183,7 @@ async function applyShirtColor(src: string, hexColor: string): Promise<string> {
 export default function EditorPage() {
   const [activeTab, setActiveTab] = useState<SidebarTab>(null);
   const [mobileSheetHeight, setMobileSheetHeight] = useState(55);
+  const [sheetViewportHeight, setSheetViewportHeight] = useState(0);
   const [isDraggingSheet, setIsDraggingSheet] = useState(false);
   const sheetDragRef = useRef<{ startY: number; startHeight: number } | null>(null);
   const [showChangeModal, setShowChangeModal] = useState(false);
@@ -188,9 +198,19 @@ export default function EditorPage() {
   const selectedProduct = productTemplates.find((product) => product.name === selectedProductName) ?? productTemplates[0];
   const views = useMemo(() => selectedProduct?.views ?? [], [selectedProduct]);
 
-  function getMaxSheetHeight() {
-    return Math.min(88, ((window.innerHeight - 112) / window.innerHeight) * 100);
-  }
+  useEffect(() => {
+    const updateSheetViewportHeight = () => {
+      setSheetViewportHeight(getSheetViewportHeight());
+    };
+
+    updateSheetViewportHeight();
+    window.addEventListener("resize", updateSheetViewportHeight);
+    window.visualViewport?.addEventListener("resize", updateSheetViewportHeight);
+    return () => {
+      window.removeEventListener("resize", updateSheetViewportHeight);
+      window.visualViewport?.removeEventListener("resize", updateSheetViewportHeight);
+    };
+  }, []);
 
   function onSheetHandlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
     if (window.innerWidth >= 1024) return;
@@ -201,7 +221,7 @@ export default function EditorPage() {
 
     function onMove(event: PointerEvent) {
       if (!sheetDragRef.current) return;
-      const deltaPercent = ((sheetDragRef.current.startY - event.clientY) / window.innerHeight) * 100;
+      const deltaPercent = ((sheetDragRef.current.startY - event.clientY) / getSheetViewportHeight()) * 100;
       setMobileSheetHeight(Math.max(18, Math.min(getMaxSheetHeight(), sheetDragRef.current.startHeight + deltaPercent)));
     }
 
@@ -690,6 +710,10 @@ export default function EditorPage() {
 
   const zone = printZone[selectedView];
   const viewElements = elements.filter(el => el.view === selectedView);
+  const mobileSheetMaxHeightPx = sheetViewportHeight > 0 ? Math.max(0, sheetViewportHeight - 112) : 0;
+  const mobileSheetHeightValue = sheetViewportHeight > 0
+    ? `${Math.min((sheetViewportHeight * mobileSheetHeight) / 100, mobileSheetMaxHeightPx)}px`
+    : `${mobileSheetHeight}vh`;
 
   return (
     <ViewportScaler>
@@ -755,12 +779,15 @@ export default function EditorPage() {
         {activeTab && activeTab !== "views" && (
           <div
             ref={sidebarScrollRef}
-            style={{ "--mobile-sheet-height": `${mobileSheetHeight}vh` } as React.CSSProperties}
+            style={{
+              "--mobile-sheet-height": mobileSheetHeightValue,
+              "--mobile-sheet-max-height": mobileSheetMaxHeightPx > 0 ? `${mobileSheetMaxHeightPx}px` : "calc(100dvh - 7rem)",
+            } as React.CSSProperties}
             className={`fixed lg:relative inset-x-0 bottom-14 lg:bottom-auto z-40 lg:z-auto bg-white border-t border-gray-200 lg:border-t-0 lg:border-r rounded-t-2xl lg:rounded-none shadow-2xl lg:shadow-none lg:w-72 lg:flex-shrink-0 ${
               activeTab === "text"
                 ? "flex flex-col overflow-hidden"
                 : "overflow-y-auto"
-            } h-[var(--mobile-sheet-height)] max-h-[calc(100vh-7rem)] lg:h-auto lg:max-h-none ${isDraggingSheet ? "" : "transition-[height] duration-300 ease-out"}`}
+            } h-[var(--mobile-sheet-height)] max-h-[var(--mobile-sheet-max-height)] lg:h-auto lg:max-h-none ${isDraggingSheet ? "" : "transition-[height] duration-300 ease-out"}`}
           >
             {/* Drag handle — mobile only */}
             <div
@@ -1313,7 +1340,7 @@ export default function EditorPage() {
       </div>{/* end body flex */}
 
       {/* ── Mobile bottom tab bar ── */}
-      <div className="lg:hidden h-14 bg-white border-t border-gray-200 flex items-center justify-around flex-shrink-0 relative z-30">
+      <div className="lg:hidden h-14 bg-white border-t border-gray-200 flex items-center justify-around flex-shrink-0 relative z-50">
         {sidebarItems.map(({ key, label, Icon }) => {
           const active = activeTab === key;
           return (
