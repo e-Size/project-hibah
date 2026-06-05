@@ -25,31 +25,17 @@ body {
   padding: 0;
 }
 
-/* Ripple hover effect */
+/* Ripple hover effect — animated via JS to avoid @property stripping in production */
 .ripple-link {
-  position: relative;
-  overflow: hidden;
+  --ripple-x: 50%;
+  --ripple-y: 50%;
+  --ripple-size: 0%;
+  background-image: radial-gradient(
+    circle at var(--ripple-x) var(--ripple-y),
+    #C39244 calc(var(--ripple-size) - 1%),
+    transparent var(--ripple-size)
+  );
   background-color: #DFAA14;
-}
-
-.ripple-link::before {
-  content: '';
-  position: absolute;
-  left: var(--ripple-x, 50%);
-  top: var(--ripple-y, 50%);
-  width: 250%;
-  padding-bottom: 250%;
-  border-radius: 50%;
-  background: #C39244;
-  transform: translate(-50%, -50%) scale(0);
-  transition: transform 0.7s ease, opacity 0.7s ease;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.ripple-link.ripple-active::before {
-  transform: translate(-50%, -50%) scale(1);
-  opacity: 1;
 }
 
 @keyframes spin-in {

@@ -6,9 +6,45 @@ export default function PageLoader({ children }: { children: React.ReactNode }) 
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
-    setReady(true);
-    const t = setTimeout(() => setHidden(true), 500);
-    return () => clearTimeout(t);
+    const MAX_WAIT = 8000;
+
+    function markReady() {
+      setReady(true);
+      setTimeout(() => setHidden(true), 500);
+    }
+
+    const timeout = setTimeout(markReady, MAX_WAIT);
+
+    const videos = Array.from(document.querySelectorAll<HTMLVideoElement>("video"));
+
+    if (videos.length === 0) {
+      clearTimeout(timeout);
+      markReady();
+      return;
+    }
+
+    let pending = videos.length;
+
+    function onReady() {
+      pending--;
+      if (pending <= 0) {
+        clearTimeout(timeout);
+        markReady();
+      }
+    }
+
+    videos.forEach((video) => {
+      if (video.readyState >= 3) {
+        onReady();
+      } else {
+        video.addEventListener("canplay", onReady, { once: true });
+      }
+    });
+
+    return () => {
+      clearTimeout(timeout);
+      videos.forEach((video) => video.removeEventListener("canplay", onReady));
+    };
   }, []);
 
   return (
