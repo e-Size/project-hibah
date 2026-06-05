@@ -810,6 +810,15 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
     </>
   );
 
+  const loadingPanel = (
+    <div className="flex flex-1 items-center justify-center py-16">
+      <div className="flex flex-col items-center gap-3">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#927615] border-t-transparent" />
+        <p className="text-sm text-gray-400">Memuat produk...</p>
+      </div>
+    </div>
+  );
+
   if (asPage) {
     return (
       <div className="min-h-screen bg-[#fdf6f0] px-4 py-6 md:px-8 md:py-10">
@@ -821,7 +830,7 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
             ← Kembali
           </button>
           <div className="flex flex-col gap-6 md:flex-row">
-            {sharedPanels}
+            {isLoading ? loadingPanel : sharedPanels}
           </div>
         </div>
       </div>
@@ -845,7 +854,7 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
         >
           x
         </button>
-        {sharedPanels}
+        {isLoading ? loadingPanel : sharedPanels}
       </div>
     </div>,
     document.body

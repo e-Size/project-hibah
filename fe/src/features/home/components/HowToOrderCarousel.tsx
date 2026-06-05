@@ -9,7 +9,7 @@ const steps = [
     num: "01",
     img: "/howto1.png",
     title: "Konsultasi Produk & Harga",
-    desc: "Informasikan kebutuhan anda untuk produk yang di inginkan, lalu customer service kami akan memberikan pilihan produk yang sesuai dan harga nya",
+    desc: "Informasikan kebutuhan produk Anda, CS kami akan bantu pilihkan produk dan harga yang sesuai.",
   },
   {
     num: "02",
@@ -117,7 +117,7 @@ export default function HowToOrderCarousel() {
           <button
             onClick={() => goTo(current - 1)}
             disabled={current === 0}
-            className="w-10 h-10 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center disabled:opacity-25 transition-opacity active:scale-95"
+            className="w-10 h-10 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center disabled:opacity-25 transition-opacity active:scale-95 text-gray-700"
             aria-label="Langkah sebelumnya"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -141,7 +141,7 @@ export default function HowToOrderCarousel() {
           <button
             onClick={() => goTo(current + 1)}
             disabled={current === steps.length - 1}
-            className="w-10 h-10 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center disabled:opacity-25 transition-opacity active:scale-95"
+            className="w-10 h-10 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center disabled:opacity-25 transition-opacity active:scale-95 text-gray-700"
             aria-label="Langkah berikutnya"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

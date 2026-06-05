@@ -19,7 +19,7 @@ export default function Home() {
         <Navbar variant="transparent" />
 
         {/* ── Hero Section ── */}
-        <section className="relative overflow-hidden flex flex-col h-screen md:block md:h-[calc(100vh/var(--page-scale,1))]">
+        <section className="relative overflow-hidden flex flex-col h-[100svh] md:block md:h-[calc(100vh/var(--page-scale,1))]">
           <Image
             src="/bg herokeren.png"
             alt="Hero background"
@@ -89,7 +89,7 @@ export default function Home() {
           </div>
 
           {/* Decorative models — mobile only, in-flow below content */}
-          <div className="md:hidden flex-1 min-h-0 relative z-5 flex items-end justify-center overflow-hidden">
+          <div className="md:hidden flex-1 min-h-[28vh] relative z-5 flex items-end justify-center overflow-hidden">
             <div className="relative w-[52%] h-full">
               <Image
                 src="/gambarcowo.png"
@@ -250,7 +250,7 @@ export default function Home() {
           <hr className="border-t-2 border-[#c0553a] mb-8 md:mb-12 mx-0 sm:mx-8 md:mx-32" />
 
           {/* Stats: stacked on mobile, 3-column on desktop */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-0 text-center mb-8 md:mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-10 gap-y-4 md:gap-16 text-center mb-8 md:mb-12 mx-0 md:mx-32">
             {[
               { value: "2.000+", label: "Universities" },
               { value: "20.000+", label: "Customer" },
@@ -293,7 +293,7 @@ export default function Home() {
             <CategoryCarousel />
           </div>
           <FadeInUp>
-            <RippleLink href="/about" className="px-8 py-2 rounded-full text-white font-light mx-0 sm:mx-6 shadow-lg">
+            <RippleLink href="/category" className="px-8 py-2 rounded-full text-white font-light mx-0 sm:mx-6 shadow-lg">
               Lihat Semua Produk
             </RippleLink>
           </FadeInUp>

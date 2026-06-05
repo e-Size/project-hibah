@@ -94,7 +94,7 @@ export default function Navbar({ variant = "default" }: { variant?: "default" | 
       {/* Mobile Dropdown Menu */}
       {menuRendered && (
         <div
-          className={`fixed top-14 left-0 right-0 z-50 md:hidden shadow-lg bg-[#F8F3E9]/90 backdrop-blur-md origin-top transition-all duration-300 ease-out ${
+          className={`fixed top-14 left-0 right-0 z-50 md:hidden shadow-lg bg-white/80 backdrop-blur-md origin-top transition-all duration-300 ease-out ${
             menuOpen ? "translate-y-0 scale-y-100 opacity-100" : "-translate-y-3 scale-y-95 opacity-0 pointer-events-none"
           }`}
         >

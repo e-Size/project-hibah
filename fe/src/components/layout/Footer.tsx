@@ -5,10 +5,10 @@ export default function Footer() {
   return (
     <footer className="bg-[#111827] text-white">
       <div className="px-4 sm:px-8 md:px-16 pt-16 pb-10">
-        <div className="flex flex-col md:flex-row gap-8 md:gap-12">
+        <div className="flex flex-col md:flex-row gap-8">
 
           {/* Logo + Tagline */}
-          <div className="flex-[1.5] flex flex-col gap-4">
+          <div className="flex-none flex flex-col gap-4 md:w-52">
             <div className="bg-white rounded-lg px-4 py-2 w-fit">
               <Image src="/logoesize.png" alt="Esize" width={140} height={50} className="h-8 w-auto" />
             </div>
@@ -20,7 +20,7 @@ export default function Footer() {
           {/* Links row on mobile, columns on md+ */}
           <div className="flex flex-row flex-wrap gap-8 md:contents">
             {/* Menu */}
-            <div className="flex-1 min-w-30 flex flex-col gap-4 md:flex-1">
+            <div className="flex-1 min-w-30 flex flex-col gap-4 md:flex-none md:ml-16">
               <h4 className="font-bold text-base">Menu</h4>
               <nav className="flex flex-col gap-3">
                 <Link href="/category" className="text-gray-400 text-sm hover:text-white transition-colors">Kategori Produk</Link>
@@ -30,19 +30,8 @@ export default function Footer() {
               </nav>
             </div>
 
-            {/* Produk Populer */}
-            <div className="flex-1 min-w-30 flex flex-col gap-4 md:flex-1">
-              <h4 className="font-bold text-base">Produk Populer</h4>
-              <nav className="flex flex-col gap-3">
-                <Link href="#" className="text-gray-400 text-sm hover:text-white transition-colors">T-Shirt Custom</Link>
-                <Link href="#" className="text-gray-400 text-sm hover:text-white transition-colors">Jacket &amp; Varsity</Link>
-                <Link href="#" className="text-gray-400 text-sm hover:text-white transition-colors">Hoodie &amp; Sweater</Link>
-                <Link href="#" className="text-gray-400 text-sm hover:text-white transition-colors">Baseball Cap</Link>
-              </nav>
-            </div>
-
             {/* Hubungi Kami */}
-            <div className="flex-1 min-w-40 flex flex-col gap-4 md:flex-1">
+            <div className="flex-1 min-w-40 flex flex-col gap-4 md:flex-none md:ml-auto">
               <h4 className="font-bold text-base">Hubungi Kami</h4>
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-3">
