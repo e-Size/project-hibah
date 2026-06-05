@@ -223,9 +223,9 @@ export default function JacketModal({ onClose }: Props) {
           </div>
 
           {/* Qty */}
-          <div>
+          <div className="max-w-full overflow-hidden">
             <p className="font-bold text-gray-800 mb-2">Jumlah Pesanan (pcs)<span className="text-red-500">*</span></p>
-            <div className="flex items-center gap-3">
+            <div className="flex w-full min-w-0 items-center gap-3">
               <button
                 onClick={() => setQty((q) => Math.max(24, q - 1))}
                 className="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center text-xl text-gray-600 hover:bg-gray-100"
@@ -234,10 +234,10 @@ export default function JacketModal({ onClose }: Props) {
               </button>
               <input
                 type="number"
-                value={qty}
+                value={qty === 0 ? "" : qty}
                 onChange={(e) => setQty(e.target.value === "" ? 0 : Number(e.target.value))}
                 onBlur={() => setQty((q) => (q < 24 ? 24 : q))}
-                className="flex-1 text-center border border-gray-300 rounded-lg py-2 text-gray-800 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className="min-w-0 flex-1 text-center border border-gray-300 rounded-lg py-2 text-gray-800 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
               <button
                 onClick={() => setQty((q) => q + 1)}
