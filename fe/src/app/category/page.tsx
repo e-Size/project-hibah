@@ -158,7 +158,7 @@ export default function CategoryPage() {
             </div>
             <p className="text-[#7C6000] text-sm sm:text-base max-w-2xl mb-8 md:mb-10 leading-snug px-2">
               Temukan berbagai pilihan pakaian dan merchandise custom untuk
-              kebutuhan event, organisasi, corporate, dan brand kamu
+              kebutuhan event, organisasi, corporate, dan brand kamu.
             </p>
           </div>
 

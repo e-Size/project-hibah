@@ -180,6 +180,70 @@ async function applyShirtColor(src: string, hexColor: string): Promise<string> {
   });
 }
 
+function getProductDescription(name: string): string {
+  const normalized = name.toLowerCase();
+  
+  if (normalized.includes("jersey")) {
+    return "Premium dry-fit material. Breathable, lightweight, and engineered perfectly for sports.";
+  }
+  if (normalized.includes("jacket") || normalized.includes("jaket")) {
+    return "High-quality outerwear fabric. Wind-resistant, durable, and highly comfortable for daily wear.";
+  }
+  if (normalized.includes("sweater")) {
+    return "Soft premium fleece material. Provides cozy warmth with a trendy, comfortable fit.";
+  }
+  if (normalized.includes("hoodie")) {
+    return "Thick premium cotton fleece. Features a comfortable hood and relaxed fit for street style.";
+  }
+  if (normalized.includes("t-shirt") || normalized.includes("tshirt") || normalized.includes("kaos")) {
+    return "100% Ring-spun cotton. Ultra-soft fabric, highly breathable, with superior everyday comfort.";
+  }
+  if (normalized.includes("kemeja") || normalized.includes("pdh")) {
+    return "Premium drill fabric. Neat stitching, durable structure, and highly professional look.";
+  }
+  if (normalized.includes("cap") || normalized.includes("bucket") || normalized.includes("topi")) {
+    return "Premium twill material with adjustable strap. Stylish sun protection for outdoor activities.";
+  }
+  if (normalized.includes("tote bag") || normalized.includes("totebag")) {
+    return "Durable heavy canvas material. Strong stitching, spacious, and perfectly eco-friendly.";
+  }
+  if (normalized.includes("id card") || normalized.includes("lanyard")) {
+    return "High-quality PVC card and durable polyester strap. Clean and crisp printing for professional identity.";
+  }
+  if (normalized.includes("payung")) {
+    return "Water-repellent premium nylon with a sturdy windproof frame. Reliable protection in any weather.";
+  }
+  if (normalized.includes("tumbler")) {
+    return "High-grade stainless steel. Double-wall vacuum insulation to keep your drinks hot or cold for hours.";
+  }
+  if (normalized.includes("mug")) {
+    return "Premium ceramic material. Heat-resistant, microwave safe, with a glossy elegant finish.";
+  }
+  if (normalized.includes("ballpoint") || normalized.includes("pulpen")) {
+    return "Ergonomic design with smooth ink flow. Professional look for corporate branding and daily writing.";
+  }
+  if (normalized.includes("sticker") || normalized.includes("stiker")) {
+    return "Premium vinyl material. High durability, water-resistant, and perfect for long-lasting branding.";
+  }
+  if (normalized.includes("key chain") || normalized.includes("gantungan")) {
+    return "High-quality crystal clear acrylic. Compact, durable, and a great accessory for merchandise.";
+  }
+  if (normalized.includes("pin") || normalized.includes("badge")) {
+    return "Sturdy plastic backing with a glossy top coat. Ideal for events, community groups, and branding.";
+  }
+  if (normalized.includes("notebook") || normalized.includes("buku")) {
+    return "Premium lined paper with a sturdy hardcover. Perfect for clean note-taking and professional layouts.";
+  }
+  if (normalized.includes("handfan") || normalized.includes("kipas")) {
+    return "Lightweight and durable plastic frame with high-quality printed art. Perfect for event merch.";
+  }
+  if (normalized.includes("wristband")) {
+    return "Soft, stretchable, and highly absorbent elastic material. Ideal for sports and promotional merchandise.";
+  }
+  
+  return "Handcrafted quality meets modern design. Tailored carefully using premium materials.";
+}
+
 export default function EditorPage() {
   const [activeTab, setActiveTab] = useState<SidebarTab>(null);
   const [mobileSheetHeight, setMobileSheetHeight] = useState(55);
@@ -817,7 +881,9 @@ export default function EditorPage() {
                     </div>
                     <div>
                       <h2 className="font-bold text-gray-900 text-sm leading-tight">{selectedProduct?.name ?? "Produk Custom"}</h2>
-                      <p className="text-gray-400 text-xs mt-1 leading-relaxed">Handcrafted quality meets modern design. Ring-spun cotton with superior comfort.</p>
+                      <p className="text-gray-400 text-xs mt-1 leading-relaxed">
+                          {getProductDescription(selectedProduct?.name ?? "")}
+                      </p>
                     </div>
                   </div>
                 </div>

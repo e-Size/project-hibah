@@ -7,6 +7,7 @@ import FadeInRight from "../../components/animation/FadeInRight";
 import FadeInLeft from "../../components/animation/FadeInLeft";
 import ViewportScaler from "../../components/ui/ViewportScaler";
 import TextType from "../../components/ui/TextType";
+import FadeInUp from "@/components/animation/FadeInUp";
 
 export default function AboutPage() {
   return (
@@ -80,7 +81,7 @@ export default function AboutPage() {
               <span className="bg-[#F8F3E9] px-1">jaket,</span>{" "}
               <span className="bg-[#F8F3E9] px-1">ID card,</span>{" "}
               <span className="bg-[#F8F3E9] px-1">tote bag,</span>{" "}
-              <span className="bg-[#F8F3E9] px-1">dan lainnya</span>.
+              <span className="bg-[#F8F3E9] px-1">dan lainnya.</span>
             </p>
           </div>
         </FadeInRight>

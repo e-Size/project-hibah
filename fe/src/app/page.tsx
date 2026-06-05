@@ -257,7 +257,7 @@ export default function Home() {
               { value: "6+", label: "Years Operating" },
             ].map((stat, i) => (
               <FadeInUp key={i}>
-                <div className="relative px-6 py-5 bg-white shadow-md rounded-xl md:bg-transparent md:shadow-none md:rounded-none md:px-10 md:py-6">
+                <div className="relative px-6 py-5 bg-transparent md:px-10 md:py-6">
                   <span className="absolute top-0 right-0 w-8 h-8 md:w-12 md:h-12 border-t-4 border-r-4 md:border-t-6 md:border-r-6 border-[#fae8e4]" />
                   <span className="absolute bottom-0 left-0 w-8 h-8 md:w-12 md:h-12 border-b-4 border-l-4 md:border-b-6 md:border-l-6 border-[#fae8e4]" />
                   <p className="text-2xl md:text-3xl font-bold text-[#927615]">{stat.value}</p>
