@@ -21,10 +21,12 @@ export default function RippleLink({ href, className = "", children, target, rel
     const start = performance.now();
 
     function tick(now: number) {
+      const target = ref.current;
+      if (!target) return;
       const t = Math.min((now - start) / duration, 1);
       const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
       const size = from + (to - from) * eased;
-      el.style.setProperty("--ripple-size", `${size}%`);
+      target.style.setProperty("--ripple-size", `${size}%`);
       if (t < 1) rafRef.current = requestAnimationFrame(tick);
     }
 
