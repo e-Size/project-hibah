@@ -25,19 +25,8 @@ export default function Footer() {
               <nav className="flex flex-col gap-3">
                 <Link href="/category" className="text-gray-400 text-sm hover:text-white transition-colors">Kategori Produk</Link>
                 <Link href="/about" className="text-gray-400 text-sm hover:text-white transition-colors">Tentang Kami</Link>
-                <Link href="/kontak" className="text-gray-400 text-sm hover:text-white transition-colors">Kontak</Link>
+                <a href="https://wa.me/6281234567890" target="_blank" rel="noopener noreferrer" className="text-gray-400 text-sm hover:text-white transition-colors">Kontak</a>
                 <Link href="/partnership" className="text-gray-400 text-sm hover:text-white transition-colors">Partnership</Link>
-              </nav>
-            </div>
-
-            {/* Produk Populer */}
-            <div className="flex-1 min-w-30 flex flex-col gap-4 md:flex-1">
-              <h4 className="font-bold text-base">Produk Populer</h4>
-              <nav className="flex flex-col gap-3">
-                <Link href="#" className="text-gray-400 text-sm hover:text-white transition-colors">T-Shirt Custom</Link>
-                <Link href="#" className="text-gray-400 text-sm hover:text-white transition-colors">Jacket &amp; Varsity</Link>
-                <Link href="#" className="text-gray-400 text-sm hover:text-white transition-colors">Hoodie &amp; Sweater</Link>
-                <Link href="#" className="text-gray-400 text-sm hover:text-white transition-colors">Baseball Cap</Link>
               </nav>
             </div>
 

@@ -189,11 +189,11 @@ export default function Home() {
               </div>
 
               <h3 className="text-base sm:text-2xl md:text-3xl font-bold text-[#7C6000] mb-4 md:mb-10 leading-tight">
-                Produksi Seragam &amp; Souvenir<br />
+                Produksi Seragam &amp; Suvenir<br />
                 Skala Besar Tanpa Ribet
               </h3>
               <p className="text-sm text-justify sm:text-lg md:text-xl text-[#7C6000] leading-relaxed mb-8">
-                Sejak 2019, Esize melayani produksi konveksi dan souvenir skala
+                Sejak 2019, Esize melayani produksi konveksi dan suvenir skala
                 besar ke seluruh Indonesia hingga luar negeri. Didukung fasilitas
                 modern dan tim berpengalaman, kami menghadirkan kualitas
                 terjaga, proses efisien, dan pengiriman tepat waktu dengan harga
@@ -293,7 +293,7 @@ export default function Home() {
             <CategoryCarousel />
           </div>
           <FadeInUp>
-            <RippleLink href="/about" className="px-8 py-2 rounded-full text-white font-light mx-0 sm:mx-6 shadow-lg">
+            <RippleLink href="/category" className="px-8 py-2 rounded-full text-white font-light mx-0 sm:mx-6 shadow-lg">
               Lihat Semua Produk
             </RippleLink>
           </FadeInUp>

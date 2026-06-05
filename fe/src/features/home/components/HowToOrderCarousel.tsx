@@ -10,6 +10,7 @@ const steps = [
     img: "/howto1.png",
     title: "Konsultasi Produk & Harga",
     desc: "Informasikan kebutuhan anda untuk produk yang di inginkan, lalu customer service kami akan memberikan pilihan produk yang sesuai dan harga nya",
+    mobileDesc: "Informasikan kebutuhan produk yang Anda inginkan, lalu CS kami akan memberikan pilihan produk yang sesuai dan harganya.",
   },
   {
     num: "02",
@@ -103,7 +104,7 @@ export default function HowToOrderCarousel() {
                   {/* Text block — flex-1 so all cards fill identically */}
                   <div className="px-5 pb-4 flex-1 overflow-hidden">
                     <p className="font-bold text-gray-800 mb-1.5 text-sm">{step.title}</p>
-                    <p className="text-gray-500 text-xs font-light leading-relaxed line-clamp-4">{step.desc}</p>
+                    <p className="text-gray-500 text-xs font-light leading-relaxed line-clamp-4">{step.mobileDesc ? step.mobileDesc : step.desc}</p>
                   </div>
                   <div className="h-1.5 bg-[#d4795e] rounded-b-2xl" />
                 </div>

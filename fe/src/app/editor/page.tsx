@@ -1055,7 +1055,7 @@ export default function EditorPage() {
 
                 <div className="px-4 py-3 border-t border-gray-100 bg-white shrink-0">
                   <button onClick={addCustomText}
-                    className="w-full bg-[#8b6340] hover:bg-[#7a5535] text-white rounded-xl py-2.5 font-bold text-xs tracking-wide transition-colors flex items-center justify-center gap-1.5">
+                    className="w-full bg-[#e8734a] hover:bg-[#d4623a] text-white rounded-xl py-2.5 font-bold text-xs tracking-wide transition-colors flex items-center justify-center gap-1.5">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
                     ADD TO DESIGN
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
