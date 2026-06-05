@@ -70,13 +70,14 @@ export default function OnboardingTour({
   const popupWidth = isMobile ? Math.min(320, viewport.width - margin * 2) : 320;
 
   if (isMobile) {
-    const estimatedHeight = 220;
-    const enoughBelow = rect.bottom + gap + estimatedHeight <= viewport.height - margin;
-    const enoughAbove = rect.top - gap - estimatedHeight >= margin;
-    const placeBelow = enoughBelow || !enoughAbove;
+    const availableAbove = Math.max(rect.top - margin, 0);
+    const availableBelow = Math.max(viewport.height - rect.bottom - margin, 0);
+    const popupHeight = 220;
+    const placeBelow = availableBelow >= popupHeight || availableBelow >= availableAbove;
+    const maxHeight = Math.max(placeBelow ? availableBelow : availableAbove, 140);
     const top = placeBelow
-      ? Math.min(rect.bottom + gap, viewport.height - margin - estimatedHeight)
-      : Math.max(margin, rect.top - gap - estimatedHeight);
+      ? rect.bottom + gap
+      : Math.max(margin, rect.top - gap - maxHeight);
     const left = Math.min(
       Math.max(rect.left + rect.width / 2 - popupWidth / 2, margin),
       viewport.width - margin - popupWidth
@@ -104,7 +105,13 @@ export default function OnboardingTour({
 
         <div
           className="fixed z-[10000] bg-white rounded-2xl shadow-2xl p-5 border border-gray-100"
-          style={{ top, left, width: popupWidth, maxHeight: `calc(100dvh - ${margin * 2}px)`, overflowY: "auto" }}
+          style={{
+            top,
+            left,
+            width: popupWidth,
+            maxHeight: Math.min(maxHeight, viewport.height - margin * 2),
+            overflowY: "auto",
+          }}
         >
           <div
             className="absolute w-3 h-3 bg-white"
