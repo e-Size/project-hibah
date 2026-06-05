@@ -14,31 +14,68 @@ import ProductModal from "../../features/category/components/ProductModal";
 import { labelColors } from "../../constants";
 import { matchesCategory } from "../../utils/search";
 
-function CategoryGrid({ items, onProductClick }: { items: CategoryItem[]; onProductClick: (product: CategoryItem) => void }) {
+function ProductCard({ cat, i, onProductClick }: { cat: CategoryItem; i: number; onProductClick: (product: CategoryItem) => void }) {
+  const [imgLoaded, setImgLoaded] = useState(false);
+  return (
+    <FadeInUp>
+      <div
+        className="relative pt-10 pr-4 group cursor-pointer"
+        onClick={() => onProductClick(cat)}
+      >
+        <div className="absolute top-0 right-0 bottom-10 left-4 rounded-xl bg-[#E6B5A8] rotate-6 origin-bottom-left transition-transform duration-300 -translate-x-4 translate-y-4 group-hover:translate-x-5 group-hover:-translate-y-5" />
+        <div className="absolute top-4 right-2 bottom-6 left-2 rounded-xl bg-[#93B1D8] rotate-3 origin-bottom-left transition-transform duration-300 -translate-x-3 translate-y-3 group-hover:translate-x-2 group-hover:-translate-y-2" />
+        <div className="relative border-4 border-[#927615] rounded-t-xl overflow-hidden bg-white transition-transform duration-300 group-hover:scale-105">
+          <div className="aspect-square relative overflow-hidden bg-gray-100">
+            {!imgLoaded && (
+              <div className="absolute inset-0 animate-pulse bg-gray-200" />
+            )}
+            <Image
+              src={cat.image || "/baju.png"}
+              alt={cat.name}
+              fill
+              className={`object-cover transition-opacity duration-300 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
+              onLoad={() => setImgLoaded(true)}
+            />
+          </div>
+          <div className="py-2 md:py-3 text-center" style={{ backgroundColor: cat.bg || labelColors[i % 4] }}>
+            {imgLoaded ? (
+              <p className="text-white font-bold text-sm md:text-lg">{cat.name}</p>
+            ) : (
+              <div className="mx-auto h-4 w-20 rounded animate-pulse bg-white/40" />
+            )}
+          </div>
+        </div>
+      </div>
+    </FadeInUp>
+  );
+}
+
+function CategoryGridSkeleton({ count }: { count: number }) {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-8 sm:gap-12 md:gap-20 px-4 sm:px-8 md:px-16">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="relative pt-10 pr-4">
+          <div className="absolute top-0 right-0 bottom-10 left-4 rounded-xl bg-[#E6B5A8]/50 rotate-6" />
+          <div className="absolute top-4 right-2 bottom-6 left-2 rounded-xl bg-[#93B1D8]/50 rotate-3" />
+          <div className="relative border-4 border-[#927615]/30 rounded-t-xl overflow-hidden">
+            <div className="aspect-square animate-pulse bg-gray-200" />
+            <div className="py-2 md:py-3 flex justify-center bg-gray-200 animate-pulse">
+              <div className="h-4 w-20 rounded bg-gray-300" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CategoryGrid({ items, isLoading, onProductClick }: { items: CategoryItem[]; isLoading: boolean; onProductClick: (product: CategoryItem) => void }) {
+  if (isLoading) return <CategoryGridSkeleton count={6} />;
   if (items.length === 0) return null;
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-8 sm:gap-12 md:gap-20 px-4 sm:px-8 md:px-16">
       {items.map((cat, i) => (
-        <FadeInUp key={cat.id ?? cat.name}>
-          <div
-            className="relative pt-10 pr-4 group cursor-pointer"
-            onClick={() => onProductClick(cat)}
-          >
-            {/* Salmon layer - furthest back, more tilted */}
-            <div className="absolute top-0 right-0 bottom-10 left-4 rounded-xl bg-[#E6B5A8] rotate-6 origin-bottom-left transition-transform duration-300 -translate-x-4 translate-y-4 group-hover:translate-x-5 group-hover:-translate-y-5" />
-            {/* Blue layer - middle, slightly tilted */}
-            <div className="absolute top-4 right-2 bottom-6 left-2 rounded-xl bg-[#93B1D8] rotate-3 origin-bottom-left transition-transform duration-300 -translate-x-3 translate-y-3 group-hover:translate-x-2 group-hover:-translate-y-2" />
-            {/* Main card */}
-            <div className="relative border-4 border-[#927615] rounded-t-xl overflow-hidden bg-white transition-transform duration-300 group-hover:scale-105">
-              <div className="aspect-square relative overflow-hidden">
-                <Image src={cat.image || "/baju.png"} alt={cat.name} fill className="object-cover" />
-              </div>
-              <div className="py-2 md:py-3 text-center" style={{ backgroundColor: cat.bg || labelColors[i % 4] }}>
-                <p className="text-white font-bold text-sm md:text-lg">{cat.name}</p>
-              </div>
-            </div>
-          </div>
-        </FadeInUp>
+        <ProductCard key={cat.id ?? cat.name} cat={cat} i={i} onProductClick={onProductClick} />
       ))}
     </div>
   );
@@ -136,7 +173,7 @@ export default function CategoryPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Cari produk..."
-              className="flex-1 bg-transparent outline-none text-sm text-gray-700 placeholder-gray-400"
+              className="flex-1 bg-transparent outline-none text-base md:text-sm text-gray-700 placeholder-gray-400"
             />
             {query && (
               <button onClick={() => setQuery("")} className="text-gray-400 hover:text-gray-600 text-lg leading-none">✕</button>
@@ -168,27 +205,23 @@ export default function CategoryPage() {
         </button>
       </div>
 
-      {!hasResults && (
+      {!hasResults && !isLoading && (
         <div className="text-center py-16 md:py-24 text-[#7C6000] text-lg md:text-xl px-4">
-          {isLoading ? "Memuat produk..." : <>Produk &quot;{query}&quot; tidak ditemukan.</>}
+          Produk &quot;{query}&quot; tidak ditemukan.
         </div>
       )}
 
       {/* Pakaian Section */}
-      {filteredPakaian.length > 0 && (
-        <div id="section-pakaian" className={`px-0 pb-4 ${query ? "pt-4" : "pt-12 md:pt-16"}`}>
-          <SectionHeader title="Pakaian" showLogos={!query} />
-          <CategoryGrid items={filteredPakaian} onProductClick={handleProductClick} />
-        </div>
-      )}
+      <div id="section-pakaian" className={`px-0 pb-4 ${query ? "pt-4" : "pt-12 md:pt-16"}`}>
+        <SectionHeader title="Pakaian" showLogos={!query} />
+        <CategoryGrid items={filteredPakaian} isLoading={isLoading} onProductClick={handleProductClick} />
+      </div>
 
       {/* Merch Section */}
-      {filteredMerch.length > 0 && (
-        <div className={`px-0 pb-12 md:pb-16 ${query ? "pt-4" : "pt-12 md:pt-16"}`}>
-          <SectionHeader title="Merch" showLogos={!query} />
-          <CategoryGrid items={filteredMerch} onProductClick={handleProductClick} />
-        </div>
-      )}
+      <div className={`px-0 pb-12 md:pb-16 ${query ? "pt-4" : "pt-12 md:pt-16"}`}>
+        <SectionHeader title="Merch" showLogos={!query} />
+        <CategoryGrid items={filteredMerch} isLoading={isLoading} onProductClick={handleProductClick} />
+      </div>
 
       <Footer />
     </main>
