@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import localFont from "next/font/local";
 import "../styles/globals.css";
 import Chatbot from "../features/chat/components/Chatbot";
+import RouteSkeletonProvider from "../components/ui/RouteSkeletonProvider";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -28,8 +29,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${poppins.variable} ${redRose.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-[var(--font-poppins)]">
-        {children}
-        <Chatbot />
+        <RouteSkeletonProvider>
+          {children}
+          <Chatbot />
+        </RouteSkeletonProvider>
       </body>
     </html>
   );
