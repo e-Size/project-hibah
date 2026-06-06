@@ -60,7 +60,13 @@ export default function LocationSection() {
             >
               {/* Photo — fixed width, stretches to card height */}
               <div className="relative w-14 md:w-60 md:h-60 shrink-0 self-stretch md:self-center overflow-hidden rounded-md">
-                <Image src={loc.photo} alt={loc.name} fill className="object-cover" />
+                <Image
+                  src={loc.photo}
+                  alt={loc.name}
+                  fill
+                  sizes="(max-width: 767px) 56px, 240px"
+                  className="object-cover"
+                />
               </div>
 
               {/* Info */}
@@ -129,7 +135,13 @@ export default function LocationSection() {
             {/* Photo + button */}
             <div className="flex flex-col gap-4 sm:gap-5 justify-center items-center flex-1 min-w-0">
               <div className="relative w-full h-52 sm:h-72 md:h-96 rounded-2xl overflow-hidden">
-                <Image src={activeLocation.photo} alt={activeLocation.name} fill className="object-cover" />
+                <Image
+                  src={activeLocation.photo}
+                  alt={activeLocation.name}
+                  fill
+                  sizes="(max-width: 639px) calc(100vw - 72px), 40vw"
+                  className="object-cover"
+                />
               </div>
               <a
                 href={activeLocation.mapLink}

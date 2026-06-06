@@ -58,7 +58,7 @@ export default function CategoryCarousel() {
               className="flex-none relative transition-transform duration-300 hover:scale-105 hover:shadow-lg hover:z-10"
               style={{ width: cardWidth, marginRight: gapPx }}
             >
-              <div className="border-[3px] border-[#927615] rounded-t-xl overflow-hidden bg-white">
+              <div className="border-[3px] border-[#927615] rounded-xl overflow-hidden bg-white">
                 <div className="aspect-square relative overflow-hidden">
                   <Image src={cat.image || "/baju.png"} alt={cat.name} fill className="object-cover" />
                 </div>

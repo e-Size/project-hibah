@@ -14,11 +14,15 @@ export default function AboutPage() {
     <main className="min-h-screen">
       <Navbar variant="light" />
       {/* Hero Section — landscape on mobile, full-height on desktop */}
-      <section className="relative w-full aspect-video md:hidden">
-        <Image src="/AboutSec.png" alt="About Esize" fill className="object-contain" priority />
-      </section>
-      <section className="relative w-full hidden md:block" style={{ height: "calc(100vh / var(--page-scale, 1))" }}>
-        <Image src="/AboutSec.png" alt="About Esize" fill className="object-cover object-center" priority />
+      <section className="relative w-full aspect-video md:aspect-auto md:h-[calc(100vh/var(--page-scale,1))]">
+        <Image
+          src="/AboutSec.png"
+          alt="About Esize"
+          fill
+          sizes="100vw"
+          className="object-contain md:object-cover md:object-center"
+          priority
+        />
       </section>
 
       {/* About Section */}
@@ -55,6 +59,7 @@ export default function AboutPage() {
               src="/about1.png"
               alt="Fasilitas Produksi"
               fill
+              sizes="50vw"
               className="object-cover"
             />
           </div>
@@ -89,6 +94,7 @@ export default function AboutPage() {
               src="/about2.png"
               alt="Komitmen Kualitas"
               fill
+              sizes="50vw"
               className="object-cover"
             />
           </div>

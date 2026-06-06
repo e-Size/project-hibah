@@ -232,7 +232,13 @@ function SelectableAddonGroup({
               >
                 {item.image_url && (
                   <span className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
-                    <Image src={resolveAssetUrl(item.image_url) || "/baju.png"} alt={item.addon_name} fill className="object-cover" />
+                    <Image
+                      src={resolveAssetUrl(item.image_url) || "/baju.png"}
+                      alt={item.addon_name}
+                      fill
+                      sizes="40px"
+                      className="object-cover"
+                    />
                   </span>
                 )}
                 <span className="min-w-0 flex-1">
@@ -606,7 +612,14 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
     <>
       <div className="flex flex-shrink-0 flex-col items-center gap-3 md:w-[45%]">
         <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl bg-[#7a6a30]">
-          <Image src={images[imgIndex]} alt={product.name} fill className="object-contain p-6" />
+          <Image
+            src={images[imgIndex]}
+            alt={product.name}
+            fill
+            sizes="(max-width: 767px) calc(100vw - 32px), 45vw"
+            loading="eager"
+            className="object-contain p-6"
+          />
           {images.length > 1 && (
             <>
               <button
@@ -634,7 +647,7 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
                 className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border-2 bg-[#7a6a30] ${index === imgIndex ? "border-[#927615]" : "border-transparent"
                   }`}
               >
-                <Image src={src} alt="" fill className="object-contain p-1" />
+                <Image src={src} alt="" fill sizes="64px" className="object-contain p-1" />
               </button>
             ))}
           </div>
