@@ -41,6 +41,22 @@ function getProductThumbnail(product: ProductTemplate) {
   return product.views.find((view) => view.key === "front") ?? product.views[0];
 }
 
+function normalizeProductName(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function findCatalogProduct(products: Product[], templateName: string) {
+  const normalizedTemplate = normalizeProductName(templateName);
+  const exact = products.find((product) => normalizeProductName(product.name) === normalizedTemplate);
+  if (exact) return exact;
+
+  const templateTokens = normalizedTemplate.split(" ").filter((token) => token.length > 1);
+  return products.find((product) => {
+    const productTokens = new Set(normalizeProductName(product.name).split(" "));
+    return templateTokens.length > 0 && templateTokens.every((token) => productTokens.has(token));
+  });
+}
+
 function getOptimizedAssetUrl(src: string, width: number, quality = 75) {
   if (src.startsWith("blob:") || src.startsWith("data:")) return src;
   return `/_next/image?url=${encodeURIComponent(src)}&w=${width}&q=${quality}`;
@@ -362,9 +378,7 @@ export default function EditorPage() {
   }, []);
 
   useEffect(() => {
-    const product = catalogProducts.find(
-      (item) => item.name.trim().toLowerCase() === selectedProductName.trim().toLowerCase()
-    );
+    const product = findCatalogProduct(catalogProducts, selectedProductName);
     if (!product) {
       setSizeGuideUrl(null);
       return;
