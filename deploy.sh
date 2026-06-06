@@ -10,11 +10,13 @@ git pull origin main
 
 echo "🔨 Building & restarting containers..."
 docker compose -f docker-compose.be.yml --env-file .env.production up -d --build
+docker compose -f docker-compose.fe.yml --env-file .env.production up -d --build
 
 echo "🧹 Cleaning up old images..."
 docker image prune -f
 
 echo "📊 Container status:"
 docker compose -f docker-compose.be.yml ps
+docker compose -f docker-compose.fe.yml ps
 
 echo "✅ Deploy complete!"
