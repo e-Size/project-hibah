@@ -7,7 +7,7 @@ import { showToast } from "@/components/admin/Toast";
 import { productAddonService, productService, uploadService } from "@/services/admin-service";
 import type { ProductAddon, ProductListItem } from "@/types/admin";
 
-const API_HOST = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "https://api.esize.id";
+const API_HOST = process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/?$/, "") || "https://api.esize.id";
 const addonTypes = ["ukuran", "tipe", "bahan", "warna"];
 
 export default function ProductAddonsPage() {

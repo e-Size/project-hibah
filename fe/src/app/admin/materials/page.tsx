@@ -7,7 +7,7 @@ import { showToast } from "@/components/admin/Toast";
 import { materialGroupService, uploadService } from "@/services/admin-service";
 import type { MaterialGroup, MaterialGroupUpdateRequest } from "@/types/admin";
 
-const API_HOST = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "https://api.esize.id";
+const API_HOST = process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/?$/, "") || "https://api.esize.id";
 
 export default function MaterialGroupsPage() {
   const [data, setData] = useState<MaterialGroup[]>([]);

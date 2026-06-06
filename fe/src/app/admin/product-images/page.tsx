@@ -6,7 +6,7 @@ import { showToast } from "@/components/admin/Toast";
 import { productImageService, productService } from "@/services/admin-service";
 import type { ProductImage, ProductListItem } from "@/types/admin";
 
-const API_HOST = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "https://api.esize.id";
+const API_HOST = process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/?$/, "") || "https://api.esize.id";
 
 export default function ProductImagesPage() {
   const [images, setImages] = useState<ProductImage[]>([]);

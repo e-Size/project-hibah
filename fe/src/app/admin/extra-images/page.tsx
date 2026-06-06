@@ -6,7 +6,7 @@ import Modal from "@/components/admin/Modal";
 import DeleteConfirm from "@/components/admin/DeleteConfirm";
 import { showToast } from "@/components/admin/Toast";
 
-const API_HOST = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "https://api.esize.id";
+const API_HOST = process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/?$/, "") || "https://api.esize.id";
 
 export default function ExtraImagesPage() {
   const [images, setImages] = useState<ExtraImage[]>([]);
