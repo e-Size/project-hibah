@@ -40,6 +40,15 @@ const menuItems = [
         ),
       },
       {
+        label: "Size Guide",
+        href: "/admin/size-guides",
+        icon: (
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M2 4.75A2.75 2.75 0 014.75 2h10.5A2.75 2.75 0 0118 4.75v10.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25V4.75zM6.5 5.5a.75.75 0 00-1.5 0v1.25H4.5a.75.75 0 000 1.5H5V10H4.5a.75.75 0 000 1.5H5v1.75H4.5a.75.75 0 000 1.5H5v.25a.75.75 0 001.5 0v-.25H8a.75.75 0 000-1.5H6.5V11.5H8A.75.75 0 008 10H6.5V8.25H8a.75.75 0 000-1.5H6.5V5.5zM10 6.25a.75.75 0 01.75-.75h4a.75.75 0 010 1.5h-4a.75.75 0 01-.75-.75zm0 3.75a.75.75 0 01.75-.75h4a.75.75 0 010 1.5h-4A.75.75 0 0110 10zm.75 3a.75.75 0 000 1.5h4a.75.75 0 000-1.5h-4z" clipRule="evenodd" />
+          </svg>
+        ),
+      },
+      {
         label: "Product Addons",
         href: "/admin/product-addons",
         icon: (

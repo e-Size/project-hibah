@@ -4,11 +4,12 @@ import (
 	"be/internal/auth"
 	"be/internal/extra_image"
 	materialgroup "be/internal/material_group"
+	pricematrix "be/internal/price_matrix"
 	"be/internal/product"
 	productaddon "be/internal/product_addon"
 	productimage "be/internal/product_image"
-	pricematrix "be/internal/price_matrix"
 	quantitytier "be/internal/quantity_tier"
+	sizeguide "be/internal/size_guide"
 	sizevariant "be/internal/size_variant"
 	"be/internal/upload"
 
@@ -26,6 +27,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	pa := productaddon.Wire(db)
 	pi := productimage.Wire(db)
 	ei := extra_image.Wire(db)
+	sg := sizeguide.Wire(db)
 	up := upload.Wire()
 
 	api := r.Group("/api")
@@ -46,6 +48,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 		api.GET("/product-images", pi.GetAll)
 		api.GET("/product-images/product/:product_id", pi.GetByProduct)
 		api.GET("/extra-images", ei.GetAll)
+		api.GET("/size-guides/product/:product_id", sg.GetByProduct)
 
 		// ─── Protected (admin) endpoints ────────────────
 		admin := api.Group("")
@@ -83,8 +86,12 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 			admin.PUT("/extra-images/:id", ei.Update)
 			admin.DELETE("/extra-images/:id", ei.Delete)
 
+			admin.GET("/size-guides", sg.GetAll)
+			admin.POST("/size-guides", sg.Create)
+			admin.PUT("/size-guides/:id", sg.Update)
+			admin.DELETE("/size-guides/:id", sg.Delete)
+
 			admin.POST("/upload", up.Upload)
 		}
 	}
 }
-

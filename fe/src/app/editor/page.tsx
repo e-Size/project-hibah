@@ -7,8 +7,8 @@ import FontPicker from "react-fontpicker-ts";
 import "react-fontpicker-ts/dist/index.css";
 import OnboardingTour, { type TourStep } from "@/components/ui/OnboardingTour";
 import ViewportScaler from "@/components/ui/ViewportScaler";
-import { getExtraImages, resolveAssetUrl } from "@/services/api";
-import type { ExtraImage } from "@/types/product";
+import { getExtraImages, getProducts, getSizeGuideByProduct, resolveAssetUrl } from "@/services/api";
+import type { ExtraImage, Product } from "@/types/product";
 
 type SidebarTab = "product" | "upload" | "text" | "layers" | "views" | null;
 type ViewType = "front" | "back" | "left" | "right";
@@ -263,7 +263,10 @@ export default function EditorPage() {
   const sheetDragRef = useRef<{ startY: number; startHeight: number } | null>(null);
   const [showChangeModal, setShowChangeModal] = useState(false);
   const [productTemplates, setProductTemplates] = useState<ProductTemplate[]>([]);
+  const [catalogProducts, setCatalogProducts] = useState<Product[]>([]);
   const [selectedProductName, setSelectedProductName] = useState("");
+  const [sizeGuideUrl, setSizeGuideUrl] = useState<string | null>(null);
+  const [showSizeGuide, setShowSizeGuide] = useState(false);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [productLoadError, setProductLoadError] = useState(false);
 
@@ -336,12 +339,13 @@ export default function EditorPage() {
   useEffect(() => {
     let ignore = false;
 
-    getExtraImages()
-      .then((images) => {
+    Promise.all([getExtraImages(), getProducts()])
+      .then(([images, products]) => {
         if (ignore) return;
         const templates = buildProductTemplates(images);
         const defaultProduct = templates.find((product) => product.name.toLowerCase() === "jersey") ?? templates[0];
         setProductTemplates(templates);
+        setCatalogProducts(products);
         setSelectedProductName((current) => current || defaultProduct?.name || "");
         setProductLoadError(false);
       })
@@ -356,6 +360,28 @@ export default function EditorPage() {
       ignore = true;
     };
   }, []);
+
+  useEffect(() => {
+    const product = catalogProducts.find(
+      (item) => item.name.trim().toLowerCase() === selectedProductName.trim().toLowerCase()
+    );
+    if (!product) {
+      setSizeGuideUrl(null);
+      return;
+    }
+
+    let ignore = false;
+    getSizeGuideByProduct(product.id)
+      .then((guide) => {
+        if (!ignore) setSizeGuideUrl(resolveAssetUrl(guide?.image_url) ?? null);
+      })
+      .catch(() => {
+        if (!ignore) setSizeGuideUrl(null);
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [catalogProducts, selectedProductName]);
 
   useEffect(() => {
     if (views.length > 0 && !views.some((view) => view.key === selectedView)) {
@@ -1075,7 +1101,14 @@ export default function EditorPage() {
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e8734a" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /></svg>
                       <span className="font-bold text-gray-800 text-sm tracking-wide">SIZE</span>
                     </div>
-                    <button className="text-xs text-[#e8734a] font-medium hover:underline">Size Guide →</button>
+                    <button
+                      type="button"
+                      onClick={() => setShowSizeGuide(true)}
+                      disabled={!sizeGuideUrl}
+                      className="text-xs text-[#e8734a] font-medium hover:underline disabled:cursor-not-allowed disabled:text-gray-300 disabled:no-underline"
+                    >
+                      Size Guide →
+                    </button>
                   </div>
                   <p className="text-sm text-gray-700 font-medium">{sizes.join("-")}</p>
                 </div>
@@ -1752,6 +1785,33 @@ export default function EditorPage() {
                 );
               })}
             </div>
+          </div>
+        </div>
+      )}
+
+      {showSizeGuide && sizeGuideUrl && (
+        <div
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 p-4 sm:p-8"
+          onClick={() => setShowSizeGuide(false)}
+        >
+          <div
+            className="relative max-h-full max-w-4xl overflow-hidden rounded-2xl bg-white p-3 shadow-2xl sm:p-5"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setShowSizeGuide(false)}
+              className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-xl text-gray-600 shadow"
+              aria-label="Tutup size guide"
+            >
+              ×
+            </button>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={getOptimizedAssetUrl(sizeGuideUrl, 1080)}
+              alt={`Size guide ${selectedProductName}`}
+              className="max-h-[85dvh] max-w-full object-contain"
+            />
           </div>
         </div>
       )}

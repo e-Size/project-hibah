@@ -40,6 +40,7 @@ func main() {
 		&models.ProductAddon{},
 		&models.ProductImage{},
 		&models.ExtraImage{},
+		&models.SizeGuide{},
 	)
 
 	r := gin.Default()

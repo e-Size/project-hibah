@@ -159,6 +159,12 @@ export interface ProductImage extends Base {
   order: number;
 }
 
+// ─── Size Guide ─────────────────────────────────────────
+export interface SizeGuide extends Base {
+  product_id: string;
+  image_url: string;
+}
+
 // ─── Extra Image ────────────────────────────────────────
 export interface ExtraImage extends Base {
   name: string;
@@ -177,4 +183,3 @@ export interface ExtraImageUpdateRequest {
   description?: string;
   image_url?: string;
 }
-

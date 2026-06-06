@@ -7,6 +7,7 @@ import type {
   PriceMatrix, PriceMatrixCreateRequest, PriceMatrixUpdateRequest,
   ProductAddon, ProductAddonCreateRequest, ProductAddonUpdateRequest,
   ProductImage,
+  SizeGuide,
   ExtraImage, ExtraImageCreateRequest, ExtraImageUpdateRequest,
 } from "@/types/admin";
 
@@ -110,6 +111,27 @@ export const productImageService = {
     apiDelete<Msg>(`/product-images/${id}`),
 };
 
+// ─── Size Guides ────────────────────────────────────────
+export const sizeGuideService = {
+  getAll: () =>
+    apiGet<R<SizeGuide[]>>("/size-guides").then(r => r.data),
+  getByProduct: (productId: string) =>
+    apiGet<R<SizeGuide>>(`/size-guides/product/${productId}`).then(r => r.data),
+  create: (productId: string, file: File) => {
+    const form = new FormData();
+    form.append("product_id", productId);
+    form.append("image", file);
+    return apiPostForm<R<SizeGuide>>("/size-guides", form).then(r => r.data);
+  },
+  update: (id: string, file: File) => {
+    const form = new FormData();
+    form.append("image", file);
+    return apiPutForm<R<SizeGuide>>(`/size-guides/${id}`, form).then(r => r.data);
+  },
+  delete: (id: string) =>
+    apiDelete<Msg>(`/size-guides/${id}`),
+};
+
 // ─── Generic Upload ─────────────────────────────────────
 export const uploadService = {
   upload: (file: File): Promise<string> => {
@@ -130,4 +152,3 @@ export const extraImageService = {
   delete: (id: string) =>
     apiDelete<Msg>(`/extra-images/${id}`),
 };
-

@@ -30,6 +30,12 @@ export type ExtraImage = {
   updated_at?: string;
 };
 
+export type SizeGuide = {
+  id: string;
+  product_id: string;
+  image_url: string;
+};
+
 export type ProductAddon = {
   id: string;
   product_id: string;

@@ -1,4 +1,4 @@
-import type { ExtraImage, Product, ProductCategory, ProductDetail } from "../types/product";
+import type { ExtraImage, Product, ProductCategory, ProductDetail, SizeGuide } from "../types/product";
 
 type ApiListResponse<T> = {
   data: T;
@@ -42,6 +42,17 @@ export async function getExtraImages(): Promise<ExtraImage[]> {
   const response = await request<ApiListResponse<ExtraImage[]>>("/extra-images");
 
   return response.data;
+}
+
+export async function getSizeGuideByProduct(productId: string): Promise<SizeGuide | null> {
+  const response = await fetch(`${API_BASE_URL}/size-guides/product/${productId}`, {
+    headers: { Accept: "application/json" },
+  });
+  if (response.status === 404) return null;
+  if (!response.ok) {
+    throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+  }
+  return (await response.json() as ApiListResponse<SizeGuide>).data;
 }
 
 export function resolveAssetUrl(value?: string): string | undefined {
