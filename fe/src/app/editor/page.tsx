@@ -37,6 +37,10 @@ type ProductTemplate = {
   views: { key: ViewType; label: string; src: string }[];
 };
 
+function getProductThumbnail(product: ProductTemplate) {
+  return product.views.find((view) => view.key === "front") ?? product.views[0];
+}
+
 function getSheetViewportHeight() {
   return window.visualViewport?.height ?? window.innerHeight;
 }
@@ -263,6 +267,7 @@ export default function EditorPage() {
   const [processedSrc, setProcessedSrc] = useState<Partial<Record<ViewType, string>>>({});
   const selectedProduct = productTemplates.find((product) => product.name === selectedProductName) ?? productTemplates[0];
   const views = useMemo(() => selectedProduct?.views ?? [], [selectedProduct]);
+  const selectedViewSource = views.find((view) => view.key === selectedView)?.src;
 
   useEffect(() => {
     const updateSheetViewportHeight = () => {
@@ -346,6 +351,37 @@ export default function EditorPage() {
       ignore = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (productTemplates.length === 0) return;
+
+    let cancelled = false;
+    let timer = 0;
+    let index = 0;
+
+    const preloadBatch = () => {
+      if (cancelled) return;
+
+      productTemplates.slice(index, index + 3).forEach((product) => {
+        const thumbnail = getProductThumbnail(product);
+        if (!thumbnail) return;
+        const image = new window.Image();
+        image.decoding = "async";
+        image.src = thumbnail.src;
+      });
+
+      index += 3;
+      if (index < productTemplates.length) {
+        timer = window.setTimeout(preloadBatch, 250);
+      }
+    };
+
+    timer = window.setTimeout(preloadBatch, 750);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [productTemplates]);
 
   useEffect(() => {
     if (views.length > 0 && !views.some((view) => view.key === selectedView)) {
@@ -1428,9 +1464,15 @@ export default function EditorPage() {
             <div className="min-h-full flex items-center justify-center p-4 lg:p-0">
             <div style={{ transform: `scale(${zoom / 100})`, transformOrigin: "center", flexShrink: 0 }}>
               <div className="relative drop-shadow-xl" style={{ width: CANVAS, height: CANVAS }}>
-                {processedSrc[selectedView] && (
+                {(processedSrc[selectedView] || selectedViewSource) && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={processedSrc[selectedView]} alt="Product" draggable={false} style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"contain", pointerEvents:"none" }} />
+                  <img
+                    src={processedSrc[selectedView] || selectedViewSource}
+                    alt="Product"
+                    draggable={false}
+                    decoding="async"
+                    style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"contain", pointerEvents:"none" }}
+                  />
                 )}
 
                 {selectedEl && viewElements.some(el => el.id === selectedEl) && (
@@ -1702,20 +1744,25 @@ export default function EditorPage() {
                 <p className="col-span-full py-8 text-center text-sm text-gray-400">Belum ada gambar produk custom.</p>
               )}
               {productTemplates.map((p) => {
-                const thumbnail = p.views.find((view) => view.key === "front") ?? p.views[0];
+                const thumbnail = getProductThumbnail(p);
                 return (
                 <button
                   key={p.name}
                   onClick={() => {
                     setSelectedProductName(p.name);
-                    setSelectedView(p.views[0].key);
+                    setSelectedView(thumbnail.key);
                     setShowChangeModal(false);
                   }}
                   className={`flex flex-col h-auto rounded-2xl border bg-[#faf8f5] hover:border-[#e8734a] hover:shadow-md transition-all overflow-hidden group ${selectedProduct?.name === p.name ? "border-[#e8734a]" : "border-gray-100"}`}
                 >
                   <div className="w-full aspect-square shrink-0 bg-[#f0ece6] relative overflow-hidden">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={thumbnail.src} alt={p.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+                    <img
+                      src={thumbnail.src}
+                      alt={p.name}
+                      decoding="async"
+                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                    />
                   </div>
                   <div className="px-3 py-2 text-left shrink-0">
                     <p className="font-semibold text-gray-900 text-sm truncate">{p.name}</p>
