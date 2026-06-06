@@ -6,12 +6,10 @@ import SpinIn from "../../components/animation/SpinIn";
 import FadeInLeft from "../../components/animation/FadeInLeft";
 import InViewVideo from "../../components/ui/InViewVideo";
 import ViewportScaler from "../../components/ui/ViewportScaler";
-import PageLoader from "../../components/ui/PageLoader";
 
 export default function PartnershipPage() {
   return (
     <ViewportScaler>
-    <PageLoader>
     <main className="min-h-screen bg-[#e8e8e6]">
       <Navbar variant="transparent" />
       <section className="px-4 sm:px-8 md:px-16 py-16 md:py-20 overflow-hidden">
@@ -130,7 +128,6 @@ export default function PartnershipPage() {
 
       <Footer />
     </main>
-    </PageLoader>
     </ViewportScaler>
   );
 }

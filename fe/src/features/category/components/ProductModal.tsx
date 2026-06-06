@@ -185,11 +185,10 @@ function SelectableAddonGroup({
           {onClear && (
             <button
               onClick={() => onClear(type)}
-              className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
-                !selected
+              className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${!selected
                   ? "border-[#e8734a] bg-[#e8734a] text-white"
                   : "border-gray-300 bg-white text-gray-700 hover:border-[#e8734a]"
-              }`}
+                }`}
             >
               Tanpa Tambahan
             </button>
@@ -228,9 +227,8 @@ function SelectableAddonGroup({
               <button
                 key={item.id}
                 onClick={() => isSelected && onClear ? onClear(type) : onSelect(type, item)}
-                className={`flex items-start gap-3 rounded-xl border-2 bg-white p-3 text-left transition-colors ${
-                  isSelected ? "border-[#4273B2]" : "border-gray-200 hover:border-gray-300"
-                }`}
+                className={`flex items-start gap-3 rounded-xl border-2 bg-white p-3 text-left transition-colors ${isSelected ? "border-[#4273B2]" : "border-gray-200 hover:border-gray-300"
+                  }`}
               >
                 {item.image_url && (
                   <span className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
@@ -266,11 +264,10 @@ function SelectableAddonGroup({
         {onClear && (
           <button
             onClick={() => onClear(type)}
-            className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
-              !selected
+            className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${!selected
                 ? "border-[#e8734a] bg-[#e8734a] text-white"
                 : "border-gray-300 text-gray-700 hover:border-[#e8734a]"
-            }`}
+              }`}
           >
             Tanpa Tambahan
           </button>
@@ -279,11 +276,10 @@ function SelectableAddonGroup({
           <button
             key={item.id}
             onClick={() => selected?.id === item.id && onClear ? onClear(type) : onSelect(type, item)}
-            className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
-              selected?.id === item.id
+            className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${selected?.id === item.id
                 ? "border-[#e8734a] bg-[#e8734a] text-white"
                 : "border-gray-300 text-gray-700 hover:border-[#e8734a]"
-            }`}
+              }`}
           >
             {item.addon_name}
             {shouldShowExtraFee(type, item) ? ` ${formatExtraFee(item.extra_fee)}` : ""}
@@ -470,11 +466,11 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
           ? items.filter((item) => jacketMaterialNames.has(item.addon_name))
           : isTumbler && type === "cetak"
             ? items.filter((item) => tumblerCetakNames.has(item.addon_name))
-          : isCap && type === "bahan"
-            ? items.filter((item) => capMaterialNames.has(item.addon_name))
-          : isIdLanyard && type === "paket"
-            ? items.filter((item) => validIdLanyardPackages.has(item.addon_name))
-          : items;
+            : isCap && type === "bahan"
+              ? items.filter((item) => capMaterialNames.has(item.addon_name))
+              : isIdLanyard && type === "paket"
+                ? items.filter((item) => validIdLanyardPackages.has(item.addon_name))
+                : items;
       return [type, filtered] as const;
     })
     .filter(([, items]) => items.length > 0)
@@ -517,53 +513,53 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
         : "Hubungi admin"
       : isJersey
         ? getPriceRangeLabel(jerseyPrice, jerseyPrice)
-      : isJacket
-        ? jacketPrice > 0
-          ? `Start From ${formatPrice(jacketPrice)}`
-          : "Hubungi admin"
-      : isFleeceProduct
-        ? fleecePrice > 0
-          ? formatPrice(fleecePrice)
-          : selectedAddons.bahan?.addon_name === "Fleece PE"
-            ? "Hubungi admin"
-            : "Nego / Hubungi admin"
-      : isPdh
-        ? getPriceRangeLabel(pdhPrice, pdhPrice)
-      : isCap
-        ? getPriceRangeLabel(capPrice, capPrice)
-      : isTumbler
-        ? tumblerPrice > 0
-          ? formatPrice(tumblerPrice)
-          : "Hubungi admin"
-      : isToteBag
-        ? getPriceRangeLabel(toteBagPrice, toteBagPrice)
-      : isIdLanyard
-        ? getPriceRangeLabel(idLanyardPrice, idLanyardPrice)
-      : isSticker
-        ? stickerPrice > 0
-          ? formatPrice(stickerPrice)
-          : "Hubungi admin"
-      : isKeychain
-        ? keychainPrice > 0
-          ? formatPrice(keychainPrice)
-          : "Hubungi admin"
-      : isWristband
-        ? wristbandPrice > 0
-          ? formatPrice(wristbandPrice)
-          : "Hubungi admin"
-      : getPriceLabel(detail);
+        : isJacket
+          ? jacketPrice > 0
+            ? `Start From ${formatPrice(jacketPrice)}`
+            : "Hubungi admin"
+          : isFleeceProduct
+            ? fleecePrice > 0
+              ? formatPrice(fleecePrice)
+              : selectedAddons.bahan?.addon_name === "Fleece PE"
+                ? "Hubungi admin"
+                : "Nego / Hubungi admin"
+            : isPdh
+              ? getPriceRangeLabel(pdhPrice, pdhPrice)
+              : isCap
+                ? getPriceRangeLabel(capPrice, capPrice)
+                : isTumbler
+                  ? tumblerPrice > 0
+                    ? formatPrice(tumblerPrice)
+                    : "Hubungi admin"
+                  : isToteBag
+                    ? getPriceRangeLabel(toteBagPrice, toteBagPrice)
+                    : isIdLanyard
+                      ? getPriceRangeLabel(idLanyardPrice, idLanyardPrice)
+                      : isSticker
+                        ? stickerPrice > 0
+                          ? formatPrice(stickerPrice)
+                          : "Hubungi admin"
+                        : isKeychain
+                          ? keychainPrice > 0
+                            ? formatPrice(keychainPrice)
+                            : "Hubungi admin"
+                          : isWristband
+                            ? wristbandPrice > 0
+                              ? formatPrice(wristbandPrice)
+                              : "Hubungi admin"
+                            : getPriceLabel(detail);
   const selectedPriceLabel =
     isJersey && jerseyPrice > 0
       ? formatPrice(jerseyPrice + selectedExtraFee)
       : isPdh && pdhPrice > 0
         ? formatPrice(pdhPrice + selectedExtraFee)
-      : (isSticker || isKeychain)
-        ? basePriceLabel
-      : isWristband && wristbandPrice > 0
-        ? formatPrice(wristbandPrice + selectedExtraFee)
-      : basePriceLabel !== "Hubungi admin" && selectedExtraFee > 0
-        ? `${basePriceLabel} + ${formatPrice(selectedExtraFee)}`
-        : basePriceLabel;
+        : (isSticker || isKeychain)
+          ? basePriceLabel
+          : isWristband && wristbandPrice > 0
+            ? formatPrice(wristbandPrice + selectedExtraFee)
+            : basePriceLabel !== "Hubungi admin" && selectedExtraFee > 0
+              ? `${basePriceLabel} + ${formatPrice(selectedExtraFee)}`
+              : basePriceLabel;
   const handleAddonSelect = (addonType: string, addon: ProductAddon) => {
     setSelectedAddons((current) => {
       if (isTumbler && addonType === "jenis" && detail) {
@@ -598,10 +594,10 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
     .map(([type, addon]) => `${type}: ${addon?.addon_name}`);
   const whatsappText = encodeURIComponent(
     `Halo Esize! Saya ingin bertanya tentang produk:\n\n` +
-      `Produk: ${product.name}\n` +
-      (selectedLines.length > 0 ? `${selectedLines.join("\n")}\n` : "") +
-      `Jumlah: ${qty} pcs\n\n` +
-      `Mohon info harga dan proses pemesanannya. Terima kasih!`
+    `Produk: ${product.name}\n` +
+    (selectedLines.length > 0 ? `${selectedLines.join("\n")}\n` : "") +
+    `Jumlah: ${qty} pcs\n\n` +
+    `Mohon info harga dan proses pemesanannya. Terima kasih!`
   );
 
   if (!asPage && !isMounted) return null;
@@ -609,208 +605,207 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
   const sharedPanels = (
     <>
       <div className="flex flex-shrink-0 flex-col items-center gap-3 md:w-[45%]">
-          <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl bg-[#7a6a30]">
-            <Image src={images[imgIndex]} alt={product.name} fill className="object-contain p-6" />
-            {images.length > 1 && (
-              <>
-                <button
-                  onClick={() => setImgIndex((index) => (index - 1 + images.length) % images.length)}
-                  className="absolute left-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white text-gray-700 shadow hover:bg-gray-100"
-                >
-                  ‹
-                </button>
-                <button
-                  onClick={() => setImgIndex((index) => (index + 1) % images.length)}
-                  className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white text-gray-700 shadow hover:bg-gray-100"
-                >
-                  ›
-                </button>
-              </>
-            )}
-          </div>
-
+        <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl bg-[#7a6a30]">
+          <Image src={images[imgIndex]} alt={product.name} fill className="object-contain p-6" />
           {images.length > 1 && (
-            <div className="flex max-w-full gap-2 overflow-x-auto">
-              {images.map((src, index) => (
-                <button
-                  key={`${src}-${index}`}
-                  onClick={() => setImgIndex(index)}
-                  className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border-2 bg-[#7a6a30] ${
-                    index === imgIndex ? "border-[#927615]" : "border-transparent"
-                  }`}
-                >
-                  <Image src={src} alt="" fill className="object-contain p-1" />
-                </button>
-              ))}
-            </div>
+            <>
+              <button
+                onClick={() => setImgIndex((index) => (index - 1 + images.length) % images.length)}
+                className="absolute left-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white text-gray-700 shadow hover:bg-gray-100"
+              >
+                ‹
+              </button>
+              <button
+                onClick={() => setImgIndex((index) => (index + 1) % images.length)}
+                className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white text-gray-700 shadow hover:bg-gray-100"
+              >
+                ›
+              </button>
+            </>
           )}
         </div>
 
-        <div ref={scrollRef} className="min-h-0 flex-1 overflow-x-hidden overflow-y-visible pr-1 md:overflow-y-auto md:overscroll-contain">
-          <div className="flex flex-col gap-5">
-            <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#9F7A04]">
-                {displayProduct?.category || product.category || "produk"}
-              </p>
-              <h2 className="pr-10 text-2xl font-bold text-gray-900">{product.name}</h2>
-              <p className="mt-1 text-2xl font-bold text-[#e8734a]">{isLoading ? "Memuat..." : selectedPriceLabel}</p>
-              <p className="mt-3 text-sm leading-relaxed text-gray-600">{description}</p>
-            </div>
-
-            {addonEntries.map(([type, items]) => (
-              <SelectableAddonGroup
-                key={type}
-                title={getAddonTitle(type)}
-                type={type}
-                items={isJersey && type === "model_kerah" ? sortJerseyCollars(items) : items}
-                selected={selectedAddons[type]}
-                onSelect={handleAddonSelect}
-                onClear={
-                  (isPdh && (type === "model" || type === "warna")) ||
-                  (isWristband && (type === "extra" || type === "lebar"))
-                    ? (addonType) => setSelectedAddons((current) => ({ ...current, [addonType]: undefined }))
-                    : undefined
-                }
-              />
+        {images.length > 1 && (
+          <div className="flex max-w-full gap-2 overflow-x-auto">
+            {images.map((src, index) => (
+              <button
+                key={`${src}-${index}`}
+                onClick={() => setImgIndex(index)}
+                className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border-2 bg-[#7a6a30] ${index === imgIndex ? "border-[#927615]" : "border-transparent"
+                  }`}
+              >
+                <Image src={src} alt="" fill className="object-contain p-1" />
+              </button>
             ))}
+          </div>
+        )}
+      </div>
 
-            {isSticker && (
-              <div className="rounded-xl border border-yellow-300 bg-yellow-50 p-4">
-                <p className="font-bold text-gray-800">Harga termasuk:</p>
-                <ul className="mt-2 space-y-1 text-xs leading-relaxed text-gray-600">
-                  <li>• Per 1 A3 dengan area cetak 297 × 448 mm</li>
-                  <li>• Die Cut / Kiss Cut</li>
-                  <li>• Dapat dibuat Sticker Pack</li>
-                  <li>• Laminating tekstur Doff / Glossy / Tidak dilaminating</li>
-                </ul>
-              </div>
-            )}
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-x-hidden overflow-y-visible pr-1 md:overflow-y-auto md:overscroll-contain">
+        <div className="flex flex-col gap-5">
+          <div>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#9F7A04]">
+              {displayProduct?.category || product.category || "produk"}
+            </p>
+            <h2 className="pr-10 text-2xl font-bold text-gray-900">{product.name}</h2>
+            <p className="mt-1 text-2xl font-bold text-[#e8734a]">{isLoading ? "Memuat..." : selectedPriceLabel}</p>
+            <p className="mt-3 text-sm leading-relaxed text-gray-600">{description}</p>
+          </div>
 
-            {isWristband && wristbandTiers.length > 0 && (
-              <div className="rounded-xl border border-yellow-300 bg-yellow-50 p-4">
-                <p className="font-bold text-gray-800">Catatan Pemesanan</p>
-                <ul className="mt-2 space-y-1 text-xs leading-relaxed text-gray-600">
-                  <li>• Quantity tersedia: {wristbandTiers.map((t) => t.toLocaleString("id-ID")).join(", ")} pcs</li>
-                  <li>• Lebar standar: maks. 1,5 cm (harga di atas sudah termasuk lebar ini)</li>
-                  <li>• Biaya tambahan dikenakan untuk lebar 2 cm, 2,5 cm, atau 3 cm</li>
-                </ul>
-              </div>
-            )}
+          {addonEntries.map(([type, items]) => (
+            <SelectableAddonGroup
+              key={type}
+              title={getAddonTitle(type)}
+              type={type}
+              items={isJersey && type === "model_kerah" ? sortJerseyCollars(items) : items}
+              selected={selectedAddons[type]}
+              onSelect={handleAddonSelect}
+              onClear={
+                (isPdh && (type === "model" || type === "warna")) ||
+                  (isWristband && (type === "extra" || type === "lebar"))
+                  ? (addonType) => setSelectedAddons((current) => ({ ...current, [addonType]: undefined }))
+                  : undefined
+              }
+            />
+          ))}
 
-            {isTShirt && tShirtNotes.length > 0 && <AddonNotes items={tShirtNotes} />}
-
-            {isPdh && pdhNotes.length > 0 && (
-              <AddonNotes
-                items={pdhNotes}
-                title="Catatan Model & Warna"
-                description="Penyesuaian model dan variasi warna akan dihitung sesuai jumlah masing-masing variasi saat konfirmasi pesanan."
-              />
-            )}
-
-            {isIdLanyard && (detail?.addons?.cetak?.length ?? 0) > 0 && (
-              <SelectableAddonGroup
-                title="Pilihan Cetak ID Card"
-                type="cetak"
-                items={detail?.addons?.cetak ?? []}
-                selected={selectedAddons.cetak}
-                onSelect={handleAddonSelect}
-                onClear={(addonType) => setSelectedAddons((current) => ({ ...current, [addonType]: undefined }))}
-              />
-            )}
-
-            {isJersey && jerseyTypes.length > 0 && (
-              <SelectableAddonGroup
-                title="Pilih Jenis Jersey"
-                type="jersey_type"
-                items={jerseyTypes}
-                selected={selectedAddons.jersey_type}
-                onSelect={(addonType, addon) => setSelectedAddons((current) => ({ ...current, [addonType]: addon }))}
-              />
-            )}
-
-            {isJersey && jerseyModelAddons.length > 0 && (
-              <SelectableAddonGroup
-                title="Pilih Model Tambahan"
-                type="model"
-                items={jerseyModelAddons}
-                selected={selectedAddons.model}
-                onSelect={(addonType, addon) => setSelectedAddons((current) => ({ ...current, [addonType]: addon }))}
-                onClear={(addonType) => setSelectedAddons((current) => ({ ...current, [addonType]: undefined }))}
-              />
-            )}
-
-            <div className="max-w-full overflow-hidden">
-              <p className="mb-2 font-bold text-gray-800">Jumlah Pesanan (pcs)</p>
-              <div className="flex items-center gap-2 w-full min-w-0">
-                <button
-                  onClick={() => {
-                    if (isWristband && wristbandTiers.length > 0) {
-                      setQty((value) => {
-                        const idx = wristbandTiers.indexOf(value);
-                        return idx > 0 ? wristbandTiers[idx - 1] : value;
-                      });
-                    } else {
-                      setQty((value) => Math.max(minQty, value - 1));
-                    }
-                  }}
-                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-gray-300 text-xl text-gray-600 hover:bg-gray-100"
-                >
-                  -
-                </button>
-                <input
-                  type="number"
-                  value={qty === 0 ? "" : qty}
-                  onChange={(event) => setQty(event.target.value === "" ? 0 : Number(event.target.value))}
-                  onBlur={() => {
-                    if (isWristband && wristbandTiers.length > 0) {
-                      setQty((value) => {
-                        const nearest = wristbandTiers.reduce((prev, curr) =>
-                          Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
-                        );
-                        return nearest;
-                      });
-                    } else {
-                      setQty((value) => (value < minQty ? minQty : value));
-                    }
-                  }}
-                  className="min-w-0 flex-1 rounded-lg border border-gray-300 py-2 text-center text-gray-800 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                />
-                <button
-                  onClick={() => {
-                    if (isWristband && wristbandTiers.length > 0) {
-                      setQty((value) => {
-                        const idx = wristbandTiers.indexOf(value);
-                        return idx < wristbandTiers.length - 1 ? wristbandTiers[idx + 1] : value;
-                      });
-                    } else {
-                      setQty((value) => value + 1);
-                    }
-                  }}
-                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-gray-300 text-xl text-gray-600 hover:bg-gray-100"
-                >
-                  +
-                </button>
-              </div>
-              <p className="mt-1 text-center text-xs text-gray-400">Minimum order {minQty} pcs</p>
+          {isSticker && (
+            <div className="rounded-xl border border-yellow-300 bg-yellow-50 p-4">
+              <p className="font-bold text-gray-800">Harga termasuk:</p>
+              <ul className="mt-2 space-y-1 text-xs leading-relaxed text-gray-600">
+                <li>• Per 1 A3 dengan area cetak 297 × 448 mm</li>
+                <li>• Die Cut / Kiss Cut</li>
+                <li>• Dapat dibuat Sticker Pack</li>
+                <li>• Laminating tekstur Doff / Glossy / Tidak dilaminating</li>
+              </ul>
             </div>
+          )}
 
-            <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappText}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 rounded-xl bg-green-500 py-4 text-base font-bold text-white transition-colors hover:bg-green-600"
-            >
-              <span className="relative flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-white">
-                <Image src="/whatsapp-logo.svg" alt="" width={18} height={18} className="h-[18px] w-[18px]" />
-              </span>
-              Order via WhatsApp
-            </a>
-
-            <div className="rounded-xl border border-yellow-300 bg-yellow-50 py-3 text-center text-sm text-gray-500">
-              Harga mengikuti spesifikasi dan jumlah pesanan.
+          {isWristband && wristbandTiers.length > 0 && (
+            <div className="rounded-xl border border-yellow-300 bg-yellow-50 p-4">
+              <p className="font-bold text-gray-800">Catatan Pemesanan</p>
+              <ul className="mt-2 space-y-1 text-xs leading-relaxed text-gray-600">
+                <li>• Quantity tersedia: {wristbandTiers.map((t) => t.toLocaleString("id-ID")).join(", ")} pcs</li>
+                <li>• Lebar standar: maks. 1,5 cm (harga di atas sudah termasuk lebar ini)</li>
+                <li>• Biaya tambahan dikenakan untuk lebar 2 cm, 2,5 cm, atau 3 cm</li>
+              </ul>
             </div>
+          )}
+
+          {isTShirt && tShirtNotes.length > 0 && <AddonNotes items={tShirtNotes} />}
+
+          {isPdh && pdhNotes.length > 0 && (
+            <AddonNotes
+              items={pdhNotes}
+              title="Catatan Model & Warna"
+              description="Penyesuaian model dan variasi warna akan dihitung sesuai jumlah masing-masing variasi saat konfirmasi pesanan."
+            />
+          )}
+
+          {isIdLanyard && (detail?.addons?.cetak?.length ?? 0) > 0 && (
+            <SelectableAddonGroup
+              title="Pilihan Cetak ID Card"
+              type="cetak"
+              items={detail?.addons?.cetak ?? []}
+              selected={selectedAddons.cetak}
+              onSelect={handleAddonSelect}
+              onClear={(addonType) => setSelectedAddons((current) => ({ ...current, [addonType]: undefined }))}
+            />
+          )}
+
+          {isJersey && jerseyTypes.length > 0 && (
+            <SelectableAddonGroup
+              title="Pilih Jenis Jersey"
+              type="jersey_type"
+              items={jerseyTypes}
+              selected={selectedAddons.jersey_type}
+              onSelect={(addonType, addon) => setSelectedAddons((current) => ({ ...current, [addonType]: addon }))}
+            />
+          )}
+
+          {isJersey && jerseyModelAddons.length > 0 && (
+            <SelectableAddonGroup
+              title="Pilih Model Tambahan"
+              type="model"
+              items={jerseyModelAddons}
+              selected={selectedAddons.model}
+              onSelect={(addonType, addon) => setSelectedAddons((current) => ({ ...current, [addonType]: addon }))}
+              onClear={(addonType) => setSelectedAddons((current) => ({ ...current, [addonType]: undefined }))}
+            />
+          )}
+
+          <div className="max-w-full overflow-hidden">
+            <p className="mb-2 font-bold text-gray-800">Jumlah Pesanan (pcs)</p>
+            <div className="flex items-center gap-2 w-full min-w-0">
+              <button
+                onClick={() => {
+                  if (isWristband && wristbandTiers.length > 0) {
+                    setQty((value) => {
+                      const idx = wristbandTiers.indexOf(value);
+                      return idx > 0 ? wristbandTiers[idx - 1] : value;
+                    });
+                  } else {
+                    setQty((value) => Math.max(minQty, value - 1));
+                  }
+                }}
+                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-gray-300 text-xl text-gray-600 hover:bg-gray-100"
+              >
+                -
+              </button>
+              <input
+                type="number"
+                value={qty === 0 ? "" : qty}
+                onChange={(event) => setQty(event.target.value === "" ? 0 : Number(event.target.value))}
+                onBlur={() => {
+                  if (isWristband && wristbandTiers.length > 0) {
+                    setQty((value) => {
+                      const nearest = wristbandTiers.reduce((prev, curr) =>
+                        Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
+                      );
+                      return nearest;
+                    });
+                  } else {
+                    setQty((value) => (value < minQty ? minQty : value));
+                  }
+                }}
+                className="min-w-0 flex-1 rounded-lg border border-gray-300 py-2 text-center text-gray-800 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              />
+              <button
+                onClick={() => {
+                  if (isWristband && wristbandTiers.length > 0) {
+                    setQty((value) => {
+                      const idx = wristbandTiers.indexOf(value);
+                      return idx < wristbandTiers.length - 1 ? wristbandTiers[idx + 1] : value;
+                    });
+                  } else {
+                    setQty((value) => value + 1);
+                  }
+                }}
+                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-gray-300 text-xl text-gray-600 hover:bg-gray-100"
+              >
+                +
+              </button>
+            </div>
+            <p className="mt-1 text-center text-xs text-gray-400">Minimum order {minQty} pcs</p>
+          </div>
+
+          <a
+            href={`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappText}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 rounded-xl bg-green-500 py-4 text-base font-bold text-white transition-colors hover:bg-green-600"
+          >
+            <span className="relative flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-white">
+              <Image src="/whatsapp-logo.svg" alt="" width={18} height={18} className="h-[18px] w-[18px]" />
+            </span>
+            Order via WhatsApp
+          </a>
+
+          <div className="rounded-xl border border-yellow-300 bg-yellow-50 py-3 text-center text-sm text-gray-500">
+            Harga mengikuti spesifikasi dan jumlah pesanan.
           </div>
         </div>
+      </div>
     </>
   );
 
@@ -822,7 +817,7 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
       <div className="flex flex-shrink-0 flex-col items-center gap-3 md:w-[45%]">
         <div className={`aspect-square w-full rounded-xl ${shimmer}`} />
         <div className="flex gap-2">
-          {[0,1,2].map(i => <div key={i} className={`h-16 w-16 rounded-lg ${shimmer}`} />)}
+          {[0, 1, 2].map(i => <div key={i} className={`h-16 w-16 rounded-lg ${shimmer}`} />)}
         </div>
       </div>
 
@@ -839,7 +834,7 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
         <div className="flex flex-col gap-2 mt-2">
           <div className={`h-4 w-28 ${shimmer}`} />
           <div className="flex gap-2">
-            {[0,1,2,3].map(i => <div key={i} className={`h-8 w-16 rounded-full ${shimmer}`} />)}
+            {[0, 1, 2, 3].map(i => <div key={i} className={`h-8 w-16 rounded-full ${shimmer}`} />)}
           </div>
         </div>
         <div className="flex flex-col gap-2 mt-2">
@@ -884,11 +879,11 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
   return createPortal(
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 sm:p-6 md:p-8"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-2 sm:p-6 md:p-8"
       onClick={onClose}
     >
       <div
-        className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-5xl touch-pan-y flex-col gap-6 overflow-x-hidden overflow-y-auto overscroll-contain rounded-2xl bg-[#fdf6f0] p-4 shadow-2xl sm:max-h-[calc(100dvh-3rem)] md:max-h-[78dvh] md:flex-row md:overflow-hidden md:p-6"
+        className="relative flex max-h-[calc(100dvh-1rem)] w-full max-w-5xl touch-pan-y flex-col gap-4 overflow-x-hidden overflow-y-auto overscroll-contain rounded-2xl bg-[#fdf6f0] p-3 shadow-2xl sm:max-h-[calc(100dvh-3rem)] sm:gap-6 sm:p-4 md:max-h-[78dvh] md:flex-row md:overflow-hidden md:gap-6 md:p-6"
         onClick={(event) => event.stopPropagation()}
       >
         <button

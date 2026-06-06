@@ -17,6 +17,8 @@ type ElType = "image" | "text";
 
 const CANVAS = 520;
 const sizes: Size[] = ["S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"];
+const MIN_TEXT_FONT_SIZE = 8;
+const MAX_TEXT_FONT_SIZE = 180;
 
 const colors = [
   "#111111", "#d4c4a8", "#8b6340", "#2b5fd4", "#c41e3a", "#1a472a", "#64748b",
@@ -178,6 +180,70 @@ async function applyShirtColor(src: string, hexColor: string): Promise<string> {
     img.crossOrigin = "anonymous";
     img.src = src;
   });
+}
+
+function getProductDescription(name: string): string {
+  const normalized = name.toLowerCase();
+  
+  if (normalized.includes("jersey")) {
+    return "Premium dry-fit material. Breathable, lightweight, and engineered perfectly for sports.";
+  }
+  if (normalized.includes("jacket") || normalized.includes("jaket")) {
+    return "High-quality outerwear fabric. Wind-resistant, durable, and highly comfortable for daily wear.";
+  }
+  if (normalized.includes("sweater")) {
+    return "Soft premium fleece material. Provides cozy warmth with a trendy, comfortable fit.";
+  }
+  if (normalized.includes("hoodie")) {
+    return "Thick premium cotton fleece. Features a comfortable hood and relaxed fit for street style.";
+  }
+  if (normalized.includes("t-shirt") || normalized.includes("tshirt") || normalized.includes("kaos")) {
+    return "100% Ring-spun cotton. Ultra-soft fabric, highly breathable, with superior everyday comfort.";
+  }
+  if (normalized.includes("kemeja") || normalized.includes("pdh")) {
+    return "Premium drill fabric. Neat stitching, durable structure, and highly professional look.";
+  }
+  if (normalized.includes("cap") || normalized.includes("bucket") || normalized.includes("topi")) {
+    return "Premium twill material with adjustable strap. Stylish sun protection for outdoor activities.";
+  }
+  if (normalized.includes("tote bag") || normalized.includes("totebag")) {
+    return "Durable heavy canvas material. Strong stitching, spacious, and perfectly eco-friendly.";
+  }
+  if (normalized.includes("id card") || normalized.includes("lanyard")) {
+    return "High-quality PVC card and durable polyester strap. Clean and crisp printing for professional identity.";
+  }
+  if (normalized.includes("payung")) {
+    return "Water-repellent premium nylon with a sturdy windproof frame. Reliable protection in any weather.";
+  }
+  if (normalized.includes("tumbler")) {
+    return "High-grade stainless steel. Double-wall vacuum insulation to keep your drinks hot or cold for hours.";
+  }
+  if (normalized.includes("mug")) {
+    return "Premium ceramic material. Heat-resistant, microwave safe, with a glossy elegant finish.";
+  }
+  if (normalized.includes("ballpoint") || normalized.includes("pulpen")) {
+    return "Ergonomic design with smooth ink flow. Professional look for corporate branding and daily writing.";
+  }
+  if (normalized.includes("sticker") || normalized.includes("stiker")) {
+    return "Premium vinyl material. High durability, water-resistant, and perfect for long-lasting branding.";
+  }
+  if (normalized.includes("key chain") || normalized.includes("gantungan")) {
+    return "High-quality crystal clear acrylic. Compact, durable, and a great accessory for merchandise.";
+  }
+  if (normalized.includes("pin") || normalized.includes("badge")) {
+    return "Sturdy plastic backing with a glossy top coat. Ideal for events, community groups, and branding.";
+  }
+  if (normalized.includes("notebook") || normalized.includes("buku")) {
+    return "Premium lined paper with a sturdy hardcover. Perfect for clean note-taking and professional layouts.";
+  }
+  if (normalized.includes("handfan") || normalized.includes("kipas")) {
+    return "Lightweight and durable plastic frame with high-quality printed art. Perfect for event merch.";
+  }
+  if (normalized.includes("wristband")) {
+    return "Soft, stretchable, and highly absorbent elastic material. Ideal for sports and promotional merchandise.";
+  }
+  
+  return "Handcrafted quality meets modern design. Tailored carefully using premium materials.";
 }
 
 export default function EditorPage() {
@@ -356,6 +422,13 @@ export default function EditorPage() {
     startX: number; startY: number;
     startW: number; startH: number; startElX: number; startElY: number;
   } | null>(null);
+  const textGestureRef = useRef<{
+    id: string;
+    pointers: Map<number, { x: number; y: number }>;
+    drag: { pointerId: number; startX: number; startY: number; elX: number; elY: number } | null;
+    pinch: { startDistance: number; startFontSize: number } | null;
+    cleanup?: () => void;
+  } | null>(null);
   const [editingTextId, setEditingTextId] = useState<string | null>(null);
   const dragLayerRef = useRef<string | null>(null);
   const sidebarScrollRef = useRef<HTMLDivElement>(null);
@@ -530,6 +603,152 @@ export default function EditorPage() {
     }
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
+  }
+
+  function clampTextFontSize(size: number) {
+    return Math.max(MIN_TEXT_FONT_SIZE, Math.min(MAX_TEXT_FONT_SIZE, Math.round(size)));
+  }
+
+  function getPointerDistance(points: Map<number, { x: number; y: number }>) {
+    const [first, second] = Array.from(points.values());
+    if (!first || !second) return 0;
+    return Math.hypot(second.x - first.x, second.y - first.y);
+  }
+
+  function updateTextFontSize(id: string, nextSize: number) {
+    const fontSize = clampTextFontSize(nextSize);
+    setElements(prev => prev.map(item =>
+      item.id === id && item.type === "text"
+        ? { ...item, fontSize, h: fontSize * 1.4 }
+        : item
+    ));
+    setTdFontSize(fontSize);
+  }
+
+  function handleTextPointerDown(e: React.PointerEvent<HTMLDivElement>, id: string) {
+    if (e.pointerType !== "touch") {
+      onPointerDown(e, id);
+      return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const el = elements.find(item => item.id === id && item.type === "text");
+    if (!el) return;
+
+    setSelectedEl(id);
+    setActiveTab("text");
+
+    if (!textGestureRef.current || textGestureRef.current.id !== id) {
+      textGestureRef.current?.cleanup?.();
+      textGestureRef.current = {
+        id,
+        pointers: new Map(),
+        drag: null,
+        pinch: null,
+      };
+    }
+
+    const gesture = textGestureRef.current;
+    gesture.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (gesture.pointers.size === 1) {
+      gesture.drag = { pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, elX: el.x, elY: el.y };
+      gesture.pinch = null;
+    }
+
+    if (gesture.pointers.size >= 2) {
+      gesture.drag = null;
+      gesture.pinch = {
+        startDistance: getPointerDistance(gesture.pointers),
+        startFontSize: el.fontSize ?? tdFontSize,
+      };
+    }
+
+    e.currentTarget.setPointerCapture(e.pointerId);
+
+    if (gesture.cleanup) return;
+
+    const scale = zoom / 100;
+    const pz = printZone[el.view];
+    const zoneLeft = (pz.x / 100) * CANVAS;
+    const zoneTop = (pz.y / 100) * CANVAS;
+    const zoneRight = ((pz.x + pz.w) / 100) * CANVAS;
+    const zoneBottom = ((pz.y + pz.h) / 100) * CANVAS;
+
+    function onMove(ev: PointerEvent) {
+      const current = textGestureRef.current;
+      if (!current || current.id !== id || !current.pointers.has(ev.pointerId)) return;
+
+      current.pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+
+      if (current.pointers.size >= 2) {
+        ev.preventDefault();
+        current.drag = null;
+        if (!current.pinch) {
+          const item = elements.find(candidate => candidate.id === id && candidate.type === "text");
+          current.pinch = {
+            startDistance: getPointerDistance(current.pointers),
+            startFontSize: item?.fontSize ?? tdFontSize,
+          };
+        }
+        const startDistance = Math.max(1, current.pinch.startDistance);
+        const distance = getPointerDistance(current.pointers);
+        updateTextFontSize(id, current.pinch.startFontSize * (distance / startDistance));
+        return;
+      }
+
+      if (!current.drag || current.drag.pointerId !== ev.pointerId) return;
+      const { startX, startY, elX, elY } = current.drag;
+      const dx = (ev.clientX - startX) / scale;
+      const dy = (ev.clientY - startY) / scale;
+      setElements(prev => prev.map(item => {
+        if (item.id !== id) return item;
+        const clampW = 20;
+        const clampH = item.h || (item.fontSize ?? 24) * 1.4;
+        const nx = Math.max(zoneLeft, Math.min(zoneRight - clampW, elX + dx));
+        const ny = Math.max(zoneTop, Math.min(zoneBottom - clampH, elY + dy));
+        return { ...item, x: nx, y: ny };
+      }));
+    }
+
+    function onUp(ev: PointerEvent) {
+      const current = textGestureRef.current;
+      if (!current || current.id !== id) return;
+
+      current.pointers.delete(ev.pointerId);
+      current.drag = null;
+      current.pinch = null;
+
+      if (current.pointers.size === 0) {
+        current.cleanup?.();
+        textGestureRef.current = null;
+      }
+    }
+
+    gesture.cleanup = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+    };
+    window.addEventListener("pointermove", onMove, { passive: false });
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
+  }
+
+  function handleTextWheel(e: React.WheelEvent<HTMLDivElement>, id: string) {
+    if (!e.ctrlKey && !e.metaKey) return;
+    const el = elements.find(item => item.id === id && item.type === "text");
+    if (!el) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedEl(id);
+    setActiveTab("text");
+
+    const factor = e.deltaY < 0 ? 1.06 : 0.94;
+    updateTextFontSize(id, (el.fontSize ?? tdFontSize) * factor);
   }
 
   function onResizeHandlePointerDown(
@@ -817,7 +1036,9 @@ export default function EditorPage() {
                     </div>
                     <div>
                       <h2 className="font-bold text-gray-900 text-sm leading-tight">{selectedProduct?.name ?? "Produk Custom"}</h2>
-                      <p className="text-gray-400 text-xs mt-1 leading-relaxed">Handcrafted quality meets modern design. Ring-spun cotton with superior comfort.</p>
+                      <p className="text-gray-400 text-xs mt-1 leading-relaxed">
+                          {getProductDescription(selectedProduct?.name ?? "")}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -1023,9 +1244,9 @@ export default function EditorPage() {
                       </div>
                       <span className="bg-gray-800 text-white text-xs font-bold px-2 py-0.5 rounded-full">{tdFontSize}px</span>
                     </div>
-                    <input type="range" min={12} max={72} value={tdFontSize} onChange={e => setTdFontSize(Number(e.target.value))}
+                    <input type="range" min={MIN_TEXT_FONT_SIZE} max={MAX_TEXT_FONT_SIZE} value={tdFontSize} onChange={e => setTdFontSize(Number(e.target.value))}
                       className="w-full accent-gray-800 h-1.5 rounded-full" />
-                    <div className="flex justify-between text-[10px] text-gray-400 mt-1"><span>12</span><span>72</span></div>
+                    <div className="flex justify-between text-[10px] text-gray-400 mt-1"><span>{MIN_TEXT_FONT_SIZE}</span><span>{MAX_TEXT_FONT_SIZE}</span></div>
                   </div>
 
                   <div className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100">
@@ -1225,7 +1446,14 @@ export default function EditorPage() {
                   return (
                     <div
                       key={el.id}
-                      onPointerDown={(e) => { if (!isEditingText) onPointerDown(e, el.id); }}
+                      onPointerDown={(e) => {
+                        if (isEditingText) return;
+                        if (el.type === "text") handleTextPointerDown(e, el.id);
+                        else onPointerDown(e, el.id);
+                      }}
+                      onWheel={(e) => {
+                        if (el.type === "text") handleTextWheel(e, el.id);
+                      }}
                       onClick={(e) => e.stopPropagation()}
                       onDoubleClick={() => { if (el.type === "text") setEditingTextId(el.id); }}
                       className={`absolute select-none touch-none ${isEditingText ? "cursor-text" : "cursor-grab active:cursor-grabbing"} ${isSelected ? "outline outline-2 outline-[#4a7fc1] outline-offset-1" : ""}`}

@@ -6,7 +6,7 @@ import SpinIn from "../../components/animation/SpinIn";
 import FadeInRight from "../../components/animation/FadeInRight";
 import FadeInLeft from "../../components/animation/FadeInLeft";
 import ViewportScaler from "../../components/ui/ViewportScaler";
-import TextType from "../../components/ui/TextType";
+import WordFadeText from "../../components/ui/WordFadeText";
 
 export default function AboutPage() {
   return (
@@ -37,22 +37,10 @@ export default function AboutPage() {
         <div className="w-full h-px bg-[#c0392b] mb-6 md:mb-10" />
 
         {/* Text */}
-        <div className="text-center text-[#7C6000] font-semibold text-sm sm:text-lg md:text-xl lg:text-2xl leading-snug max-w-4xl mx-auto">
-          <TextType
-            text={[
-              "Esize adalah sebuah perusahaan yang bergerak di bidang penyediaan barang dan jasa konveksi serta suvenir. Didirikan pada tahun 2019 kini esize telah bertransformasi menjadi sebuah perusahaan yang memiliki kemampuan untuk memproduksi dan menyediakan kebutuhan pelanggan dengan kapasitas besar ke seluruh Indonesia dan luar negeri.",
-            ]}
-            typingSpeed={15}
-            pauseDuration={3000}
-            loop={false}
-            showCursor={true}
-            hideCursorOnComplete={true}
-            cursorCharacter="|"
-            cursorBlinkDuration={0.5}
-            startOnVisible={true}
-            className="text-[#7C6000] font-semibold text-sm sm:text-lg md:text-xl lg:text-2xl leading-snug"
-          />
-        </div>
+        <WordFadeText
+          text="Esize adalah sebuah perusahaan yang bergerak di bidang penyediaan barang dan jasa konveksi serta suvenir. Didirikan pada tahun 2019 kini esize telah bertransformasi menjadi sebuah perusahaan yang memiliki kemampuan untuk memproduksi dan menyediakan kebutuhan pelanggan dengan kapasitas besar ke seluruh Indonesia dan luar negeri."
+          className="text-center text-[#7C6000] font-semibold text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed max-w-4xl mx-auto"
+        />
 
         {/* Bottom divider */}
         <div className="w-full h-px bg-[#c0392b] mt-6 md:mt-10 mb-8" />
@@ -70,30 +58,30 @@ export default function AboutPage() {
               className="object-cover"
             />
           </div>
-          <div className="flex-1 bg-[#f5e8e0] flex items-center justify-center px-3 sm:px-8 md:px-12 py-4 sm:py-12 md:py-16">
-            <p className="text-[#7C6000] font-semibold text-xs sm:text-xl md:text-[28px] leading-snug text-start md:text-end">
-              Didukung <span className="bg-[#F8F3E9] px-1">fasilitas produksi modern</span> dan{" "}
-              <span className="bg-[#F8F3E9] px-1">tim berpengalaman lebih dari 10 tahun,</span>{" "}
+          <div className="flex-1 bg-[#f9e9ca] flex items-center justify-center px-3 sm:px-8 md:px-12 py-4 sm:py-12 md:py-16">
+            <p className="text-[#7C6000] font-semibold text-xs sm:text-base md:text-lg lg:text-xl leading-snug text-start md:text-end">
+              Didukung <span className="rounded-sm bg-[#cfe2f7] px-1.5 text-[#7C6000]">fasilitas produksi modern</span> dan{" "}
+              <span className="rounded-sm bg-[#cfe2f7] px-1.5 text-[#7C6000]">tim berpengalaman lebih dari 10 tahun,</span>{" "}
               kami siap memenuhi kebutuhan konveksi
-              dan suvenir seperti <span className="bg-[#F8F3E9] px-1">seragam,</span>{" "}
-              <span className="bg-[#F8F3E9] px-1">kaos event,</span>{" "}
-              <span className="bg-[#F8F3E9] px-1">jaket,</span>{" "}
-              <span className="bg-[#F8F3E9] px-1">ID card,</span>{" "}
-              <span className="bg-[#F8F3E9] px-1">tote bag,</span>{" "}
-              <span className="bg-[#F8F3E9] px-1">dan lainnya</span>.
+              dan suvenir seperti <span className="rounded-sm bg-[#cfe2f7] px-1.5 text-[#7C6000]">seragam,</span>{" "}
+              <span className="rounded-sm bg-[#cfe2f7] px-1.5 text-[#7C6000]">kaos event,</span>{" "}
+              <span className="rounded-sm bg-[#cfe2f7] px-1.5 text-[#7C6000]">jaket,</span>{" "}
+              <span className="rounded-sm bg-[#cfe2f7] px-1.5 text-[#7C6000]">ID card,</span>{" "}
+              <span className="rounded-sm bg-[#cfe2f7] px-1.5 text-[#7C6000]">tote bag,</span>{" "}
+              <span className="rounded-sm bg-[#cfe2f7] px-1.5 text-[#7C6000]">dan lainnya.</span>
             </p>
           </div>
         </FadeInRight>
 
         {/* Bottom row: text left, image right */}
         <FadeInLeft className="flex flex-row">
-          <div className="flex-1 bg-[#dce8f5] flex items-center justify-center px-3 sm:px-8 md:px-12 py-4 sm:py-12 md:py-16">
-            <p className="text-[#7C6000] font-semibold text-xs sm:text-xl md:text-[28px] leading-snug text-start">
+          <div className="flex-1 bg-[#cfe2f7] flex items-center justify-center px-3 sm:px-8 md:px-12 py-4 sm:py-12 md:py-16">
+            <p className="text-[#7C6000] font-semibold text-xs sm:text-base md:text-lg lg:text-xl leading-snug text-start">
               Kami berkomitmen menghadirkan produk
-              berstandar tinggi dengan <span className="bg-[#F8F3E9] px-1">layanan terbaik,</span>{" "}
-              <span className="bg-[#F8F3E9] px-1">proses efisien,</span>{" "}
-              <span className="bg-[#F8F3E9] px-1">pengiriman tepat waktu,</span>
-              dan <span className="bg-[#F8F3E9] px-1">harga yang tetap bersahabat.</span>
+              berstandar tinggi dengan <span className="bg-[#f9e9ca] px-1 text-[#7C6000]">layanan terbaik,</span>{" "}
+              <span className="bg-[#f9e9ca] px-1 text-[#7C6000]">proses efisien,</span>{" "}
+              <span className="bg-[#f9e9ca] px-1 text-[#7C6000]">pengiriman tepat waktu,</span>
+              dan <span className="bg-[#f9e9ca] px-1 text-[#7C6000]">harga yang tetap bersahabat.</span>
             </p>
           </div>
           <div className="flex-1 relative min-h-0">
