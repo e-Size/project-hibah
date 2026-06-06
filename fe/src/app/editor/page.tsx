@@ -41,6 +41,11 @@ function getProductThumbnail(product: ProductTemplate) {
   return product.views.find((view) => view.key === "front") ?? product.views[0];
 }
 
+function getOptimizedAssetUrl(src: string, width: number, quality = 75) {
+  if (src.startsWith("blob:") || src.startsWith("data:")) return src;
+  return `/_next/image?url=${encodeURIComponent(src)}&w=${width}&q=${quality}`;
+}
+
 function getSheetViewportHeight() {
   return window.visualViewport?.height ?? window.innerHeight;
 }
@@ -353,55 +358,27 @@ export default function EditorPage() {
   }, []);
 
   useEffect(() => {
-    if (productTemplates.length === 0) return;
-
-    let cancelled = false;
-    let timer = 0;
-    let index = 0;
-
-    const preloadBatch = () => {
-      if (cancelled) return;
-
-      productTemplates.slice(index, index + 3).forEach((product) => {
-        const thumbnail = getProductThumbnail(product);
-        if (!thumbnail) return;
-        const image = new window.Image();
-        image.decoding = "async";
-        image.src = thumbnail.src;
-      });
-
-      index += 3;
-      if (index < productTemplates.length) {
-        timer = window.setTimeout(preloadBatch, 250);
-      }
-    };
-
-    timer = window.setTimeout(preloadBatch, 750);
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-    };
-  }, [productTemplates]);
-
-  useEffect(() => {
     if (views.length > 0 && !views.some((view) => view.key === selectedView)) {
       setSelectedView(views[0].key);
     }
   }, [selectedView, views]);
 
   useEffect(() => {
-    let ignore = false;
     setProcessedSrc({});
-    views.forEach(v => {
-      applyShirtColor(v.src, selectedColor).then(dataUrl => {
-        if (!ignore) setProcessedSrc(prev => ({ ...prev, [v.key]: dataUrl }));
-      });
+  }, [selectedColor, views]);
+
+  useEffect(() => {
+    if (!selectedViewSource) return;
+
+    let ignore = false;
+    applyShirtColor(getOptimizedAssetUrl(selectedViewSource, 640), selectedColor).then(dataUrl => {
+      if (!ignore) setProcessedSrc(prev => ({ ...prev, [selectedView]: dataUrl }));
     });
 
     return () => {
       ignore = true;
     };
-  }, [selectedColor, views]);
+  }, [selectedColor, selectedView, selectedViewSource]);
 
   const [zoom, setZoom] = useState(100);
   const [elements, setElements] = useState<CanvasEl[]>([]);
@@ -922,7 +899,8 @@ export default function EditorPage() {
   async function downloadZip() {
     const zip = new JSZip();
     for (const v of views) {
-      const c = await renderViewToCanvas(v.key, v.src, processedSrc[v.key]);
+      const coloredSrc = processedSrc[v.key] ?? await applyShirtColor(getOptimizedAssetUrl(v.src, 640), selectedColor);
+      const c = await renderViewToCanvas(v.key, v.src, coloredSrc);
       const blob = await new Promise<Blob>(res => c.toBlob(b => res(b!), "image/png"));
       zip.file(`${v.key}.png`, blob);
     }
@@ -951,7 +929,8 @@ export default function EditorPage() {
 
     for (let i = 0; i < views.length; i++) {
       const v = views[i];
-      const vc = await renderViewToCanvas(v.key, v.src, processedSrc[v.key]);
+      const coloredSrc = processedSrc[v.key] ?? await applyShirtColor(getOptimizedAssetUrl(v.src, 640), selectedColor);
+      const vc = await renderViewToCanvas(v.key, v.src, coloredSrc);
       ctx.drawImage(vc, positions[i].x, positions[i].y, GRID, GRID);
       ctx.fillStyle = "#00000066";
       ctx.font = "bold 18px sans-serif";
@@ -1467,7 +1446,7 @@ export default function EditorPage() {
                 {(processedSrc[selectedView] || selectedViewSource) && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={processedSrc[selectedView] || selectedViewSource}
+                    src={processedSrc[selectedView] || getOptimizedAssetUrl(selectedViewSource!, 640)}
                     alt="Product"
                     draggable={false}
                     decoding="async"
@@ -1588,7 +1567,7 @@ export default function EditorPage() {
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={processedSrc[key]} alt={label} style={{ width:"100%", height:"100%", objectFit:"contain" }} />
                         ) : (
-                          <Image src={views.find(v => v.key === key)!.src} alt={label} fill className="object-contain" />
+                          <Image src={views.find(v => v.key === key)!.src} alt={label} fill sizes="112px" className="object-contain" />
                         )}
                       </div>
                     </div>
@@ -1660,9 +1639,9 @@ export default function EditorPage() {
                       {processedSrc[key] ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={processedSrc[key]} alt={label} style={{ width:"100%", height:"100%", objectFit:"contain" }} />
-                      ) : (
-                        <Image src={views.find(v => v.key === key)!.src} alt={label} fill className="object-contain" />
-                      )}
+                        ) : (
+                          <Image src={views.find(v => v.key === key)!.src} alt={label} fill sizes="80px" className="object-contain" />
+                        )}
                     </div>
                   </div>
                   <p className={`text-[9px] font-semibold tracking-wider mt-1 ${active ? "text-[#e8734a]" : "text-gray-400"}`}>{label}</p>
@@ -1758,9 +1737,10 @@ export default function EditorPage() {
                   <div className="w-full aspect-square shrink-0 bg-[#f0ece6] relative overflow-hidden">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={thumbnail.src}
+                      src={getOptimizedAssetUrl(thumbnail.src, 256)}
                       alt={p.name}
                       decoding="async"
+                      loading="lazy"
                       className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>

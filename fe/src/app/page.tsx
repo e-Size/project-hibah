@@ -25,6 +25,7 @@ export default function Home() {
             alt="Hero background"
             fill
             className="object-cover object-[30%_center] md:object-center -z-10"
+            sizes="100vw"
             priority
           />
 
@@ -96,7 +97,7 @@ export default function Home() {
                 alt="Model pria"
                 fill
                 className="object-cover object-bottom"
-                priority
+                sizes="(max-width: 767px) 96vw, 1px"
               />
             </div>
             <div className="relative h-[clamp(245px,calc(100svh-320px),455px)] w-[76vw] max-w-[340px] -translate-x-[clamp(3rem,16vw,4rem)] z-10 pointer-events-none">
@@ -105,7 +106,7 @@ export default function Home() {
                 alt="Model wanita"
                 fill
                 className="object-cover object-bottom"
-                priority
+                sizes="(max-width: 767px) 76vw, 1px"
               />
             </div>
           </div>
@@ -137,7 +138,7 @@ export default function Home() {
                 alt="Model pria"
                 fill
                 className="object-contain object-bottom"
-                priority
+                sizes="(min-width: 768px) 27vw, 1px"
               />
             </div>
             <div className="relative w-43/100 h-250 -translate-x-52 z-10">
@@ -146,7 +147,7 @@ export default function Home() {
                 alt="Model wanita"
                 fill
                 className="object-contain object-bottom"
-                priority
+                sizes="(min-width: 768px) 22vw, 1px"
               />
             </div>
           </ParallaxScroll>
@@ -168,22 +169,22 @@ export default function Home() {
               <div className="md:hidden grid grid-cols-2 gap-2 w-full mb-6">
                 <div className="rounded-tl-2xl rounded-br-2xl bg-[#4a7fc1] aspect-square relative p-3">
                   <div className="relative w-full h-full rounded-tl-xl rounded-br-xl overflow-hidden">
-                    <Image src="/ataskanan.png" alt="Produk 1" fill className="object-cover" />
+                    <Image src="/ataskanan.png" alt="Produk 1" fill sizes="(max-width: 767px) 50vw, 1px" className="object-cover" />
                   </div>
                 </div>
                 <div className="rounded-tr-2xl rounded-bl-2xl bg-[#c0553a] aspect-square relative p-3">
                   <div className="relative w-full h-full rounded-tr-xl rounded-bl-xl overflow-hidden">
-                    <Image src="/ataskiri.png" alt="Produk 2" fill className="object-cover" />
+                    <Image src="/ataskiri.png" alt="Produk 2" fill sizes="(max-width: 767px) 50vw, 1px" className="object-cover" />
                   </div>
                 </div>
                 <div className="rounded-tr-2xl rounded-bl-2xl bg-[#7C6000] aspect-square relative p-3">
                   <div className="relative w-full h-full rounded-tr-xl rounded-bl-xl overflow-hidden">
-                    <Image src="/bawahkiri.png" alt="Produk 3" fill className="object-cover" />
+                    <Image src="/bawahkiri.png" alt="Produk 3" fill sizes="(max-width: 767px) 50vw, 1px" className="object-cover" />
                   </div>
                 </div>
                 <div className="rounded-tl-2xl rounded-br-2xl bg-[#4a7fc1] aspect-square relative p-3">
                   <div className="relative w-full h-full rounded-tl-xl rounded-br-xl overflow-hidden">
-                    <Image src="/bawahkanan.png" alt="Produk 4" fill className="object-cover" />
+                    <Image src="/bawahkanan.png" alt="Produk 4" fill sizes="(max-width: 767px) 50vw, 1px" className="object-cover" />
                   </div>
                 </div>
               </div>
@@ -209,28 +210,28 @@ export default function Home() {
               <FadeInLeft>
                 <div className="rounded-tl-2xl rounded-br-2xl bg-[#4a7fc1] aspect-square relative p-3">
                   <div className="relative w-full h-full rounded-tl-xl rounded-br-xl overflow-hidden">
-                    <Image src="/ataskanan.png" alt="Produk 1" fill className="object-cover" />
+                    <Image src="/ataskanan.png" alt="Produk 1" fill sizes="(min-width: 768px) 210px, 1px" className="object-cover" />
                   </div>
                 </div>
               </FadeInLeft>
               <FadeInRight>
                 <div className="rounded-tr-2xl rounded-bl-2xl bg-[#c0553a] aspect-square relative p-3">
                   <div className="relative w-full h-full rounded-tr-xl rounded-bl-xl overflow-hidden">
-                    <Image src="/ataskiri.png" alt="Produk 2" fill className="object-cover" />
+                    <Image src="/ataskiri.png" alt="Produk 2" fill sizes="(min-width: 768px) 210px, 1px" className="object-cover" />
                   </div>
                 </div>
               </FadeInRight>
               <FadeInLeft>
                 <div className="rounded-tr-2xl rounded-bl-2xl bg-[#7C6000] aspect-square relative p-3">
                   <div className="relative w-full h-full rounded-tr-xl rounded-bl-xl overflow-hidden">
-                    <Image src="/bawahkiri.png" alt="Produk 3" fill className="object-cover" />
+                    <Image src="/bawahkiri.png" alt="Produk 3" fill sizes="(min-width: 768px) 210px, 1px" className="object-cover" />
                   </div>
                 </div>
               </FadeInLeft>
               <FadeInRight>
                 <div className="rounded-tl-2xl rounded-br-2xl bg-[#4a7fc1] aspect-square relative p-3">
                   <div className="relative w-full h-full rounded-tl-xl rounded-br-xl overflow-hidden">
-                    <Image src="/bawahkanan.png" alt="Produk 4" fill className="object-cover" />
+                    <Image src="/bawahkanan.png" alt="Produk 4" fill sizes="(min-width: 768px) 210px, 1px" className="object-cover" />
                   </div>
                 </div>
               </FadeInRight>
