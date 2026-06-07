@@ -8,6 +8,7 @@ import type {
   ProductAddon, ProductAddonCreateRequest, ProductAddonUpdateRequest,
   ProductImage,
   SizeGuide,
+  ColorPalette, ColorPaletteCreateRequest, ColorPaletteUpdateRequest,
   ExtraImage, ExtraImageCreateRequest, ExtraImageUpdateRequest,
 } from "@/types/admin";
 
@@ -130,6 +131,20 @@ export const sizeGuideService = {
   },
   delete: (id: string) =>
     apiDelete<Msg>(`/size-guides/${id}`),
+};
+
+// ─── Color Palettes ─────────────────────────────────────
+export const colorPaletteService = {
+  getAll: () =>
+    apiGet<R<ColorPalette[]>>("/color-palettes").then(r => r.data),
+  getByProduct: (productId: string) =>
+    apiGet<R<ColorPalette>>(`/color-palettes/product/${productId}`).then(r => r.data),
+  create: (data: ColorPaletteCreateRequest) =>
+    apiPost<R<ColorPalette>>("/color-palettes", data).then(r => r.data),
+  update: (id: string, data: ColorPaletteUpdateRequest) =>
+    apiPut<R<ColorPalette>>(`/color-palettes/${id}`, data).then(r => r.data),
+  delete: (id: string) =>
+    apiDelete<Msg>(`/color-palettes/${id}`),
 };
 
 // ─── Generic Upload ─────────────────────────────────────

@@ -165,6 +165,21 @@ export interface SizeGuide extends Base {
   image_url: string;
 }
 
+// ─── Color Palette ──────────────────────────────────────
+export interface ColorPalette extends Base {
+  product_id: string;
+  colors: string[];
+}
+
+export interface ColorPaletteCreateRequest {
+  product_id: string;
+  colors: string[];
+}
+
+export interface ColorPaletteUpdateRequest {
+  colors: string[];
+}
+
 // ─── Extra Image ────────────────────────────────────────
 export interface ExtraImage extends Base {
   name: string;

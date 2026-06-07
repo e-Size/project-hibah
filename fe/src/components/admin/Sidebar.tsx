@@ -49,6 +49,15 @@ const menuItems = [
         ),
       },
       {
+        label: "Color Palette",
+        href: "/admin/color-palettes",
+        icon: (
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 2a8 8 0 100 16 1.5 1.5 0 001.06-2.56c-.291-.293-.7-.443-1.018-.69-.31-.24-.534-.598-.534-1.06 0-.802.65-1.452 1.452-1.452h1.75a3.5 3.5 0 003.5-3.5C16.21 4.546 13.42 2 10 2zM5 11a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm2-4a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm5-1a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm3 3a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" clipRule="evenodd" />
+          </svg>
+        ),
+      },
+      {
         label: "Product Addons",
         href: "/admin/product-addons",
         icon: (

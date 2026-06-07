@@ -2,6 +2,7 @@ package routes
 
 import (
 	"be/internal/auth"
+	colorpalette "be/internal/color_palette"
 	"be/internal/extra_image"
 	materialgroup "be/internal/material_group"
 	pricematrix "be/internal/price_matrix"
@@ -28,6 +29,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	pi := productimage.Wire(db)
 	ei := extra_image.Wire(db)
 	sg := sizeguide.Wire(db)
+	cp := colorpalette.Wire(db)
 	up := upload.Wire()
 
 	api := r.Group("/api")
@@ -49,6 +51,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 		api.GET("/product-images/product/:product_id", pi.GetByProduct)
 		api.GET("/extra-images", ei.GetAll)
 		api.GET("/size-guides/product/:product_id", sg.GetByProduct)
+		api.GET("/color-palettes/product/:product_id", cp.GetByProduct)
 
 		// ─── Protected (admin) endpoints ────────────────
 		admin := api.Group("")
@@ -90,6 +93,11 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 			admin.POST("/size-guides", sg.Create)
 			admin.PUT("/size-guides/:id", sg.Update)
 			admin.DELETE("/size-guides/:id", sg.Delete)
+
+			admin.GET("/color-palettes", cp.GetAll)
+			admin.POST("/color-palettes", cp.Create)
+			admin.PUT("/color-palettes/:id", cp.Update)
+			admin.DELETE("/color-palettes/:id", cp.Delete)
 
 			admin.POST("/upload", up.Upload)
 		}

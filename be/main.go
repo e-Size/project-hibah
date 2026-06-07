@@ -41,6 +41,7 @@ func main() {
 		&models.ProductImage{},
 		&models.ExtraImage{},
 		&models.SizeGuide{},
+		&models.ColorPalette{},
 	)
 
 	r := gin.Default()
