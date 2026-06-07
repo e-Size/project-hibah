@@ -51,16 +51,17 @@ function ProductCard({ cat, i, onProductClick }: { cat: CategoryItem; i: number;
 }
 
 function CategoryGridSkeleton({ count }: { count: number }) {
+  const shimmer = "animate-pulse bg-gray-200";
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-8 sm:gap-12 md:gap-20 px-4 sm:px-8 md:px-16">
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="relative pt-10 pr-4">
           <div className="absolute top-0 right-0 bottom-10 left-4 rounded-xl bg-[#E6B5A8]/50 rotate-6" />
           <div className="absolute top-4 right-2 bottom-6 left-2 rounded-xl bg-[#93B1D8]/50 rotate-3" />
-          <div className="relative border-4 border-[#927615]/30 rounded-t-xl overflow-hidden">
-            <div className="aspect-square animate-pulse bg-gray-200" />
-            <div className="py-2 md:py-3 flex justify-center bg-gray-200 animate-pulse">
-              <div className="h-4 w-20 rounded bg-gray-300" />
+          <div className="relative border-4 border-[#927615]/30 rounded-t-xl overflow-hidden bg-white">
+            <div className={`aspect-square ${shimmer}`} />
+            <div className="py-2 md:py-3 flex justify-center">
+              <div className={`h-4 w-20 rounded ${shimmer}`} />
             </div>
           </div>
         </div>
@@ -232,21 +233,23 @@ export default function CategoryPage() {
               )}
             </label>
 
-            {/* Category chips — desktop only */}
-            <div className="hidden md:flex gap-3 mt-1">
-              <button
-                onClick={() => setActiveChip(prev => prev === "pakaian" ? null : "pakaian")}
-                className={`rounded-full border-[1.5px] px-6 py-2 text-sm font-medium transition ${activeChip === "pakaian" ? "border-[#3a5fcf] bg-[#3a5fcf] text-white" : "border-stone-200 bg-white text-stone-600 hover:border-[#3a5fcf] hover:text-[#3a5fcf]"}`}
-              >
-                Pakaian
-              </button>
-              <button
-                onClick={() => setActiveChip(prev => prev === "merch" ? null : "merch")}
-                className={`rounded-full border-[1.5px] px-6 py-2 text-sm font-medium transition ${activeChip === "merch" ? "border-[#3a5fcf] bg-[#3a5fcf] text-white" : "border-stone-200 bg-white text-stone-600 hover:border-[#3a5fcf] hover:text-[#3a5fcf]"}`}
-              >
-                Merch
-              </button>
-            </div>
+            {/* Category chips — desktop only, hidden while searching */}
+            {!query && (
+              <div className="hidden md:flex gap-3 mt-1">
+                <button
+                  onClick={() => setActiveChip(prev => prev === "pakaian" ? null : "pakaian")}
+                  className={`rounded-full border-[1.5px] px-6 py-2 text-sm font-medium transition ${activeChip === "pakaian" ? "border-[#3a5fcf] bg-[#3a5fcf] text-white" : "border-stone-200 bg-white text-stone-600 hover:border-[#3a5fcf] hover:text-[#3a5fcf]"}`}
+                >
+                  Pakaian
+                </button>
+                <button
+                  onClick={() => setActiveChip(prev => prev === "merch" ? null : "merch")}
+                  className={`rounded-full border-[1.5px] px-6 py-2 text-sm font-medium transition ${activeChip === "merch" ? "border-[#3a5fcf] bg-[#3a5fcf] text-white" : "border-stone-200 bg-white text-stone-600 hover:border-[#3a5fcf] hover:text-[#3a5fcf]"}`}
+                >
+                  Merch
+                </button>
+              </div>
+            )}
 
             {/* Chevron — mobile only */}
             <button
@@ -267,7 +270,7 @@ export default function CategoryPage() {
         {/* Pakaian Section */}
         {activeChip !== "merch" && (
           <div id="section-pakaian" className={`px-0 pb-4 ${query ? "pt-4" : "pt-12 md:pt-16"}`}>
-            <SectionHeader title="Pakaian" showLogos={!query} />
+            {!query && <SectionHeader title="Pakaian" showLogos={!query} />}
             <CategoryGrid items={filteredPakaian} isLoading={isLoading} onProductClick={handleProductClick} />
           </div>
         )}
@@ -275,7 +278,7 @@ export default function CategoryPage() {
         {/* Merch Section */}
         {activeChip !== "pakaian" && (
           <div id="section-merch" className={`px-0 pb-12 md:pb-16 ${query ? "pt-4" : "pt-12 md:pt-16"}`}>
-            <SectionHeader title="Merch" showLogos={!query} />
+            {!query && <SectionHeader title="Merch" showLogos={!query} />}
             <CategoryGrid items={filteredMerch} isLoading={isLoading} onProductClick={handleProductClick} />
           </div>
         )}

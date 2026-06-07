@@ -55,16 +55,16 @@ export default function LocationSection() {
           {locations.map((loc) => (
             <div
               key={loc.name}
-              className={`flex-1 md:max-w-140 border-[3px] md:border-[6px] bg-[#fdf6f0] flex flex-row p-1.5 md:p-4 gap-1.5 md:gap-5 ${loc.rounded}`}
+              className={`flex-1 md:max-w-140 border-[3px] md:border-[6px] bg-[#fdf6f0] flex flex-col md:flex-row p-1.5 md:p-4 gap-1.5 md:gap-5 ${loc.rounded}`}
               style={{ borderColor: loc.borderColor }}
             >
-              {/* Photo — fixed width, stretches to card height */}
-              <div className="relative w-14 md:w-60 md:h-60 shrink-0 self-stretch md:self-center overflow-hidden rounded-md">
+              {/* Photo — full width on mobile, fixed width on desktop */}
+              <div className="relative w-full h-32 md:w-60 md:h-60 shrink-0 self-stretch md:self-center overflow-hidden rounded-md">
                 <Image
                   src={loc.photo}
                   alt={loc.name}
                   fill
-                  sizes="(max-width: 767px) 56px, 240px"
+                  sizes="(max-width: 767px) 100vw, 240px"
                   className="object-cover"
                 />
               </div>
@@ -78,7 +78,7 @@ export default function LocationSection() {
                   <svg className="flex-shrink-0 mt-0.5" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={loc.borderColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
                   </svg>
-                  <p className="text-gray-500 text-[9px] md:text-sm leading-snug line-clamp-4">{loc.address}</p>
+                  <p className="text-gray-500 text-[9px] md:text-sm leading-snug">{loc.address}</p>
                 </div>
                 <div className="flex items-center gap-1 md:gap-3">
                   <svg className="flex-shrink-0" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={loc.borderColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
