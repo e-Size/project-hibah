@@ -60,7 +60,7 @@ export default function CategoryCarousel() {
             >
               <div className="border-[3px] border-[#927615] rounded-xl overflow-hidden bg-white">
                 <div className="aspect-square relative overflow-hidden">
-                  <Image src={cat.image || "/baju.png"} alt={cat.name} fill className="object-cover" />
+                  <Image src={cat.image || "/baju.png"} alt={cat.name} fill sizes="(max-width: 639px) 40vw, (max-width: 1023px) 33vw, 25vw" className="object-cover" />
                 </div>
                 <div
                   className="py-2 text-center"

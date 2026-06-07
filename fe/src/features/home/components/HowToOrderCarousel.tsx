@@ -98,7 +98,7 @@ export default function HowToOrderCarousel() {
                       {step.num}
                     </span>
                     <div className="relative w-full h-36">
-                      <Image src={step.img} alt={step.title} fill className="object-cover pointer-events-none" />
+                      <Image src={step.img} alt={step.title} fill sizes="(max-width: 1023px) 76vw, 1px" className="object-cover pointer-events-none" />
                     </div>
                   </div>
                   {/* Text block — flex-1 so all cards fill identically */}
@@ -164,7 +164,7 @@ export default function HowToOrderCarousel() {
                     {step.num}
                   </span>
                   <div className="relative w-full h-30">
-                    <Image src={step.img} alt={step.title} fill className="object-cover" />
+                    <Image src={step.img} alt={step.title} fill sizes="(min-width: 1024px) 18vw, 1px" className="object-cover" />
                   </div>
                 </div>
                 <div className="flex-1 px-4 pb-4">

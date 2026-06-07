@@ -1327,7 +1327,7 @@ export default function EditorPage() {
                       {viewElements.filter(el => el.type === "image").map((el) => (
                         <button key={el.id} onClick={() => setSelectedEl(el.id === selectedEl ? null : el.id)}
                           className={`aspect-square rounded-xl overflow-hidden relative border-2 transition-all ${el.id === selectedEl ? "border-[#e8734a]" : "border-gray-100"}`}>
-                          <Image src={el.src!} alt="element" fill className="object-cover" />
+                          <Image src={el.src!} alt="element" fill sizes="100px" className="object-cover" />
                         </button>
                       ))}
                     </div>
@@ -1508,7 +1508,7 @@ export default function EditorPage() {
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" className="shrink-0"><circle cx="9" cy="5" r="1" fill="#9ca3af"/><circle cx="9" cy="12" r="1" fill="#9ca3af"/><circle cx="9" cy="19" r="1" fill="#9ca3af"/><circle cx="15" cy="5" r="1" fill="#9ca3af"/><circle cx="15" cy="12" r="1" fill="#9ca3af"/><circle cx="15" cy="19" r="1" fill="#9ca3af"/></svg>
                       {el.type === "image" ? (
                         <div className="w-8 h-8 rounded overflow-hidden relative shrink-0">
-                          <Image src={el.src!} alt="" fill className="object-cover" />
+                          <Image src={el.src!} alt="" fill sizes="32px" className="object-cover" />
                         </div>
                       ) : (
                         <div className="w-8 h-8 rounded flex items-center justify-center shrink-0 text-xs font-bold text-white" style={{ backgroundColor: el.color ?? "#111", fontFamily: el.fontFamily }}>T</div>

@@ -33,6 +33,7 @@ function ProductCard({ cat, i, onProductClick }: { cat: CategoryItem; i: number;
               src={cat.image || "/baju.png"}
               alt={cat.name}
               fill
+              sizes="(max-width: 767px) 45vw, 30vw"
               className={`object-cover transition-opacity duration-300 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
               onLoad={() => setImgLoaded(true)}
             />

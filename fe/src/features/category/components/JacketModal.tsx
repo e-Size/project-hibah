@@ -84,7 +84,7 @@ export default function JacketModal({ onClose }: Props) {
         {/* Left — image carousel (fixed, no scroll) */}
         <div className="flex flex-col items-center gap-3 md:w-[45%] flex-shrink-0 overflow-hidden min-h-0">
           <div className="relative w-full aspect-square bg-[#7a6a30] rounded-xl overflow-hidden flex items-center justify-center mb-5">
-            <Image src={images[imgIndex]} alt="Jacket" fill className="object-contain p-6 " />
+            <Image src={images[imgIndex]} alt="Jacket" fill sizes="(max-width: 767px) calc(100vw - 32px), 45vw" className="object-contain p-6 " />
             <button
               onClick={() => setImgIndex((i) => (i - 1 + images.length) % images.length)}
               className="absolute left-2 top-1/2 -translate-y-1/2 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow text-gray-700 hover:bg-gray-100"
@@ -174,7 +174,7 @@ export default function JacketModal({ onClose }: Props) {
                   }`}
                 >
                   <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-200 relative">
-                    <Image src={b.img} alt={b.name} fill className="object-cover" />
+                    <Image src={b.img} alt={b.name} fill sizes="64px" className="object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
