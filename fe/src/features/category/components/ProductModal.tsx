@@ -656,7 +656,7 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
 
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-x-hidden overflow-y-visible pr-1 md:overflow-y-auto md:overscroll-contain">
         <div className="flex flex-col gap-5">
-          <div>
+          <div className="md:sticky md:top-0 md:z-10 md:-mb-5 md:bg-[#fdf6f0] md:pb-5">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#9F7A04]">
               {displayProduct?.category || product.category || "produk"}
             </p>
