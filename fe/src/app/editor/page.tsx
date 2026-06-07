@@ -1928,7 +1928,7 @@ export default function EditorPage() {
           onClick={() => setShowSizeGuide(false)}
         >
           <div
-            className="relative max-h-full max-w-4xl overflow-hidden rounded-2xl bg-white p-3 shadow-2xl sm:p-5"
+            className="relative w-fit max-w-[90vw] overflow-hidden rounded-2xl bg-white p-3 shadow-2xl sm:p-5"
             onClick={(event) => event.stopPropagation()}
           >
             <button
@@ -1943,7 +1943,7 @@ export default function EditorPage() {
             <img
               src={getOptimizedAssetUrl(sizeGuideUrl, 1080)}
               alt={`Size guide ${selectedProductName}`}
-              className="max-h-[85dvh] max-w-full object-contain"
+              className="block max-h-[72vh] max-w-[88vw] object-contain sm:max-h-[60vh] sm:max-w-[80vw]"
             />
           </div>
         </div>
