@@ -1,14 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { pakaian, merch } from "../data/categories";
 import { getProducts, resolveAssetUrl } from "../services/api";
 import type { CategoryItem, Product, ProductCategory } from "../types/product";
-
-const fallbackByCategory: Record<ProductCategory, CategoryItem[]> = {
-  pakaian,
-  merch,
-};
 
 function splitKeywords(value: string): string[] {
   return value
@@ -58,21 +52,12 @@ export function useProducts(category?: ProductCategory) {
     };
   }, [category]);
 
-  const items = useMemo(() => {
-    if (products.length > 0) {
-      return products.map(productToCategoryItem);
-    }
-
-    if (category) return fallbackByCategory[category];
-
-    return [...fallbackByCategory.pakaian, ...fallbackByCategory.merch];
-  }, [category, products]);
+  const items = useMemo(() => products.map(productToCategoryItem), [products]);
 
   return {
     error,
     isLoading,
     items,
     products,
-    usingFallback: products.length === 0,
   };
 }
