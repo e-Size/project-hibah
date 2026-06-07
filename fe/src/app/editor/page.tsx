@@ -128,6 +128,7 @@ type CanvasEl = {
   h: number;
   view: ViewType;
   curve?: number;
+  rotation?: number;
 };
 
 function IconProduct({ active }: { active: boolean }) {
@@ -469,6 +470,7 @@ export default function EditorPage() {
   }
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
   const draggingRef = useRef<{ id: string; startX: number; startY: number; elX: number; elY: number } | null>(null);
   const resizingRef = useRef<{
     id: string; corner: "se" | "sw" | "ne" | "nw";
@@ -480,9 +482,11 @@ export default function EditorPage() {
     pointers: Map<number, { x: number; y: number }>;
     drag: { pointerId: number; startX: number; startY: number; elX: number; elY: number } | null;
     pinch: { startDistance: number; startFontSize: number } | null;
+    moved: boolean;
     cleanup?: () => void;
   } | null>(null);
   const [editingTextId, setEditingTextId] = useState<string | null>(null);
+  const measureCtxRef = useRef<CanvasRenderingContext2D | null>(null);
   const dragLayerRef = useRef<string | null>(null);
   const sidebarScrollRef = useRef<HTMLDivElement>(null);
 
@@ -575,24 +579,29 @@ export default function EditorPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tdText, tdFontSize, tdSpacing, tdColor, tdBold, tdItalic, tdAlign, tdFont, tdCurve]);
 
+  function addImageFiles(files: File[]) {
+    files
+      .filter((file) => file.type.startsWith("image/"))
+      .forEach((file) => {
+        const src = URL.createObjectURL(file);
+        const zone = printZone[selectedView];
+        const newEl: CanvasEl = {
+          id: Math.random().toString(36).slice(2),
+          type: "image",
+          src,
+          x: (zone.x / 100) * CANVAS,
+          y: (zone.y / 100) * CANVAS,
+          w: (zone.w / 100) * CANVAS,
+          h: (zone.h / 100) * CANVAS,
+          view: selectedView,
+        };
+        setElementsWithHistory(prev => [...prev, newEl]);
+        setSelectedEl(newEl.id);
+      });
+  }
+
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? []);
-    files.forEach((file) => {
-      const src = URL.createObjectURL(file);
-      const zone = printZone[selectedView];
-      const newEl: CanvasEl = {
-        id: Math.random().toString(36).slice(2),
-        type: "image",
-        src,
-        x: (zone.x / 100) * CANVAS,
-        y: (zone.y / 100) * CANVAS,
-        w: (zone.w / 100) * CANVAS,
-        h: (zone.h / 100) * CANVAS,
-        view: selectedView,
-      };
-      setElementsWithHistory(prev => [...prev, newEl]);
-      setSelectedEl(newEl.id);
-    });
+    addImageFiles(Array.from(e.target.files ?? []));
     e.target.value = "";
   }
 
@@ -611,6 +620,7 @@ export default function EditorPage() {
       textAlign: tdAlign,
       color: tdColor,
       curve: tdCurve,
+      rotation: 0,
       x: (zone.x / 100) * CANVAS + 10,
       y: (zone.y / 100) * CANVAS + 10,
       w: (zone.w / 100) * CANVAS - 20,
@@ -642,8 +652,7 @@ export default function EditorPage() {
       const dy = (ev.clientY - startY) / scale;
       setElements(prev => prev.map(item => {
         if (item.id !== id) return item;
-        const clampW = item.type === "text" ? 20 : item.w;
-        const clampH = item.type === "text" ? 20 : item.h;
+        const { w: clampW, h: clampH } = item.type === "text" ? getTextBoxSize(item) : { w: item.w, h: item.h };
         const nx = Math.max(zoneLeft, Math.min(zoneRight - clampW, elX + dx));
         const ny = Math.max(zoneTop,  Math.min(zoneBottom - clampH, elY + dy));
         return { ...item, x: nx, y: ny };
@@ -658,8 +667,69 @@ export default function EditorPage() {
     window.addEventListener("pointerup", onUp);
   }
 
+  function onRotateHandlePointerDown(e: React.PointerEvent, id: string) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const wrapper = (e.currentTarget as HTMLElement).parentElement;
+    if (!wrapper) return;
+    const rect = wrapper.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const startRotation = elements.find(item => item.id === id)?.rotation ?? 0;
+    const startAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
+
+    setSelectedEl(id);
+
+    function onMove(ev: PointerEvent) {
+      const angle = Math.atan2(ev.clientY - centerY, ev.clientX - centerX) * (180 / Math.PI);
+      const rotation = Math.round(startRotation + (angle - startAngle));
+      setElements(prev => prev.map(item => item.id === id ? { ...item, rotation } : item));
+    }
+    function onUp() {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+    }
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
+  }
+
   function clampTextFontSize(size: number) {
     return Math.max(MIN_TEXT_FONT_SIZE, Math.min(MAX_TEXT_FONT_SIZE, Math.round(size)));
+  }
+
+  function measureTextWidth(el: CanvasEl, fontSize: number) {
+    if (!measureCtxRef.current) {
+      measureCtxRef.current = document.createElement("canvas").getContext("2d");
+    }
+    const ctx = measureCtxRef.current;
+    if (!ctx) return 0;
+    ctx.font = `${el.fontWeight ?? "400"} ${fontSize}px ${el.fontFamily ?? "Poppins"}, sans-serif`;
+    const text = el.text || "";
+    const spacing = (el.letterSpacing ?? 0) * Math.max(0, text.length - 1);
+    return ctx.measureText(text).width + spacing;
+  }
+
+  function getTextBoxSize(el: CanvasEl) {
+    const fontSize = el.fontSize ?? 24;
+    const curve = el.curve ?? 0;
+    const h = curve !== 0 ? fontSize + Math.abs(curve) + 10 : (el.h || fontSize * 1.4);
+    const w = curve !== 0 ? el.w : Math.max(20, measureTextWidth(el, fontSize));
+    return { w, h };
+  }
+
+  function getMaxFitFontSize(el: CanvasEl, desiredSize: number) {
+    const pz = printZone[el.view];
+    const availW = ((pz.x + pz.w) / 100) * CANVAS - el.x;
+    const availH = ((pz.y + pz.h) / 100) * CANVAS - el.y;
+    let size = clampTextFontSize(desiredSize);
+    while (size > MIN_TEXT_FONT_SIZE && (measureTextWidth(el, size) > availW || size * 1.4 > availH)) {
+      size -= 1;
+    }
+    return size;
   }
 
   function getPointerDistance(points: Map<number, { x: number; y: number }>) {
@@ -669,7 +739,9 @@ export default function EditorPage() {
   }
 
   function updateTextFontSize(id: string, nextSize: number) {
-    const fontSize = clampTextFontSize(nextSize);
+    const el = elements.find(item => item.id === id && item.type === "text");
+    if (!el) return;
+    const fontSize = getMaxFitFontSize(el, nextSize);
     setElements(prev => prev.map(item =>
       item.id === id && item.type === "text"
         ? { ...item, fontSize, h: fontSize * 1.4 }
@@ -691,7 +763,6 @@ export default function EditorPage() {
     if (!el) return;
 
     setSelectedEl(id);
-    setActiveTab("text");
 
     if (!textGestureRef.current || textGestureRef.current.id !== id) {
       textGestureRef.current?.cleanup?.();
@@ -700,6 +771,7 @@ export default function EditorPage() {
         pointers: new Map(),
         drag: null,
         pinch: null,
+        moved: false,
       };
     }
 
@@ -754,12 +826,14 @@ export default function EditorPage() {
 
       if (!current.drag || current.drag.pointerId !== ev.pointerId) return;
       const { startX, startY, elX, elY } = current.drag;
+      if (!current.moved && Math.hypot(ev.clientX - startX, ev.clientY - startY) > 6) {
+        current.moved = true;
+      }
       const dx = (ev.clientX - startX) / scale;
       const dy = (ev.clientY - startY) / scale;
       setElements(prev => prev.map(item => {
         if (item.id !== id) return item;
-        const clampW = 20;
-        const clampH = item.h || (item.fontSize ?? 24) * 1.4;
+        const { w: clampW, h: clampH } = getTextBoxSize(item);
         const nx = Math.max(zoneLeft, Math.min(zoneRight - clampW, elX + dx));
         const ny = Math.max(zoneTop, Math.min(zoneBottom - clampH, elY + dy));
         return { ...item, x: nx, y: ny };
@@ -770,6 +844,8 @@ export default function EditorPage() {
       const current = textGestureRef.current;
       if (!current || current.id !== id) return;
 
+      const wasTap = !current.moved && !current.pinch && current.pointers.size === 1;
+
       current.pointers.delete(ev.pointerId);
       current.drag = null;
       current.pinch = null;
@@ -778,6 +854,8 @@ export default function EditorPage() {
         current.cleanup?.();
         textGestureRef.current = null;
       }
+
+      if (wasTap) setActiveTab("text");
     }
 
     gesture.cleanup = () => {
@@ -909,8 +987,17 @@ export default function EditorPage() {
       } else if (el.type === "text" && el.text) {
         ctx.save();
         const curve = el.curve ?? 0;
+        const fsz = el.fontSize ?? 16;
+        const rotation = el.rotation ?? 0;
+        if (rotation !== 0) {
+          const boxH = curve !== 0 ? fsz + Math.abs(curve) + 10 : (el.h || fsz * 1.4);
+          const cx = el.x + el.w / 2;
+          const cy = el.y + boxH / 2;
+          ctx.translate(cx, cy);
+          ctx.rotate((rotation * Math.PI) / 180);
+          ctx.translate(-cx, -cy);
+        }
         if (curve !== 0) {
-          const fsz = el.fontSize ?? 16;
           const absS = Math.abs(curve);
           const r = (absS * absS + (el.w / 2) * (el.w / 2)) / (2 * absS);
           const midY = fsz * 0.8;
@@ -925,9 +1012,9 @@ export default function EditorPage() {
             img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
           });
         } else {
-          ctx.font = `${el.fontWeight ?? '400'} ${el.fontSize}px ${el.fontFamily ?? 'Poppins'}, sans-serif`;
+          ctx.font = `${el.fontWeight ?? '400'} ${fsz}px ${el.fontFamily ?? 'Poppins'}, sans-serif`;
           ctx.fillStyle = el.color ?? "#111111";
-          ctx.fillText(el.text, el.x, el.y + (el.fontSize ?? 16));
+          ctx.fillText(el.text, el.x, el.y + fsz);
         }
         ctx.restore();
       }
@@ -1175,7 +1262,17 @@ export default function EditorPage() {
                   </div>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 py-8 flex flex-col items-center gap-3">
+                <div
+                  onDragOver={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
+                  onDragEnter={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
+                  onDragLeave={(e) => { if (e.currentTarget === e.target) setIsDraggingFile(false); }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDraggingFile(false);
+                    addImageFiles(Array.from(e.dataTransfer.files ?? []));
+                  }}
+                  className={`bg-white rounded-2xl shadow-sm border py-8 flex flex-col items-center gap-3 transition-colors ${isDraggingFile ? "border-[#e8734a] bg-[#fff4ee]" : "border-gray-100"}`}
+                >
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     className="w-20 h-20 rounded-3xl flex items-center justify-center hover:opacity-90 transition-opacity"
@@ -1306,7 +1403,12 @@ export default function EditorPage() {
                       </div>
                       <span className="bg-gray-800 text-white text-xs font-bold px-2 py-0.5 rounded-full">{tdFontSize}px</span>
                     </div>
-                    <input type="range" min={MIN_TEXT_FONT_SIZE} max={MAX_TEXT_FONT_SIZE} value={tdFontSize} onChange={e => setTdFontSize(Number(e.target.value))}
+                    <input type="range" min={MIN_TEXT_FONT_SIZE} max={MAX_TEXT_FONT_SIZE} value={tdFontSize}
+                      onChange={e => {
+                        const next = Number(e.target.value);
+                        if (selectedEl) updateTextFontSize(selectedEl, next);
+                        else setTdFontSize(next);
+                      }}
                       className="w-full accent-gray-800 h-1.5 rounded-full" />
                     <div className="flex justify-between text-[10px] text-gray-400 mt-1"><span>{MIN_TEXT_FONT_SIZE}</span><span>{MAX_TEXT_FONT_SIZE}</span></div>
                   </div>
@@ -1366,9 +1468,7 @@ export default function EditorPage() {
                 <div className="px-4 py-3 border-t border-gray-100 bg-white shrink-0">
                   <button onClick={addCustomText}
                     className="w-full bg-[#e8734a] hover:bg-[#d4623a] text-white rounded-xl py-2.5 font-bold text-xs tracking-wide transition-colors flex items-center justify-center gap-1.5">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
                     ADD TO DESIGN
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
                   </button>
                 </div>
               </div>
@@ -1525,8 +1625,27 @@ export default function EditorPage() {
                       onClick={(e) => e.stopPropagation()}
                       onDoubleClick={() => { if (el.type === "text") setEditingTextId(el.id); }}
                       className={`absolute select-none touch-none ${isEditingText ? "cursor-text" : "cursor-grab active:cursor-grabbing"} ${isSelected ? "outline outline-2 outline-[#4a7fc1] outline-offset-1" : ""}`}
-                      style={{ left: el.x, top: el.y, width: el.type === "image" ? el.w : "auto", height: el.type === "image" ? el.h : "auto" }}
+                      style={{
+                        left: el.x,
+                        top: el.y,
+                        width: el.type === "image" ? el.w : "auto",
+                        height: el.type === "image" ? el.h : "auto",
+                        transform: el.type === "text" && el.rotation ? `rotate(${el.rotation}deg)` : undefined,
+                        transformOrigin: "center",
+                      }}
                     >
+                      {isSelected && el.type === "text" && !isEditingText && (
+                        <div
+                          onPointerDown={(e) => onRotateHandlePointerDown(e, el.id)}
+                          className="absolute -top-9 left-1/2 -translate-x-1/2 flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#4a7fc1] bg-white shadow-sm touch-none cursor-grab active:cursor-grabbing z-10"
+                          title="Putar teks"
+                        >
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a7fc1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 12a9 9 0 1 1-3-6.7" />
+                            <polyline points="21 3 21 9 15 9" />
+                          </svg>
+                        </div>
+                      )}
                       {el.type === "image" ? (
                         <div style={{ width: el.w, height: el.h, position: "relative" }}>
                           {/* eslint-disable-next-line @next/next/no-img-element */}
