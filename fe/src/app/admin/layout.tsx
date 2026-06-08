@@ -4,8 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import "../../styles/admin.css";
 import Sidebar from "@/components/admin/Sidebar";
 import ToastContainer from "@/components/admin/Toast";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.esize.id/api";
+import { verifySession, logoutRequest } from "@/lib/api";
 
 interface AuthContextType {
   logout: () => void;
@@ -24,25 +23,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [checking, setChecking] = useState(true);
 
   const verify = useCallback(async () => {
-    const token = localStorage.getItem("admin_token");
-    if (!token) {
-      setAuthed(false);
-      setChecking(false);
-      return;
-    }
-    try {
-      const res = await fetch(`${API_BASE}/auth/verify`, {
-        headers: { Authorization: token },
-      });
-      if (res.ok) {
-        setAuthed(true);
-      } else {
-        localStorage.removeItem("admin_token");
-        setAuthed(false);
-      }
-    } catch {
-      setAuthed(false);
-    }
+    setChecking(true);
+    const ok = await verifySession();
+    setAuthed(ok);
     setChecking(false);
   }, []);
 
@@ -50,20 +33,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     verify();
   }, [verify, pathname]);
 
-  const logout = useCallback(() => {
-    const token = localStorage.getItem("admin_token");
-    if (token) {
-      fetch(`${API_BASE}/auth/logout`, {
-        method: "POST",
-        headers: { Authorization: token },
-      }).catch(() => {});
-    }
-    localStorage.removeItem("admin_token");
+  const logout = useCallback(async () => {
+    await logoutRequest();
     setAuthed(false);
     router.replace("/admin/login");
   }, [router]);
 
-  // Still checking auth status
   if (checking) {
     return (
       <div className="login-page">
@@ -74,7 +49,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  // Not authed & not on login page → show login page
   if (!authed && !isLoginPage) {
     router.replace("/admin/login");
     return (
@@ -86,7 +60,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  // On login page (either authed or not) → render children directly (no sidebar)
   if (isLoginPage) {
     return (
       <AuthContext.Provider value={{ logout }}>
@@ -96,7 +69,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  // Authed & not login page → full admin layout
   return (
     <AuthContext.Provider value={{ logout }}>
       <div className="admin-layout">

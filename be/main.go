@@ -32,6 +32,7 @@ func main() {
 
 	config.ConnectDB()
 	config.DB.AutoMigrate(
+		&models.User{},
 		&models.Product{},
 		&models.MaterialGroup{},
 		&models.SizeVariant{},

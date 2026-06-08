@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { setTokens } from "@/lib/api";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.esize.id/api";
 
@@ -25,13 +26,13 @@ export default function AdminLoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
-      const data = await res.json();
+      const data = await res.json() as { access_token?: string; refresh_token?: string; error?: string };
       if (!res.ok) {
         setError(data.error || "Login gagal");
         setLoading(false);
         return;
       }
-      localStorage.setItem("admin_token", data.token);
+      setTokens(data.access_token!, data.refresh_token!);
       router.replace("/admin");
     } catch {
       setError("Tidak bisa terhubung ke server");

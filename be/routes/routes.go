@@ -37,6 +37,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 		// ─── Auth (public) ──────────────────────────────
 		api.POST("/auth/login", auth.Login)
 		api.POST("/auth/logout", auth.Logout)
+		api.POST("/auth/refresh", auth.Refresh)
 		api.GET("/auth/verify", auth.Verify)
 
 		// ─── Public GET endpoints ───────────────────────
