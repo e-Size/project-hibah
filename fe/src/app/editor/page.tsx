@@ -294,6 +294,8 @@ export default function EditorPage() {
 
   const [selectedColor, setSelectedColor] = useState("#ffffff");
   const [activeColors, setActiveColors] = useState<string[]>(colors);
+  const [colorPage, setColorPage] = useState(0);
+  const COLOR_PAGE_SIZE = 28;
   const [selectedView, setSelectedView] = useState<ViewType>("front");
   const [processedSrc, setProcessedSrc] = useState<Partial<Record<ViewType, string>>>({});
   const selectedProduct = productTemplates.find((product) => product.name === selectedProductName) ?? productTemplates[0];
@@ -417,10 +419,12 @@ export default function EditorPage() {
         if (ignore) return;
         if (palette && palette.colors && palette.colors.length > 0) {
           setActiveColors(palette.colors);
+          setColorPage(0);
           setSelectedColor((prev) => palette.colors.includes(prev) ? prev : palette.colors[0]);
         } else {
           const fallback = product.category === "merch" ? DEFAULT_MERCH_COLORS : colors;
           setActiveColors(fallback);
+          setColorPage(0);
           setSelectedColor((prev) => fallback.includes(prev) ? prev : fallback[0]);
         }
       })
@@ -428,6 +432,7 @@ export default function EditorPage() {
         if (ignore) return;
         const fallback = product.category === "merch" ? DEFAULT_MERCH_COLORS : colors;
         setActiveColors(fallback);
+        setColorPage(0);
         setSelectedColor((prev) => fallback.includes(prev) ? prev : fallback[0]);
       });
 
@@ -1437,7 +1442,7 @@ export default function EditorPage() {
                       type="button"
                       onClick={() => setShowSizeGuide(true)}
                       disabled={!sizeGuideUrl}
-                      className="text-xs text-[#e8734a] font-medium hover:underline disabled:cursor-not-allowed disabled:text-gray-300 disabled:no-underline"
+                      className="text-xs text-gray-800 font-medium hover:underline disabled:cursor-not-allowed disabled:text-gray-300 disabled:no-underline"
                     >
                       Size Guide →
                     </button>
@@ -1446,14 +1451,39 @@ export default function EditorPage() {
                 </div>
 
                 <div className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: "#F5E6D3" }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b6340" strokeWidth="2"><circle cx="13.5" cy="6.5" r=".5" fill="#8b6340" /><circle cx="17.5" cy="10.5" r=".5" fill="#8b6340" /><circle cx="8.5" cy="7.5" r=".5" fill="#8b6340" /><circle cx="6.5" cy="12.5" r=".5" fill="#8b6340" /><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" /></svg>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: "#F5E6D3" }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b6340" strokeWidth="2"><circle cx="13.5" cy="6.5" r=".5" fill="#8b6340" /><circle cx="17.5" cy="10.5" r=".5" fill="#8b6340" /><circle cx="8.5" cy="7.5" r=".5" fill="#8b6340" /><circle cx="6.5" cy="12.5" r=".5" fill="#8b6340" /><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" /></svg>
+                      </div>
+                      <span className="font-bold text-gray-800 text-sm tracking-wide">COLOR PALETTE</span>
                     </div>
-                    <span className="font-bold text-gray-800 text-sm tracking-wide">COLOR PALETTE</span>
+                    {activeColors.length > COLOR_PAGE_SIZE && (
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setColorPage((p) => Math.max(0, p - 1))}
+                          disabled={colorPage === 0}
+                          className="w-6 h-6 rounded-md flex items-center justify-center disabled:opacity-30 hover:bg-gray-200 transition-colors text-gray-800"
+                        >
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg>
+                        </button>
+                        <span className="text-xs text-gray-600 tabular-nums font-medium">
+                          {colorPage + 1}/{Math.ceil(activeColors.length / COLOR_PAGE_SIZE)}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setColorPage((p) => Math.min(Math.ceil(activeColors.length / COLOR_PAGE_SIZE) - 1, p + 1))}
+                          disabled={colorPage >= Math.ceil(activeColors.length / COLOR_PAGE_SIZE) - 1}
+                          className="w-6 h-6 rounded-md flex items-center justify-center disabled:opacity-30 hover:bg-gray-200 transition-colors text-gray-800"
+                        >
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg>
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <div className="grid grid-cols-7 gap-2">
-                    {activeColors.map((color) => (
+                    {activeColors.slice(colorPage * COLOR_PAGE_SIZE, (colorPage + 1) * COLOR_PAGE_SIZE).map((color) => (
                       <button
                         key={color}
                         onClick={() => setSelectedColor(color)}

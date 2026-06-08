@@ -964,6 +964,23 @@
   margin: 0;
 }
 
+.login-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  color: var(--admin-primary);
+  text-decoration: none;
+  margin-bottom: 12px;
+  font-weight: 500;
+  transition: opacity 0.15s;
+}
+
+.login-back-link:hover {
+  opacity: 0.75;
+  text-decoration: underline;
+}
+
 /* Spinners */
 .login-spinner {
   width: 36px;

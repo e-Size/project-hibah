@@ -68,6 +68,8 @@ export default function Chatbot() {
     }
   }
 
+  if (pathname.startsWith("/admin")) return null;
+
   return (
     <>
       {/* Toggle Button */}
