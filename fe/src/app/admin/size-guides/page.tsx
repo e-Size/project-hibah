@@ -1,17 +1,21 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Pagination from "@/components/admin/Pagination";
 import DeleteConfirm from "@/components/admin/DeleteConfirm";
 import Modal from "@/components/admin/Modal";
 import { showToast } from "@/components/admin/Toast";
 import { productService, sizeGuideService } from "@/services/admin-service";
-import type { ProductListItem, SizeGuide } from "@/types/admin";
+import type { ProductListItem, SizeGuide, PaginationMeta } from "@/types/admin";
 
 const API_HOST = process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/?$/, "") || "https://api.esize.id";
+const DEFAULT_META: PaginationMeta = { total: 0, page: 1, limit: 20, total_pages: 1 };
 
 export default function SizeGuidesPage() {
   const [guides, setGuides] = useState<SizeGuide[]>([]);
   const [products, setProducts] = useState<ProductListItem[]>([]);
+  const [meta, setMeta] = useState<PaginationMeta>(DEFAULT_META);
+  const [page, setPage] = useState(1);
   const [selectedProduct, setSelectedProduct] = useState("");
   const [editing, setEditing] = useState<SizeGuide | null>(null);
   const [deleting, setDeleting] = useState<SizeGuide | null>(null);
@@ -22,28 +26,26 @@ export default function SizeGuidesPage() {
   const [saving, setSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [guideData, productData] = await Promise.all([
-        sizeGuideService.getAll(),
-        productService.getAll(),
-      ]);
-      setGuides(guideData);
-      setProducts(productData);
-    } catch {
-      showToast("Gagal memuat size guide", "error");
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    productService.getAll().then(setProducts).catch(() => showToast("Gagal memuat produk", "error"));
   }, []);
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const loadGuides = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await sizeGuideService.getPaginated({ page });
+      setGuides(res.data);
+      setMeta(res.meta);
+    } catch { showToast("Gagal memuat size guide", "error"); }
+    setLoading(false);
+  }, [page]);
 
+  useEffect(() => { loadGuides(); }, [loadGuides]);
+
+  // Guides already uploaded (filtered from visible page)
+  const guidedProductIds = new Set(guides.map(g => g.product_id));
   const availableProducts = products.filter(
-    (product) => !guides.some((guide) => guide.product_id === product.id) || product.id === editing?.product_id
+    (p) => !guidedProductIds.has(p.id) || p.id === editing?.product_id
   );
 
   const openCreate = () => {
@@ -77,15 +79,8 @@ export default function SizeGuidesPage() {
 
   const handleSave = async () => {
     const file = fileRef.current?.files?.[0];
-    if (!selectedProduct) {
-      showToast("Pilih produk", "error");
-      return;
-    }
-    if (!file) {
-      showToast(editing ? "Pilih gambar pengganti" : "Pilih gambar size guide", "error");
-      return;
-    }
-
+    if (!selectedProduct) { showToast("Pilih produk", "error"); return; }
+    if (!file) { showToast(editing ? "Pilih gambar pengganti" : "Pilih gambar size guide", "error"); return; }
     setSaving(true);
     try {
       if (editing) {
@@ -96,12 +91,9 @@ export default function SizeGuidesPage() {
         showToast("Size guide berhasil ditambahkan", "success");
       }
       closeModal();
-      await loadData();
-    } catch {
-      showToast("Gagal menyimpan size guide", "error");
-    } finally {
-      setSaving(false);
-    }
+      await loadGuides();
+    } catch { showToast("Gagal menyimpan size guide", "error"); }
+    setSaving(false);
   };
 
   const handleDelete = async () => {
@@ -111,16 +103,13 @@ export default function SizeGuidesPage() {
       await sizeGuideService.delete(deleting.id);
       showToast("Size guide berhasil dihapus", "success");
       setDeleting(null);
-      await loadData();
-    } catch {
-      showToast("Gagal menghapus size guide", "error");
-    } finally {
-      setSaving(false);
-    }
+      await loadGuides();
+    } catch { showToast("Gagal menghapus size guide", "error"); }
+    setSaving(false);
   };
 
   const productName = (productId: string) =>
-    products.find((product) => product.id === productId)?.name ?? "Unknown Product";
+    products.find((p) => p.id === productId)?.name ?? "Unknown Product";
 
   return (
     <>
@@ -165,6 +154,7 @@ export default function SizeGuidesPage() {
               ))}
             </div>
           )}
+          <Pagination meta={meta} onPageChange={setPage} />
         </div>
       </div>
 
@@ -183,9 +173,9 @@ export default function SizeGuidesPage() {
       >
         <div className="admin-form-group">
           <label className="admin-form-label">Produk *</label>
-          <select className="admin-form-select" value={selectedProduct} onChange={(event) => setSelectedProduct(event.target.value)} disabled={Boolean(editing)}>
+          <select className="admin-form-select" value={selectedProduct} onChange={(e) => setSelectedProduct(e.target.value)} disabled={Boolean(editing)}>
             <option value="">— Pilih Produk —</option>
-            {availableProducts.map((product) => <option key={product.id} value={product.id}>{product.name}</option>)}
+            {availableProducts.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
         </div>
         <div className="admin-form-group">
@@ -204,7 +194,7 @@ export default function SizeGuidesPage() {
       {viewing && (
         <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(0,0,0,.8)", display: "flex", alignItems: "center", justifyContent: "center", padding: 32 }} onClick={() => setViewing(null)}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={`${API_HOST}${viewing.image_url}`} alt="Size guide" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", background: "white", borderRadius: 8 }} onClick={(event) => event.stopPropagation()} />
+          <img src={`${API_HOST}${viewing.image_url}`} alt="Size guide" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", background: "white", borderRadius: 8 }} onClick={(e) => e.stopPropagation()} />
         </div>
       )}
 

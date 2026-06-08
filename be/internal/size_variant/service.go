@@ -1,6 +1,7 @@
 package sizevariant
 
 import (
+	"be/internal/pagination"
 	"be/models"
 
 	"gorm.io/gorm"
@@ -14,10 +15,29 @@ func NewService(db *gorm.DB) *Service {
 	return &Service{db: db}
 }
 
-func (s *Service) FindAll() ([]models.SizeVariant, error) {
+func (s *Service) FindAll(p pagination.Params) ([]models.SizeVariant, int64, error) {
+	q := s.db.Model(&models.SizeVariant{})
+	if p.Search != "" {
+		q = q.Where("code ILIKE ? OR label ILIKE ? OR variant_type ILIKE ?",
+			"%"+p.Search+"%", "%"+p.Search+"%", "%"+p.Search+"%")
+	}
+
+	var total int64
 	var list []models.SizeVariant
-	err := s.db.Find(&list).Error
-	return list, err
+
+	if p.Limit > 0 {
+		q.Count(&total)
+		offset := (p.Page - 1) * p.Limit
+		if err := q.Limit(p.Limit).Offset(offset).Find(&list).Error; err != nil {
+			return nil, 0, err
+		}
+	} else {
+		if err := q.Find(&list).Error; err != nil {
+			return nil, 0, err
+		}
+		total = int64(len(list))
+	}
+	return list, total, nil
 }
 
 func (s *Service) Create(req CreateRequest) (*models.SizeVariant, error) {

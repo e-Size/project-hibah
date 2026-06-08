@@ -1,6 +1,7 @@
 package productaddon
 
 import (
+	"be/internal/pagination"
 	"errors"
 	"net/http"
 	"os"
@@ -14,12 +15,13 @@ type Handler struct {
 }
 
 func (h *Handler) GetAll(c *gin.Context) {
-	list, err := h.service.FindAll(c.Query("product_id"))
+	p := pagination.ParseParams(c)
+	list, total, err := h.service.FindAll(c.Query("product_id"), c.Query("addon_type"), p)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": list})
+	c.JSON(http.StatusOK, gin.H{"data": list, "meta": pagination.CalcMeta(total, p)})
 }
 
 func (h *Handler) Create(c *gin.Context) {

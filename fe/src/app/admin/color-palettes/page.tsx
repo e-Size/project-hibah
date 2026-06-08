@@ -1,17 +1,21 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Pagination from "@/components/admin/Pagination";
 import DeleteConfirm from "@/components/admin/DeleteConfirm";
 import Modal from "@/components/admin/Modal";
 import { showToast } from "@/components/admin/Toast";
 import { productService, colorPaletteService } from "@/services/admin-service";
-import type { ProductListItem, ColorPalette } from "@/types/admin";
+import type { ProductListItem, ColorPalette, PaginationMeta } from "@/types/admin";
 
 const HEX_RE = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+const DEFAULT_META: PaginationMeta = { total: 0, page: 1, limit: 20, total_pages: 1 };
 
 export default function ColorPalettesPage() {
   const [palettes, setPalettes] = useState<ColorPalette[]>([]);
   const [products, setProducts] = useState<ProductListItem[]>([]);
+  const [meta, setMeta] = useState<PaginationMeta>(DEFAULT_META);
+  const [page, setPage] = useState(1);
   const [selectedProduct, setSelectedProduct] = useState("");
   const [colors, setColors] = useState<string[]>(["#ffffff"]);
   const [editing, setEditing] = useState<ColorPalette | null>(null);
@@ -20,28 +24,25 @@ export default function ColorPalettesPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [paletteData, productData] = await Promise.all([
-        colorPaletteService.getAll(),
-        productService.getAll(),
-      ]);
-      setPalettes(paletteData);
-      setProducts(productData);
-    } catch {
-      showToast("Gagal memuat color palette", "error");
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    productService.getAll().then(setProducts).catch(() => showToast("Gagal memuat produk", "error"));
   }, []);
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const loadPalettes = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await colorPaletteService.getPaginated({ page });
+      setPalettes(res.data);
+      setMeta(res.meta);
+    } catch { showToast("Gagal memuat color palette", "error"); }
+    setLoading(false);
+  }, [page]);
 
+  useEffect(() => { loadPalettes(); }, [loadPalettes]);
+
+  const paletteProductIds = new Set(palettes.map(p => p.product_id));
   const availableProducts = products.filter(
-    (product) => !palettes.some((palette) => palette.product_id === product.id) || product.id === editing?.product_id
+    (p) => !paletteProductIds.has(p.id) || p.id === editing?.product_id
   );
 
   const openCreate = () => {
@@ -65,28 +66,17 @@ export default function ColorPalettesPage() {
     setColors(["#ffffff"]);
   };
 
-  const updateColor = (index: number, value: string) => {
-    setColors((prev) => prev.map((color, i) => (i === index ? value : color)));
-  };
+  const updateColor = (index: number, value: string) =>
+    setColors((prev) => prev.map((c, i) => (i === index ? value : c)));
 
   const addColor = () => setColors((prev) => [...prev, "#ffffff"]);
   const removeColor = (index: number) => setColors((prev) => prev.filter((_, i) => i !== index));
 
   const handleSave = async () => {
-    if (!selectedProduct) {
-      showToast("Pilih produk", "error");
-      return;
-    }
-    const cleaned = colors.map((color) => color.trim()).filter(Boolean);
-    if (cleaned.length === 0) {
-      showToast("Tambahkan minimal satu warna", "error");
-      return;
-    }
-    if (!cleaned.every((color) => HEX_RE.test(color))) {
-      showToast("Format warna harus hex, contoh: #FFFFFF", "error");
-      return;
-    }
-
+    if (!selectedProduct) { showToast("Pilih produk", "error"); return; }
+    const cleaned = colors.map((c) => c.trim()).filter(Boolean);
+    if (cleaned.length === 0) { showToast("Tambahkan minimal satu warna", "error"); return; }
+    if (!cleaned.every((c) => HEX_RE.test(c))) { showToast("Format warna harus hex, contoh: #FFFFFF", "error"); return; }
     setSaving(true);
     try {
       if (editing) {
@@ -97,12 +87,9 @@ export default function ColorPalettesPage() {
         showToast("Color palette berhasil ditambahkan", "success");
       }
       closeModal();
-      await loadData();
-    } catch {
-      showToast("Gagal menyimpan color palette", "error");
-    } finally {
-      setSaving(false);
-    }
+      await loadPalettes();
+    } catch { showToast("Gagal menyimpan color palette", "error"); }
+    setSaving(false);
   };
 
   const handleDelete = async () => {
@@ -112,16 +99,13 @@ export default function ColorPalettesPage() {
       await colorPaletteService.delete(deleting.id);
       showToast("Color palette berhasil dihapus", "success");
       setDeleting(null);
-      await loadData();
-    } catch {
-      showToast("Gagal menghapus color palette", "error");
-    } finally {
-      setSaving(false);
-    }
+      await loadPalettes();
+    } catch { showToast("Gagal menghapus color palette", "error"); }
+    setSaving(false);
   };
 
   const productName = (productId: string) =>
-    products.find((product) => product.id === productId)?.name ?? "Unknown Product";
+    products.find((p) => p.id === productId)?.name ?? "Unknown Product";
 
   return (
     <>
@@ -167,6 +151,7 @@ export default function ColorPalettesPage() {
               ))}
             </div>
           )}
+          <Pagination meta={meta} onPageChange={setPage} />
         </div>
       </div>
 
@@ -185,12 +170,11 @@ export default function ColorPalettesPage() {
       >
         <div className="admin-form-group">
           <label className="admin-form-label">Produk *</label>
-          <select className="admin-form-select" value={selectedProduct} onChange={(event) => setSelectedProduct(event.target.value)} disabled={Boolean(editing)}>
+          <select className="admin-form-select" value={selectedProduct} onChange={(e) => setSelectedProduct(e.target.value)} disabled={Boolean(editing)}>
             <option value="">— Pilih Produk —</option>
-            {availableProducts.map((product) => <option key={product.id} value={product.id}>{product.name}</option>)}
+            {availableProducts.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
         </div>
-
         <div className="admin-form-group">
           <label className="admin-form-label">Warna *</label>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -211,13 +195,7 @@ export default function ColorPalettesPage() {
                   placeholder="#ffffff"
                   style={{ fontFamily: "monospace", margin: 0 }}
                 />
-                <button
-                  type="button"
-                  className="admin-btn admin-btn-danger"
-                  onClick={() => removeColor(index)}
-                  disabled={colors.length <= 1}
-                  style={{ flexShrink: 0 }}
-                >
+                <button type="button" className="admin-btn admin-btn-danger" onClick={() => removeColor(index)} disabled={colors.length <= 1} style={{ flexShrink: 0 }}>
                   Hapus
                 </button>
               </div>

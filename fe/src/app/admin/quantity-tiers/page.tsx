@@ -1,26 +1,43 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
 import DataTable, { Column } from "@/components/admin/DataTable";
+import Pagination from "@/components/admin/Pagination";
 import Modal from "@/components/admin/Modal";
 import DeleteConfirm from "@/components/admin/DeleteConfirm";
 import { showToast } from "@/components/admin/Toast";
 import { quantityTierService } from "@/services/admin-service";
-import type { QuantityTier } from "@/types/admin";
+import type { QuantityTier, PaginationMeta } from "@/types/admin";
+
+const DEFAULT_META: PaginationMeta = { total: 0, page: 1, limit: 10, total_pages: 1 };
 
 export default function QuantityTiersPage() {
   const [data, setData] = useState<QuantityTier[]>([]);
   const [loading, setLoading] = useState(true);
+  const [meta, setMeta] = useState<PaginationMeta>(DEFAULT_META);
+  const [page, setPage] = useState(1);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
+
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<QuantityTier | null>(null);
   const [deleting, setDeleting] = useState<QuantityTier | null>(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ min_qty: 1, max_qty: 10, label: "" });
 
+  useEffect(() => {
+    const t = setTimeout(() => { setSearch(searchInput); setPage(1); }, 300);
+    return () => clearTimeout(t);
+  }, [searchInput]);
+
   const load = useCallback(async () => {
     setLoading(true);
-    try { setData(await quantityTierService.getAll()); } catch { showToast("Gagal memuat data", "error"); }
+    try {
+      const res = await quantityTierService.getPaginated({ page, search });
+      setData(res.data);
+      setMeta(res.meta);
+    } catch { showToast("Gagal memuat data", "error"); }
     setLoading(false);
-  }, []);
+  }, [page, search]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -73,7 +90,19 @@ export default function QuantityTiersPage() {
           <h2>Quantity Tier</h2>
           <button className="admin-btn admin-btn-primary" onClick={openCreate}>+ Tambah Tier</button>
         </div>
+        <div style={{ padding: "12px 20px 0" }}>
+          <input
+            className="admin-form-input"
+            style={{ maxWidth: 320 }}
+            placeholder="Cari label tier..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+          />
+        </div>
         <DataTable columns={columns} data={data} loading={loading} onEdit={openEdit} onDelete={(item) => setDeleting(item)} />
+        <div style={{ padding: "0 20px 16px" }}>
+          <Pagination meta={meta} onPageChange={setPage} />
+        </div>
       </div>
 
       <Modal

@@ -1,6 +1,7 @@
 package product
 
 import (
+	"be/internal/pagination"
 	"be/models"
 
 	"gorm.io/gorm"
@@ -14,18 +15,33 @@ func NewService(db *gorm.DB) *Service {
 	return &Service{db: db}
 }
 
-func (s *Service) FindAll(category string) ([]ProductListItem, error) {
-	var list []models.Product
-	q := s.db
+func (s *Service) FindAll(category string, p pagination.Params) ([]ProductListItem, int64, error) {
+	q := s.db.Model(&models.Product{})
 	if category != "" {
 		q = q.Where("category = ?", category)
 	}
-	if err := q.Find(&list).Error; err != nil {
-		return nil, err
+	if p.Search != "" {
+		q = q.Where("name ILIKE ? OR keywords ILIKE ?", "%"+p.Search+"%", "%"+p.Search+"%")
+	}
+
+	var total int64
+	var list []models.Product
+
+	if p.Limit > 0 {
+		q.Count(&total)
+		offset := (p.Page - 1) * p.Limit
+		if err := q.Limit(p.Limit).Offset(offset).Find(&list).Error; err != nil {
+			return nil, 0, err
+		}
+	} else {
+		if err := q.Find(&list).Error; err != nil {
+			return nil, 0, err
+		}
+		total = int64(len(list))
 	}
 
 	if len(list) == 0 {
-		return []ProductListItem{}, nil
+		return []ProductListItem{}, total, nil
 	}
 
 	ids := make([]string, len(list))
@@ -33,7 +49,6 @@ func (s *Service) FindAll(category string) ([]ProductListItem, error) {
 		ids[i] = p.ID.String()
 	}
 
-	// Ambil gambar pertama (thumbnail) untuk setiap produk
 	var images []models.ProductImage
 	s.db.Where("product_id IN ?", ids).Order(`"order" asc`).Find(&images)
 
@@ -52,7 +67,7 @@ func (s *Service) FindAll(category string) ([]ProductListItem, error) {
 			Thumbnail: thumbMap[p.ID.String()],
 		}
 	}
-	return result, nil
+	return result, total, nil
 }
 
 func (s *Service) FindByID(id string) (*models.Product, []models.ProductImage, []models.PriceMatrix, map[string][]models.ProductAddon, error) {

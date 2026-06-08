@@ -1,6 +1,7 @@
 package pricematrix
 
 import (
+	"be/internal/pagination"
 	"errors"
 	"net/http"
 
@@ -13,12 +14,14 @@ type Handler struct {
 }
 
 func (h *Handler) GetAll(c *gin.Context) {
-	list, err := h.service.FindAll()
+	p := pagination.ParseParams(c)
+	productID := c.Query("product_id")
+	list, total, err := h.service.FindAll(productID, p)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": list})
+	c.JSON(http.StatusOK, gin.H{"data": list, "meta": pagination.CalcMeta(total, p)})
 }
 
 func (h *Handler) Create(c *gin.Context) {

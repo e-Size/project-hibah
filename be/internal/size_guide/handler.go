@@ -2,6 +2,7 @@ package sizeguide
 
 import (
 	"be/internal/imgutil"
+	"be/internal/pagination"
 	"errors"
 	"fmt"
 	"net/http"
@@ -21,12 +22,13 @@ type Handler struct {
 }
 
 func (h *Handler) GetAll(c *gin.Context) {
-	list, err := h.service.GetAll()
+	p := pagination.ParseParams(c)
+	list, total, err := h.service.GetAll(p)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": list})
+	c.JSON(http.StatusOK, gin.H{"data": list, "meta": pagination.CalcMeta(total, p)})
 }
 
 func (h *Handler) GetByProduct(c *gin.Context) {

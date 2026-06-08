@@ -1,55 +1,67 @@
 "use client";
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import DataTable, { Column } from "@/components/admin/DataTable";
+import Pagination from "@/components/admin/Pagination";
 import Modal from "@/components/admin/Modal";
 import DeleteConfirm from "@/components/admin/DeleteConfirm";
 import { showToast } from "@/components/admin/Toast";
 import { materialGroupService, uploadService } from "@/services/admin-service";
-import type { MaterialGroup, MaterialGroupUpdateRequest } from "@/types/admin";
+import type { MaterialGroup, MaterialGroupUpdateRequest, PaginationMeta } from "@/types/admin";
 
 const API_HOST = process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/?$/, "") || "https://api.esize.id";
+const DEFAULT_META: PaginationMeta = { total: 0, page: 1, limit: 10, total_pages: 1 };
 
 export default function MaterialGroupsPage() {
   const [data, setData] = useState<MaterialGroup[]>([]);
   const [loading, setLoading] = useState(true);
+  const [meta, setMeta] = useState<PaginationMeta>(DEFAULT_META);
+  const [page, setPage] = useState(1);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
+
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<MaterialGroup | null>(null);
   const [deleting, setDeleting] = useState<MaterialGroup | null>(null);
   const [saving, setSaving] = useState(false);
-  
   const [name, setName] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
-  
-  // View modal state
   const [viewingImage, setViewingImage] = useState<string | null>(null);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const t = setTimeout(() => { setSearch(searchInput); setPage(1); }, 300);
+    return () => clearTimeout(t);
+  }, [searchInput]);
 
   const load = useCallback(async () => {
     setLoading(true);
-    try { setData(await materialGroupService.getAll()); } catch { showToast("Gagal memuat data", "error"); }
+    try {
+      const res = await materialGroupService.getPaginated({ page, search });
+      setData(res.data);
+      setMeta(res.meta);
+    } catch { showToast("Gagal memuat data", "error"); }
     setLoading(false);
-  }, []);
+  }, [page, search]);
 
   useEffect(() => { load(); }, [load]);
 
-  const openCreate = () => { 
-    setEditing(null); 
-    setName(""); 
+  const openCreate = () => {
+    setEditing(null);
+    setName("");
     setImageFile(null);
     setPreviewUrl("");
     if (fileInputRef.current) fileInputRef.current.value = "";
-    setModalOpen(true); 
+    setModalOpen(true);
   };
-  
-  const openEdit = (item: MaterialGroup) => { 
-    setEditing(item); 
-    setName(item.name); 
+
+  const openEdit = (item: MaterialGroup) => {
+    setEditing(item);
+    setName(item.name);
     setImageFile(null);
     setPreviewUrl(item.image_url ? `${API_HOST}${item.image_url}` : "");
     if (fileInputRef.current) fileInputRef.current.value = "";
-    setModalOpen(true); 
+    setModalOpen(true);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,10 +77,7 @@ export default function MaterialGroupsPage() {
     setSaving(true);
     try {
       let uploadedUrl = "";
-      if (imageFile) {
-        uploadedUrl = await uploadService.upload(imageFile);
-      }
-
+      if (imageFile) uploadedUrl = await uploadService.upload(imageFile);
       if (editing) {
         const payload: MaterialGroupUpdateRequest = { name };
         if (uploadedUrl) payload.image_url = uploadedUrl;
@@ -98,11 +107,10 @@ export default function MaterialGroupsPage() {
 
   const columns: Column<MaterialGroup>[] = [
     {
-      key: "image_url",
-      label: "Gambar",
+      key: "image_url", label: "Gambar",
       render: (item) => (
         item.image_url ? (
-          <div 
+          <div
             style={{ width: 48, height: 48, borderRadius: 8, overflow: "hidden", border: "1px solid var(--admin-border)", cursor: "pointer", background: "white" }}
             onClick={(e) => { e.stopPropagation(); setViewingImage(`${API_HOST}${item.image_url}`); }}
           >
@@ -124,7 +132,19 @@ export default function MaterialGroupsPage() {
           <h2>Material</h2>
           <button className="admin-btn admin-btn-primary" onClick={openCreate}>+ Tambah Material</button>
         </div>
+        <div style={{ padding: "12px 20px 0" }}>
+          <input
+            className="admin-form-input"
+            style={{ maxWidth: 320 }}
+            placeholder="Cari nama material..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+          />
+        </div>
         <DataTable columns={columns} data={data} loading={loading} onEdit={openEdit} onDelete={(item) => setDeleting(item)} />
+        <div style={{ padding: "0 20px 16px" }}>
+          <Pagination meta={meta} onPageChange={setPage} />
+        </div>
       </div>
 
       <Modal
@@ -140,24 +160,16 @@ export default function MaterialGroupsPage() {
           </>
         }
       >
-        <div onKeyDown={(e) => { if (e.key === 'Enter') handleSave(); }}>
+        <div onKeyDown={(e) => { if (e.key === "Enter") handleSave(); }}>
           <div className="admin-form-group">
             <label className="admin-form-label">Nama Material *</label>
             <input className="admin-form-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Cotton, Polyester" />
           </div>
-
           <div className="admin-form-group">
             <label className="admin-form-label">Upload Gambar {editing ? "(Opsional)" : ""}</label>
-            <input
-              type="file"
-              className="admin-form-input"
-              accept=".jpg,.jpeg,.png,.webp"
-              onChange={handleFileChange}
-              ref={fileInputRef}
-            />
+            <input type="file" className="admin-form-input" accept=".jpg,.jpeg,.png,.webp" onChange={handleFileChange} ref={fileInputRef} />
             {editing && <p className="admin-form-hint">Kosongkan jika tidak ingin mengganti gambar</p>}
           </div>
-          
           {previewUrl && (
             <div style={{ marginTop: 16, borderRadius: 8, overflow: "hidden", border: "1px solid var(--admin-border)", background: "white" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -167,13 +179,12 @@ export default function MaterialGroupsPage() {
         </div>
       </Modal>
 
-      {/* View Fullscreen Modal */}
       {viewingImage && (
-        <div 
+        <div
           style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", padding: 40 }}
           onClick={() => setViewingImage(null)}
         >
-          <button 
+          <button
             style={{ position: "absolute", top: 20, right: 20, background: "white", border: "none", borderRadius: "50%", width: 40, height: 40, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
             onClick={() => setViewingImage(null)}
           >
@@ -182,12 +193,7 @@ export default function MaterialGroupsPage() {
             </svg>
           </button>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={viewingImage}
-            alt="View"
-            style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", borderRadius: 8, background: "white" }}
-            onClick={(e) => e.stopPropagation()}
-          />
+          <img src={viewingImage} alt="View" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", borderRadius: 8, background: "white" }} onClick={(e) => e.stopPropagation()} />
         </div>
       )}
 

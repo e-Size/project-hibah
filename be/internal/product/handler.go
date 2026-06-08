@@ -1,6 +1,7 @@
 package product
 
 import (
+	"be/internal/pagination"
 	"errors"
 	"net/http"
 
@@ -13,13 +14,14 @@ type Handler struct {
 }
 
 func (h *Handler) GetAll(c *gin.Context) {
-	category := c.Query("category") // opsional: "pakaian" atau "merch"
-	list, err := h.service.FindAll(category)
+	p := pagination.ParseParams(c)
+	category := c.Query("category")
+	list, total, err := h.service.FindAll(category, p)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": list})
+	c.JSON(http.StatusOK, gin.H{"data": list, "meta": pagination.CalcMeta(total, p)})
 }
 
 func (h *Handler) GetByID(c *gin.Context) {
@@ -33,7 +35,6 @@ func (h *Handler) GetByID(c *gin.Context) {
 		return
 	}
 
-	// Hitung range harga dari price_matrix
 	var priceFrom, priceTo int
 	for i, pm := range matrix {
 		if i == 0 || pm.Price < priceFrom {

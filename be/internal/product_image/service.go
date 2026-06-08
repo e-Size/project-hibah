@@ -1,6 +1,7 @@
 package productimage
 
 import (
+	"be/internal/pagination"
 	"be/models"
 
 	"gorm.io/gorm"
@@ -14,10 +15,29 @@ func NewService(db *gorm.DB) *Service {
 	return &Service{db: db}
 }
 
-func (s *Service) GetAll() ([]models.ProductImage, error) {
+func (s *Service) GetAll(productID string, p pagination.Params) ([]models.ProductImage, int64, error) {
+	q := s.db.Model(&models.ProductImage{})
+	if productID != "" {
+		q = q.Where("product_id = ?", productID)
+	}
+	q = q.Order("product_id asc, \"order\" asc")
+
+	var total int64
 	var list []models.ProductImage
-	err := s.db.Order("product_id asc, \"order\" asc").Find(&list).Error
-	return list, err
+
+	if p.Limit > 0 {
+		q.Count(&total)
+		offset := (p.Page - 1) * p.Limit
+		if err := q.Limit(p.Limit).Offset(offset).Find(&list).Error; err != nil {
+			return nil, 0, err
+		}
+	} else {
+		if err := q.Find(&list).Error; err != nil {
+			return nil, 0, err
+		}
+		total = int64(len(list))
+	}
+	return list, total, nil
 }
 
 func (s *Service) FindByProduct(productID string) ([]models.ProductImage, error) {
@@ -36,7 +56,6 @@ func (s *Service) Create(req CreateRequest) (*models.ProductImage, error) {
 	return &img, err
 }
 
-// Update returns the updated record and the old file path (if the file was replaced).
 func (s *Service) Update(id string, req UpdateRequest) (*models.ProductImage, string, error) {
 	var img models.ProductImage
 	if err := s.db.First(&img, "id = ?", id).Error; err != nil {
@@ -56,7 +75,6 @@ func (s *Service) Update(id string, req UpdateRequest) (*models.ProductImage, st
 	return &img, oldPath, nil
 }
 
-// Delete removes the record and returns the file path for the caller to clean up.
 func (s *Service) Delete(id string) (string, error) {
 	var img models.ProductImage
 	if err := s.db.First(&img, "id = ?", id).Error; err != nil {

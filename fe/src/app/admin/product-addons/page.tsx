@@ -1,24 +1,31 @@
 "use client";
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import DataTable, { Column } from "@/components/admin/DataTable";
+import Pagination from "@/components/admin/Pagination";
 import Modal from "@/components/admin/Modal";
 import DeleteConfirm from "@/components/admin/DeleteConfirm";
 import { showToast } from "@/components/admin/Toast";
 import { productAddonService, productService, uploadService } from "@/services/admin-service";
-import type { ProductAddon, ProductListItem } from "@/types/admin";
+import type { ProductAddon, ProductListItem, PaginationMeta } from "@/types/admin";
 
 const API_HOST = process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/?$/, "") || "https://api.esize.id";
 const addonTypes = ["ukuran", "tipe", "bahan", "warna"];
+const DEFAULT_META: PaginationMeta = { total: 0, page: 1, limit: 10, total_pages: 1 };
 
 export default function ProductAddonsPage() {
   const [data, setData] = useState<ProductAddon[]>([]);
   const [products, setProducts] = useState<ProductListItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [meta, setMeta] = useState<PaginationMeta>(DEFAULT_META);
+  const [page, setPage] = useState(1);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
+  const [filterProduct, setFilterProduct] = useState("");
+
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<ProductAddon | null>(null);
   const [deleting, setDeleting] = useState<ProductAddon | null>(null);
   const [saving, setSaving] = useState(false);
-  const [filterProduct, setFilterProduct] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [viewingImage, setViewingImage] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -27,20 +34,29 @@ export default function ProductAddonsPage() {
     color_hex: "", image_url: "", desc: "",
   });
 
+  // Load products for dropdown once
+  useEffect(() => {
+    productService.getAll().then(setProducts).catch(() => showToast("Gagal memuat produk", "error"));
+  }, []);
+
+  useEffect(() => {
+    const t = setTimeout(() => { setSearch(searchInput); setPage(1); }, 300);
+    return () => clearTimeout(t);
+  }, [searchInput]);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [addons, prods] = await Promise.all([
-        productAddonService.getAll(filterProduct || undefined),
-        productService.getAll(),
-      ]);
-      setData(addons);
-      setProducts(prods);
+      const res = await productAddonService.getPaginated({ page, search, product_id: filterProduct || undefined });
+      setData(res.data);
+      setMeta(res.meta);
     } catch { showToast("Gagal memuat data", "error"); }
     setLoading(false);
-  }, [filterProduct]);
+  }, [page, search, filterProduct]);
 
   useEffect(() => { load(); }, [load]);
+
+  const handleFilterChange = (v: string) => { setFilterProduct(v); setPage(1); };
 
   const openCreate = () => {
     setEditing(null);
@@ -68,9 +84,7 @@ export default function ProductAddonsPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setPreviewUrl(URL.createObjectURL(file));
-    }
+    if (file) setPreviewUrl(URL.createObjectURL(file));
   };
 
   const handleSave = async () => {
@@ -78,32 +92,20 @@ export default function ProductAddonsPage() {
     if (!form.addon_name.trim()) { showToast("Nama addon wajib diisi", "error"); return; }
     setSaving(true);
     try {
-      // Upload file dulu jika ada
       let imageUrl = form.image_url;
       const file = fileRef.current?.files?.[0];
-      if (file) {
-        imageUrl = await uploadService.upload(file);
-      }
+      if (file) imageUrl = await uploadService.upload(file);
 
       if (editing) {
         await productAddonService.update(editing.id, {
-          addon_type: form.addon_type,
-          addon_name: form.addon_name,
-          extra_fee: form.extra_fee,
-          color_hex: form.color_hex,
-          image_url: imageUrl,
-          desc: form.desc,
+          addon_type: form.addon_type, addon_name: form.addon_name, extra_fee: form.extra_fee,
+          color_hex: form.color_hex, image_url: imageUrl, desc: form.desc,
         });
         showToast("Addon berhasil diupdate", "success");
       } else {
         await productAddonService.create({
-          product_id: form.product_id,
-          addon_type: form.addon_type,
-          addon_name: form.addon_name,
-          extra_fee: form.extra_fee,
-          color_hex: form.color_hex,
-          image_url: imageUrl,
-          desc: form.desc,
+          product_id: form.product_id, addon_type: form.addon_type, addon_name: form.addon_name,
+          extra_fee: form.extra_fee, color_hex: form.color_hex, image_url: imageUrl, desc: form.desc,
         });
         showToast("Addon berhasil ditambahkan", "success");
       }
@@ -135,15 +137,9 @@ export default function ProductAddonsPage() {
         return p ? p.name : item.product_id.slice(0, 8);
       },
     },
-    {
-      key: "addon_type", label: "Tipe",
-      render: (item) => <span className="admin-badge admin-badge-amber">{item.addon_type}</span>,
-    },
+    { key: "addon_type", label: "Tipe", render: (item) => <span className="admin-badge admin-badge-amber">{item.addon_type}</span> },
     { key: "addon_name", label: "Nama" },
-    {
-      key: "extra_fee", label: "Extra Fee",
-      render: (item) => item.extra_fee ? fmt(item.extra_fee) : "—",
-    },
+    { key: "extra_fee", label: "Extra Fee", render: (item) => item.extra_fee ? fmt(item.extra_fee) : "—" },
     {
       key: "color_hex", label: "Warna",
       render: (item) => item.color_hex ? <span className="admin-color-swatch" style={{ backgroundColor: item.color_hex }} /> : "—",
@@ -152,7 +148,7 @@ export default function ProductAddonsPage() {
       key: "image_url", label: "Gambar",
       render: (item) => (
         item.image_url ? (
-          <div 
+          <div
             style={{ width: 48, height: 48, borderRadius: 8, overflow: "hidden", border: "1px solid var(--admin-border)", cursor: "pointer", background: "white" }}
             onClick={(e) => { e.stopPropagation(); setViewingImage(`${API_HOST}${item.image_url}`); }}
           >
@@ -176,7 +172,7 @@ export default function ProductAddonsPage() {
               className="admin-form-select"
               style={{ width: "auto", minWidth: 180, padding: "6px 10px", fontSize: "0.8rem" }}
               value={filterProduct}
-              onChange={(e) => setFilterProduct(e.target.value)}
+              onChange={(e) => handleFilterChange(e.target.value)}
             >
               <option value="">Semua Produk</option>
               {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -184,7 +180,19 @@ export default function ProductAddonsPage() {
           </div>
           <button className="admin-btn admin-btn-primary" onClick={openCreate}>+ Tambah Addon</button>
         </div>
+        <div style={{ padding: "12px 20px 0" }}>
+          <input
+            className="admin-form-input"
+            style={{ maxWidth: 320 }}
+            placeholder="Cari nama addon..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+          />
+        </div>
         <DataTable columns={columns} data={data} loading={loading} onEdit={openEdit} onDelete={(item) => setDeleting(item)} />
+        <div style={{ padding: "0 20px 16px" }}>
+          <Pagination meta={meta} onPageChange={setPage} />
+        </div>
       </div>
 
       <Modal
@@ -229,19 +237,12 @@ export default function ProductAddonsPage() {
           <div className="admin-form-group">
             <label className="admin-form-label">Warna (Hex)</label>
             <input className="admin-form-input" value={form.color_hex} onChange={(e) => setForm({ ...form, color_hex: e.target.value })} placeholder="#111111" />
-            <p className="admin-form-hint">Hanya untuk addon_type &quot;warna&quot;</p>
           </div>
         </div>
         <div className="admin-form-group">
           <label className="admin-form-label">Gambar (untuk tipe bahan)</label>
-          <input
-            ref={fileRef}
-            className="admin-form-input"
-            type="file"
-            accept=".jpg,.jpeg,.png,.webp"
-            onChange={handleFileChange}
-          />
-          <p className="admin-form-hint">Format: JPG, PNG, WebP. Kosongkan jika tidak ingin mengubah.</p>
+          <input ref={fileRef} className="admin-form-input" type="file" accept=".jpg,.jpeg,.png,.webp" onChange={handleFileChange} />
+          <p className="admin-form-hint">Kosongkan jika tidak ingin mengubah.</p>
         </div>
         {previewUrl && (
           <div style={{ marginBottom: 16, borderRadius: 8, overflow: "hidden", border: "1px solid var(--admin-border)" }}>
@@ -255,13 +256,12 @@ export default function ProductAddonsPage() {
         </div>
       </Modal>
 
-      {/* View Fullscreen Modal */}
       {viewingImage && (
-        <div 
+        <div
           style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", padding: 40 }}
           onClick={() => setViewingImage(null)}
         >
-          <button 
+          <button
             style={{ position: "absolute", top: 20, right: 20, background: "white", border: "none", borderRadius: "50%", width: 40, height: 40, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
             onClick={() => setViewingImage(null)}
           >
@@ -270,12 +270,7 @@ export default function ProductAddonsPage() {
             </svg>
           </button>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={viewingImage}
-            alt="View"
-            style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", borderRadius: 8, background: "white" }}
-            onClick={(e) => e.stopPropagation()}
-          />
+          <img src={viewingImage} alt="View" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", borderRadius: 8, background: "white" }} onClick={(e) => e.stopPropagation()} />
         </div>
       )}
 

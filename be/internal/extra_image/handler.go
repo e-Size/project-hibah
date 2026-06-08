@@ -1,6 +1,7 @@
 package extra_image
 
 import (
+	"be/internal/pagination"
 	"net/http"
 	"os"
 
@@ -16,12 +17,13 @@ func NewHandler(service *Service) *Handler {
 }
 
 func (h *Handler) GetAll(c *gin.Context) {
-	images, err := h.service.GetAll()
+	p := pagination.ParseParams(c)
+	images, total, err := h.service.GetAll(p)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": images})
+	c.JSON(http.StatusOK, gin.H{"data": images, "meta": pagination.CalcMeta(total, p)})
 }
 
 func (h *Handler) Create(c *gin.Context) {

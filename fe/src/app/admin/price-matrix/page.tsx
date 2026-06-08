@@ -1,11 +1,14 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
 import DataTable, { Column } from "@/components/admin/DataTable";
+import Pagination from "@/components/admin/Pagination";
 import Modal from "@/components/admin/Modal";
 import DeleteConfirm from "@/components/admin/DeleteConfirm";
 import { showToast } from "@/components/admin/Toast";
 import { priceMatrixService, productService, sizeVariantService, quantityTierService, materialGroupService } from "@/services/admin-service";
-import type { PriceMatrix, ProductListItem, SizeVariant, QuantityTier, MaterialGroup } from "@/types/admin";
+import type { PriceMatrix, ProductListItem, SizeVariant, QuantityTier, MaterialGroup, PaginationMeta } from "@/types/admin";
+
+const DEFAULT_META: PaginationMeta = { total: 0, page: 1, limit: 10, total_pages: 1 };
 
 export default function PriceMatrixPage() {
   const [data, setData] = useState<PriceMatrix[]>([]);
@@ -14,28 +17,42 @@ export default function PriceMatrixPage() {
   const [tiers, setTiers] = useState<QuantityTier[]>([]);
   const [matGroups, setMatGroups] = useState<MaterialGroup[]>([]);
   const [loading, setLoading] = useState(true);
+  const [meta, setMeta] = useState<PaginationMeta>(DEFAULT_META);
+  const [page, setPage] = useState(1);
+  const [filterProduct, setFilterProduct] = useState("");
+
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<PriceMatrix | null>(null);
   const [deleting, setDeleting] = useState<PriceMatrix | null>(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ product_id: "", size_variant_id: "", quantity_tier_id: "", material_group_id: "", price: 0 });
 
+  // Load dropdowns once
+  useEffect(() => {
+    Promise.all([
+      productService.getAll(),
+      sizeVariantService.getAll(),
+      quantityTierService.getAll(),
+      materialGroupService.getAll(),
+    ]).then(([prods, sv, qt, mg]) => {
+      setProducts(prods); setSizes(sv); setTiers(qt); setMatGroups(mg);
+    }).catch(() => showToast("Gagal memuat referensi data", "error"));
+  }, []);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [pm, prods, sv, qt, mg] = await Promise.all([
-        priceMatrixService.getAll(),
-        productService.getAll(),
-        sizeVariantService.getAll(),
-        quantityTierService.getAll(),
-        materialGroupService.getAll(),
-      ]);
-      setData(pm); setProducts(prods); setSizes(sv); setTiers(qt); setMatGroups(mg);
+      const res = await priceMatrixService.getPaginated({ page, product_id: filterProduct || undefined });
+      setData(res.data);
+      setMeta(res.meta);
     } catch { showToast("Gagal memuat data", "error"); }
     setLoading(false);
-  }, []);
+  }, [page, filterProduct]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Reset page when filter changes
+  const handleFilterChange = (v: string) => { setFilterProduct(v); setPage(1); };
 
   const openCreate = () => {
     setEditing(null);
@@ -128,10 +145,24 @@ export default function PriceMatrixPage() {
     <>
       <div className="admin-card">
         <div className="admin-card-header">
-          <h2>Price Matrix</h2>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+            <h2 style={{ margin: 0 }}>Price Matrix</h2>
+            <select
+              className="admin-form-select"
+              style={{ width: "auto", minWidth: 180, padding: "6px 10px", fontSize: "0.8rem" }}
+              value={filterProduct}
+              onChange={(e) => handleFilterChange(e.target.value)}
+            >
+              <option value="">Semua Produk</option>
+              {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </div>
           <button className="admin-btn admin-btn-primary" onClick={openCreate}>+ Tambah Harga</button>
         </div>
         <DataTable columns={columns} data={data} loading={loading} onEdit={openEdit} onDelete={(item) => setDeleting(item)} />
+        <div style={{ padding: "0 20px 16px" }}>
+          <Pagination meta={meta} onPageChange={setPage} />
+        </div>
       </div>
 
       <Modal

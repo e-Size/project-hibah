@@ -10,15 +10,35 @@ import type {
   SizeGuide,
   ColorPalette, ColorPaletteCreateRequest, ColorPaletteUpdateRequest,
   ExtraImage, ExtraImageCreateRequest, ExtraImageUpdateRequest,
+  PaginationMeta,
 } from "@/types/admin";
 
 type R<T> = { data: T };
 type Msg = { message: string };
+type Paged<T> = { data: T; meta: PaginationMeta };
+
+export interface PageParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  [key: string]: string | number | undefined;
+}
+
+function buildQuery(params: PageParams): string {
+  const q = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== "" && v !== null) q.set(k, String(v));
+  });
+  const s = q.toString();
+  return s ? `?${s}` : "";
+}
 
 // ─── Products ───────────────────────────────────────────
 export const productService = {
   getAll: (category?: string) =>
     apiGet<R<ProductListItem[]>>(`/products${category ? `?category=${category}` : ""}`).then(r => r.data),
+  getPaginated: (params: PageParams & { category?: string }) =>
+    apiGet<Paged<ProductListItem[]>>(`/products${buildQuery({ limit: 10, ...params })}`),
   getById: (id: string) =>
     apiGet<{ data: { product: Product; images: ProductImage[]; price_from: number; price_to: number; price_matrix: PriceMatrix[]; addons: Record<string, ProductAddon[]> } }>(`/products/${id}`).then(r => r.data),
   create: (data: ProductCreateRequest) =>
@@ -33,6 +53,8 @@ export const productService = {
 export const materialGroupService = {
   getAll: () =>
     apiGet<R<MaterialGroup[]>>("/material-groups").then(r => r.data),
+  getPaginated: (params: PageParams) =>
+    apiGet<Paged<MaterialGroup[]>>(`/material-groups${buildQuery({ limit: 10, ...params })}`),
   create: (data: MaterialGroupCreateRequest) =>
     apiPost<R<MaterialGroup>>("/material-groups", data).then(r => r.data),
   update: (id: string, data: MaterialGroupUpdateRequest) =>
@@ -45,6 +67,8 @@ export const materialGroupService = {
 export const sizeVariantService = {
   getAll: () =>
     apiGet<R<SizeVariant[]>>("/size-variants").then(r => r.data),
+  getPaginated: (params: PageParams) =>
+    apiGet<Paged<SizeVariant[]>>(`/size-variants${buildQuery({ limit: 10, ...params })}`),
   create: (data: SizeVariantCreateRequest) =>
     apiPost<R<SizeVariant>>("/size-variants", data).then(r => r.data),
   update: (id: string, data: SizeVariantUpdateRequest) =>
@@ -57,6 +81,8 @@ export const sizeVariantService = {
 export const quantityTierService = {
   getAll: () =>
     apiGet<R<QuantityTier[]>>("/quantity-tiers").then(r => r.data),
+  getPaginated: (params: PageParams) =>
+    apiGet<Paged<QuantityTier[]>>(`/quantity-tiers${buildQuery({ limit: 10, ...params })}`),
   create: (data: QuantityTierCreateRequest) =>
     apiPost<R<QuantityTier>>("/quantity-tiers", data).then(r => r.data),
   update: (id: string, data: QuantityTierUpdateRequest) =>
@@ -69,6 +95,8 @@ export const quantityTierService = {
 export const priceMatrixService = {
   getAll: () =>
     apiGet<R<PriceMatrix[]>>("/price-matrix").then(r => r.data),
+  getPaginated: (params: PageParams & { product_id?: string }) =>
+    apiGet<Paged<PriceMatrix[]>>(`/price-matrix${buildQuery({ limit: 10, ...params })}`),
   create: (data: PriceMatrixCreateRequest) =>
     apiPost<R<PriceMatrix>>("/price-matrix", data).then(r => r.data),
   update: (id: string, data: PriceMatrixUpdateRequest) =>
@@ -81,6 +109,8 @@ export const priceMatrixService = {
 export const productAddonService = {
   getAll: (productId?: string) =>
     apiGet<R<ProductAddon[]>>(`/product-addons${productId ? `?product_id=${productId}` : ""}`).then(r => r.data),
+  getPaginated: (params: PageParams & { product_id?: string; addon_type?: string }) =>
+    apiGet<Paged<ProductAddon[]>>(`/product-addons${buildQuery({ limit: 10, ...params })}`),
   create: (data: ProductAddonCreateRequest) =>
     apiPost<R<ProductAddon>>("/product-addons", data).then(r => r.data),
   update: (id: string, data: ProductAddonUpdateRequest) =>
@@ -93,6 +123,8 @@ export const productAddonService = {
 export const productImageService = {
   getAll: () =>
     apiGet<R<ProductImage[]>>("/product-images").then(r => r.data),
+  getPaginated: (params: PageParams & { product_id?: string }) =>
+    apiGet<Paged<ProductImage[]>>(`/product-images${buildQuery({ limit: 20, ...params })}`),
   getByProduct: (productId: string) =>
     apiGet<R<ProductImage[]>>(`/product-images/product/${productId}`).then(r => r.data),
   create: (productId: string, file: File, order: number) => {
@@ -116,6 +148,8 @@ export const productImageService = {
 export const sizeGuideService = {
   getAll: () =>
     apiGet<R<SizeGuide[]>>("/size-guides").then(r => r.data),
+  getPaginated: (params: PageParams) =>
+    apiGet<Paged<SizeGuide[]>>(`/size-guides${buildQuery({ limit: 20, ...params })}`),
   getByProduct: (productId: string) =>
     apiGet<R<SizeGuide>>(`/size-guides/product/${productId}`).then(r => r.data),
   create: (productId: string, file: File) => {
@@ -137,6 +171,8 @@ export const sizeGuideService = {
 export const colorPaletteService = {
   getAll: () =>
     apiGet<R<ColorPalette[]>>("/color-palettes").then(r => r.data),
+  getPaginated: (params: PageParams) =>
+    apiGet<Paged<ColorPalette[]>>(`/color-palettes${buildQuery({ limit: 20, ...params })}`),
   getByProduct: (productId: string) =>
     apiGet<R<ColorPalette>>(`/color-palettes/product/${productId}`).then(r => r.data),
   create: (data: ColorPaletteCreateRequest) =>
@@ -160,6 +196,8 @@ export const uploadService = {
 export const extraImageService = {
   getAll: () =>
     apiGet<R<ExtraImage[]>>("/extra-images").then(r => r.data),
+  getPaginated: (params: PageParams) =>
+    apiGet<Paged<ExtraImage[]>>(`/extra-images${buildQuery({ limit: 20, ...params })}`),
   create: (data: ExtraImageCreateRequest) =>
     apiPost<R<ExtraImage>>("/extra-images", data).then(r => r.data),
   update: (id: string, data: ExtraImageUpdateRequest) =>

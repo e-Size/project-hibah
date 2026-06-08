@@ -1,7 +1,9 @@
 package extra_image
 
 import (
+	"be/internal/pagination"
 	"be/models"
+
 	"gorm.io/gorm"
 )
 
@@ -13,10 +15,28 @@ func NewService(db *gorm.DB) *Service {
 	return &Service{db: db}
 }
 
-func (s *Service) GetAll() ([]models.ExtraImage, error) {
-	var images []models.ExtraImage
-	err := s.db.Find(&images).Error
-	return images, err
+func (s *Service) GetAll(p pagination.Params) ([]models.ExtraImage, int64, error) {
+	q := s.db.Model(&models.ExtraImage{})
+	if p.Search != "" {
+		q = q.Where("name ILIKE ? OR description ILIKE ?", "%"+p.Search+"%", "%"+p.Search+"%")
+	}
+
+	var total int64
+	var list []models.ExtraImage
+
+	if p.Limit > 0 {
+		q.Count(&total)
+		offset := (p.Page - 1) * p.Limit
+		if err := q.Limit(p.Limit).Offset(offset).Find(&list).Error; err != nil {
+			return nil, 0, err
+		}
+	} else {
+		if err := q.Find(&list).Error; err != nil {
+			return nil, 0, err
+		}
+		total = int64(len(list))
+	}
+	return list, total, nil
 }
 
 func (s *Service) Create(req CreateRequest) (models.ExtraImage, error) {
