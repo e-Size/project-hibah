@@ -154,7 +154,7 @@ export default function SizeGuidesPage() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={`${API_HOST}${guide.image_url}`} alt={productName(guide.product_id)} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                   </button>
-                  <div style={{ padding: 12 }}>
+                  <div style={{ padding: 12, color: "var(--admin-text)" }}>
                     <strong style={{ display: "block", marginBottom: 10 }}>{productName(guide.product_id)}</strong>
                     <div style={{ display: "flex", gap: 8 }}>
                       <button className="admin-btn admin-btn-secondary" onClick={() => openEdit(guide)}>Ganti</button>

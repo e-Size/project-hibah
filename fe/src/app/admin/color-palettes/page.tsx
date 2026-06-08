@@ -156,7 +156,7 @@ export default function ColorPalettesPage() {
                       />
                     ))}
                   </div>
-                  <div style={{ padding: 12, borderTop: "1px solid var(--admin-border)" }}>
+                  <div style={{ padding: 12, borderTop: "1px solid var(--admin-border)", color: "var(--admin-text)" }}>
                     <strong style={{ display: "block", marginBottom: 10 }}>{productName(palette.product_id)}</strong>
                     <div style={{ display: "flex", gap: 8 }}>
                       <button className="admin-btn admin-btn-secondary" onClick={() => openEdit(palette)}>Ubah</button>
