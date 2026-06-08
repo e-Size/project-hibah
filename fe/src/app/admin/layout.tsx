@@ -20,44 +20,48 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isLoginPage = pathname === "/admin/login";
 
   const [authed, setAuthed] = useState(false);
-  const [checking, setChecking] = useState(true);
+  // Track which path has been verified — checking is true whenever path hasn't been verified yet.
+  // This means checking flips to true immediately on navigation, with no race condition.
+  const [lastVerifiedPath, setLastVerifiedPath] = useState<string | null>(null);
+  const checking = lastVerifiedPath !== pathname;
 
   const verify = useCallback(async () => {
-    setChecking(true);
     const ok = await verifySession();
     setAuthed(ok);
-    setChecking(false);
-  }, []);
+    setLastVerifiedPath(pathname);
+  }, [pathname]);
 
   useEffect(() => {
     verify();
-  }, [verify, pathname]);
+  }, [verify]);
+
+  // If user is already authed but landed on login page, redirect to admin
+  useEffect(() => {
+    if (!checking && authed && isLoginPage) {
+      router.replace("/admin");
+    }
+  }, [checking, authed, isLoginPage, router]);
 
   const logout = useCallback(async () => {
     await logoutRequest();
     setAuthed(false);
+    setLastVerifiedPath(null);
     router.replace("/admin/login");
   }, [router]);
 
-  if (checking) {
-    return (
-      <div className="login-page">
-        <div className="login-card" style={{ padding: "60px 40px", textAlign: "center" }}>
-          <div className="login-spinner" />
-        </div>
+  const Spinner = () => (
+    <div className="login-page">
+      <div className="login-card" style={{ padding: "60px 40px", textAlign: "center" }}>
+        <div className="login-spinner" />
       </div>
-    );
-  }
+    </div>
+  );
+
+  if (checking) return <Spinner />;
 
   if (!authed && !isLoginPage) {
     router.replace("/admin/login");
-    return (
-      <div className="login-page">
-        <div className="login-card" style={{ padding: "60px 40px", textAlign: "center" }}>
-          <div className="login-spinner" />
-        </div>
-      </div>
-    );
+    return <Spinner />;
   }
 
   if (isLoginPage) {
