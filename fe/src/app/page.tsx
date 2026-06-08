@@ -90,22 +90,22 @@ export default function Home() {
           </div>
 
           {/* Decorative models — mobile only, in-flow below content */}
-          <div className="md:hidden relative z-5 flex flex-1 min-h-0 -mt-[clamp(1.25rem,5svh,3rem)] max-[380px]:-mt-5 items-end justify-center overflow-visible">
-            <div className="relative h-[clamp(250px,calc(100svh-310px),470px)] w-[96vw] max-w-[430px] translate-x-[clamp(2.25rem,12vw,3rem)] z-0">
+          <div className="md:hidden relative z-5 flex flex-1 min-h-0 mt-[clamp(0.125rem,1svh,0.5rem)] items-end justify-center overflow-visible">
+            <div className="relative h-full w-[96vw] max-w-[430px] translate-x-[clamp(2.25rem,12vw,3rem)] z-0">
               <Image
                 src="/gambarcowo.png"
                 alt="Model pria"
                 fill
-                className="object-cover object-bottom"
+                className="object-contain object-bottom"
                 sizes="(max-width: 767px) 96vw, 1px"
               />
             </div>
-            <div className="relative h-[clamp(245px,calc(100svh-320px),455px)] w-[76vw] max-w-[340px] -translate-x-[clamp(3rem,16vw,4rem)] z-10 pointer-events-none">
+            <div className="relative h-full w-[76vw] max-w-[340px] -translate-x-[clamp(3rem,16vw,4rem)] z-10 pointer-events-none">
               <Image
                 src="/gambarcewe.png"
                 alt="Model wanita"
                 fill
-                className="object-cover object-bottom"
+                className="object-contain object-bottom"
                 sizes="(max-width: 767px) 76vw, 1px"
               />
             </div>

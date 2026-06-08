@@ -485,7 +485,17 @@ export default function EditorPage() {
     moved: boolean;
     cleanup?: () => void;
   } | null>(null);
+  const imageGestureRef = useRef<{
+    id: string;
+    pointers: Map<number, { x: number; y: number }>;
+    drag: { pointerId: number; startX: number; startY: number; elX: number; elY: number } | null;
+    pinch: { startDistance: number; startW: number; startH: number } | null;
+    moved: boolean;
+    cleanup?: () => void;
+  } | null>(null);
   const [editingTextId, setEditingTextId] = useState<string | null>(null);
+  const [pinchHintId, setPinchHintId] = useState<string | null>(null);
+  const pinchHintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const measureCtxRef = useRef<CanvasRenderingContext2D | null>(null);
   const dragLayerRef = useRef<string | null>(null);
   const sidebarScrollRef = useRef<HTMLDivElement>(null);
@@ -516,6 +526,18 @@ export default function EditorPage() {
     el.addEventListener("wheel", stopBubble, { passive: false });
     return () => el.removeEventListener("wheel", stopBubble);
   }, [activeTab]);
+
+  // Show pinch hint briefly when an element is selected on mobile
+  useEffect(() => {
+    if (pinchHintTimerRef.current) clearTimeout(pinchHintTimerRef.current);
+    if (!selectedEl || typeof window === "undefined" || window.innerWidth >= 1024) {
+      setPinchHintId(null);
+      return;
+    }
+    setPinchHintId(selectedEl);
+    pinchHintTimerRef.current = setTimeout(() => setPinchHintId(null), 2500);
+    return () => { if (pinchHintTimerRef.current) clearTimeout(pinchHintTimerRef.current); };
+  }, [selectedEl]);
 
   const [showTour, setShowTour] = useState(true);
   const changeBtnRef = useRef<HTMLButtonElement | null>(null);
@@ -665,6 +687,130 @@ export default function EditorPage() {
     }
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
+  }
+
+  function handleImagePointerDown(e: React.PointerEvent<HTMLDivElement>, id: string) {
+    if (e.pointerType !== "touch") {
+      onPointerDown(e, id);
+      return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const el = elements.find(item => item.id === id && item.type === "image");
+    if (!el) return;
+
+    setSelectedEl(id);
+
+    if (!imageGestureRef.current || imageGestureRef.current.id !== id) {
+      imageGestureRef.current?.cleanup?.();
+      imageGestureRef.current = {
+        id,
+        pointers: new Map(),
+        drag: null,
+        pinch: null,
+        moved: false,
+      };
+    }
+
+    const gesture = imageGestureRef.current;
+    gesture.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (gesture.pointers.size === 1) {
+      gesture.drag = { pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, elX: el.x, elY: el.y };
+      gesture.pinch = null;
+    }
+
+    if (gesture.pointers.size >= 2) {
+      gesture.drag = null;
+      gesture.pinch = {
+        startDistance: getPointerDistance(gesture.pointers),
+        startW: el.w,
+        startH: el.h,
+      };
+    }
+
+    e.currentTarget.setPointerCapture(e.pointerId);
+
+    if (gesture.cleanup) return;
+
+    const scale = zoom / 100;
+    const pz = printZone[el.view];
+    const zoneLeft = (pz.x / 100) * CANVAS;
+    const zoneTop = (pz.y / 100) * CANVAS;
+    const zoneRight = ((pz.x + pz.w) / 100) * CANVAS;
+    const zoneBottom = ((pz.y + pz.h) / 100) * CANVAS;
+
+    function onMove(ev: PointerEvent) {
+      const current = imageGestureRef.current;
+      if (!current || current.id !== id || !current.pointers.has(ev.pointerId)) return;
+
+      current.pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+
+      if (current.pointers.size >= 2) {
+        ev.preventDefault();
+        current.drag = null;
+        if (!current.pinch) {
+          const item = elements.find(candidate => candidate.id === id && candidate.type === "image");
+          if (!item) return;
+          current.pinch = {
+            startDistance: getPointerDistance(current.pointers),
+            startW: item.w,
+            startH: item.h,
+          };
+        }
+        const startDistance = Math.max(1, current.pinch.startDistance);
+        const distance = getPointerDistance(current.pointers);
+        const ratio = distance / startDistance;
+        setElements(prev => prev.map(item => {
+          if (item.id !== id) return item;
+          const newW = Math.max(20, Math.min(zoneRight - item.x, current.pinch!.startW * ratio));
+          const newH = Math.max(20, Math.min(zoneBottom - item.y, current.pinch!.startH * ratio));
+          return { ...item, w: newW, h: newH };
+        }));
+        // Hide pinch hint immediately once user starts pinching
+        setPinchHintId(null);
+        return;
+      }
+
+      if (!current.drag || current.drag.pointerId !== ev.pointerId) return;
+      const { startX, startY, elX, elY } = current.drag;
+      if (!current.moved && Math.hypot(ev.clientX - startX, ev.clientY - startY) > 6) {
+        current.moved = true;
+      }
+      const dx = (ev.clientX - startX) / scale;
+      const dy = (ev.clientY - startY) / scale;
+      setElements(prev => prev.map(item => {
+        if (item.id !== id) return item;
+        const nx = Math.max(zoneLeft, Math.min(zoneRight - item.w, elX + dx));
+        const ny = Math.max(zoneTop, Math.min(zoneBottom - item.h, elY + dy));
+        return { ...item, x: nx, y: ny };
+      }));
+    }
+
+    function onUp(ev: PointerEvent) {
+      const current = imageGestureRef.current;
+      if (!current || current.id !== id) return;
+
+      current.pointers.delete(ev.pointerId);
+      current.drag = null;
+      current.pinch = null;
+
+      if (current.pointers.size === 0) {
+        current.cleanup?.();
+        imageGestureRef.current = null;
+      }
+    }
+
+    gesture.cleanup = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+    };
+    window.addEventListener("pointermove", onMove, { passive: false });
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
   }
 
   function onRotateHandlePointerDown(e: React.PointerEvent, id: string) {
@@ -821,6 +967,8 @@ export default function EditorPage() {
         const startDistance = Math.max(1, current.pinch.startDistance);
         const distance = getPointerDistance(current.pointers);
         updateTextFontSize(id, current.pinch.startFontSize * (distance / startDistance));
+        // Hide pinch hint immediately once user starts pinching
+        setPinchHintId(null);
         return;
       }
 
@@ -939,6 +1087,43 @@ export default function EditorPage() {
     }
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
+  }
+
+  function onTextCornerResizePointerDown(
+    e: React.PointerEvent,
+    id: string,
+    corner: "se" | "sw" | "ne" | "nw"
+  ) {
+    e.stopPropagation();
+    e.preventDefault();
+    const el = elements.find(item => item.id === id && item.type === "text");
+    if (!el) return;
+    setSelectedEl(id);
+
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startFontSize = el.fontSize ?? 24;
+    const scale = zoom / 100;
+
+    // Determine drag direction sign based on corner
+    const signX = corner.endsWith("e") ? 1 : -1;
+    const signY = corner.startsWith("s") ? 1 : -1;
+
+    function onMove(ev: PointerEvent) {
+      const dx = ((ev.clientX - startX) / scale) * signX;
+      const dy = ((ev.clientY - startY) / scale) * signY;
+      const delta = (dx + dy) / 2;
+      const ratio = 1 + delta / 100;
+      updateTextFontSize(id, startFontSize * ratio);
+    }
+    function onUp() {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+    }
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
   }
 
   function deleteSelected() {
@@ -1617,7 +1802,7 @@ export default function EditorPage() {
                       onPointerDown={(e) => {
                         if (isEditingText) return;
                         if (el.type === "text") handleTextPointerDown(e, el.id);
-                        else onPointerDown(e, el.id);
+                        else handleImagePointerDown(e, el.id);
                       }}
                       onWheel={(e) => {
                         if (el.type === "text") handleTextWheel(e, el.id);
@@ -1634,6 +1819,26 @@ export default function EditorPage() {
                         transformOrigin: "center",
                       }}
                     >
+                      {/* Pinch-to-resize indicator — mobile only */}
+                      {isSelected && pinchHintId === el.id && (
+                        <div
+                          className="absolute -top-10 left-1/2 -translate-x-1/2 z-20 pointer-events-none animate-fade-in-out"
+                          style={{ whiteSpace: "nowrap" }}
+                        >
+                          <div className="flex items-center gap-1.5 bg-gray-900/85 text-white text-[10px] font-semibold px-2.5 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M21 11V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6" />
+                              <circle cx="18" cy="18" r="3" />
+                              <path d="M18 14v1" />
+                              <path d="M18 21v1" />
+                              <path d="M22 18h-1" />
+                              <path d="M15 18h-1" />
+                            </svg>
+                            Cubit untuk resize
+                          </div>
+                          <div className="w-2.5 h-2.5 bg-gray-900/85 rotate-45 mx-auto -mt-1.5" />
+                        </div>
+                      )}
                       {isSelected && el.type === "text" && !isEditingText && (
                         <div
                           onPointerDown={(e) => onRotateHandlePointerDown(e, el.id)}
@@ -1677,28 +1882,49 @@ export default function EditorPage() {
                           className="bg-transparent outline-none border-none w-full"
                           style={{ fontSize: el.fontSize, fontWeight: el.fontWeight, fontStyle: el.fontStyle, fontFamily: el.fontFamily ?? "var(--font-poppins)", letterSpacing: el.letterSpacing, textAlign: el.textAlign, color: el.color, minWidth: 80, width: "100%" }}
                         />
-                      ) : el.curve && el.curve !== 0 ? (() => {
-                          const s = el.curve!;
-                          const fsz = el.fontSize ?? 24;
-                          const absS = Math.abs(s);
-                          const r = (absS * absS + (el.w / 2) * (el.w / 2)) / (2 * absS);
-                          const midY = fsz * 0.8;
-                          const epY = s > 0 ? midY + absS : midY - absS;
-                          const sweep = s > 0 ? "0" : "1";
-                          const arcD = `M 0,${epY} A ${r},${r} 0 0,${sweep} ${el.w},${epY}`;
-                          const svgH = fsz + absS + 10;
-                          return (
-                            <svg width={el.w} height={svgH} style={{ overflow: "visible" }}>
-                              <defs><path id={`arc-${el.id}`} d={arcD} fill="none" /></defs>
-                              <text fontFamily={`${el.fontFamily ?? 'Poppins'}, sans-serif`} fontSize={el.fontSize} fontWeight={el.fontWeight} fontStyle={el.fontStyle} fill={el.color ?? '#111'} textAnchor="middle" letterSpacing={el.letterSpacing}>
-                                <textPath href={`#arc-${el.id}`} startOffset="50%">{el.text}</textPath>
-                              </text>
-                            </svg>
-                          );
-                        })() : (
-                        <span style={{ fontSize: el.fontSize, fontWeight: el.fontWeight, fontStyle: el.fontStyle, fontFamily: el.fontFamily ?? "var(--font-poppins)", letterSpacing: el.letterSpacing, textAlign: el.textAlign, color: el.color, whiteSpace: "nowrap", display: "block", width: "100%" }}>
-                          {el.text}
-                        </span>
+                      ) : (
+                        <>
+                          {el.curve && el.curve !== 0 ? (() => {
+                            const s = el.curve!;
+                            const fsz = el.fontSize ?? 24;
+                            const absS = Math.abs(s);
+                            const r = (absS * absS + (el.w / 2) * (el.w / 2)) / (2 * absS);
+                            const midY = fsz * 0.8;
+                            const epY = s > 0 ? midY + absS : midY - absS;
+                            const sweep = s > 0 ? "0" : "1";
+                            const arcD = `M 0,${epY} A ${r},${r} 0 0,${sweep} ${el.w},${epY}`;
+                            const svgH = fsz + absS + 10;
+                            return (
+                              <svg width={el.w} height={svgH} style={{ overflow: "visible" }}>
+                                <defs><path id={`arc-${el.id}`} d={arcD} fill="none" /></defs>
+                                <text fontFamily={`${el.fontFamily ?? 'Poppins'}, sans-serif`} fontSize={el.fontSize} fontWeight={el.fontWeight} fontStyle={el.fontStyle} fill={el.color ?? '#111'} textAnchor="middle" letterSpacing={el.letterSpacing}>
+                                  <textPath href={`#arc-${el.id}`} startOffset="50%">{el.text}</textPath>
+                                </text>
+                              </svg>
+                            );
+                          })() : (
+                            <span style={{ fontSize: el.fontSize, fontWeight: el.fontWeight, fontStyle: el.fontStyle, fontFamily: el.fontFamily ?? "var(--font-poppins)", letterSpacing: el.letterSpacing, textAlign: el.textAlign, color: el.color, whiteSpace: "nowrap", display: "block", width: "100%" }}>
+                              {el.text}
+                            </span>
+                          )}
+                          {/* Corner resize circles — mobile only */}
+                          {isSelected && (["nw","ne","sw","se"] as const).map((corner) => (
+                            <div
+                              key={corner}
+                              onPointerDown={(e) => { e.preventDefault(); onTextCornerResizePointerDown(e, el.id, corner); }}
+                              className="lg:hidden absolute w-8 h-8 z-10 touch-none flex items-center justify-center"
+                              style={{
+                                top:    corner.startsWith("n") ? -16 : undefined,
+                                bottom: corner.startsWith("s") ? -16 : undefined,
+                                left:   corner.endsWith("w")   ? -16 : undefined,
+                                right:  corner.endsWith("e")   ? -16 : undefined,
+                                cursor: corner === "nw" || corner === "se" ? "nwse-resize" : "nesw-resize",
+                              }}
+                            >
+                              <div className="w-3 h-3 bg-white border-2 border-[#4a7fc1] rounded-full pointer-events-none" />
+                            </div>
+                          ))}
+                        </>
                       )}
                     </div>
                   );

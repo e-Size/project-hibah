@@ -60,3 +60,14 @@ body {
 .animate-skeleton-pulse {
   animation: skeleton-pulse 1.35s ease-in-out infinite;
 }
+
+@keyframes fade-in-out {
+  0% { opacity: 0; transform: translateX(-50%) translateY(4px); }
+  12% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  75% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-2px); }
+}
+
+.animate-fade-in-out {
+  animation: fade-in-out 2.5s ease-in-out forwards;
+}
