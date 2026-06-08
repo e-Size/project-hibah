@@ -1953,12 +1953,12 @@ export default function EditorPage() {
                               {el.text}
                             </span>
                           )}
-                          {/* Corner resize circles — mobile only */}
+                          {/* Corner resize circles — mobile and desktop */}
                           {isSelected && (["nw","ne","sw","se"] as const).map((corner) => (
                             <div
                               key={corner}
                               onPointerDown={(e) => { e.preventDefault(); onTextCornerResizePointerDown(e, el.id, corner); }}
-                              className="lg:hidden absolute w-8 h-8 z-10 touch-none flex items-center justify-center"
+                              className="absolute w-8 h-8 z-10 touch-none flex items-center justify-center"
                               style={{
                                 top:    corner.startsWith("n") ? -16 : undefined,
                                 bottom: corner.startsWith("s") ? -16 : undefined,
