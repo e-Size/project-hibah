@@ -1,4 +1,4 @@
-import type { ExtraImage, Product, ProductCategory, ProductDetail, SizeGuide } from "../types/product";
+import type { ColorPalette, ExtraImage, Product, ProductCategory, ProductDetail, SizeGuide } from "../types/product";
 
 type ApiListResponse<T> = {
   data: T;
@@ -53,6 +53,17 @@ export async function getSizeGuideByProduct(productId: string): Promise<SizeGuid
     throw new Error(`API request failed: ${response.status} ${response.statusText}`);
   }
   return (await response.json() as ApiListResponse<SizeGuide>).data;
+}
+
+export async function getColorPaletteByProduct(productId: string): Promise<ColorPalette | null> {
+  const response = await fetch(`${API_BASE_URL}/color-palettes/product/${productId}`, {
+    headers: { Accept: "application/json" },
+  });
+  if (response.status === 404) return null;
+  if (!response.ok) {
+    throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+  }
+  return (await response.json() as ApiListResponse<ColorPalette>).data;
 }
 
 export function resolveAssetUrl(value?: string): string | undefined {

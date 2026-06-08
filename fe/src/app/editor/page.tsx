@@ -7,7 +7,7 @@ import FontPicker from "react-fontpicker-ts";
 import "react-fontpicker-ts/dist/index.css";
 import OnboardingTour, { type TourStep } from "@/components/ui/OnboardingTour";
 import ViewportScaler from "@/components/ui/ViewportScaler";
-import { getExtraImages, getProducts, getSizeGuideByProduct, resolveAssetUrl } from "@/services/api";
+import { getExtraImages, getProducts, getSizeGuideByProduct, getColorPaletteByProduct, resolveAssetUrl } from "@/services/api";
 import type { ExtraImage, Product } from "@/types/product";
 
 type SidebarTab = "product" | "upload" | "text" | "layers" | "views" | null;
@@ -23,6 +23,11 @@ const MAX_TEXT_FONT_SIZE = 180;
 const colors = [
   "#111111", "#d4c4a8", "#8b6340", "#2b5fd4", "#c41e3a", "#1a472a", "#64748b",
   "#c0392b", "#4d7c0f", "#7f1d1d", "#c8a96e", "#6b8e6b", "#cd853f", "#ffffff",
+];
+
+const DEFAULT_MERCH_COLORS = [
+  "#ffffff", "#111111", "#2b5fd4", "#c41e3a", "#1a472a", "#fcd34d", "#f472b6",
+  "#a78bfa", "#e8734a", "#38bdf8", "#34d399", "#64748b", "#8b6340", "#cd853f",
 ];
 
 const viewDefinitions: { key: ViewType; label: string; descriptions: string[] }[] = [
@@ -288,6 +293,7 @@ export default function EditorPage() {
   const [productLoadError, setProductLoadError] = useState(false);
 
   const [selectedColor, setSelectedColor] = useState("#ffffff");
+  const [activeColors, setActiveColors] = useState<string[]>(colors);
   const [selectedView, setSelectedView] = useState<ViewType>("front");
   const [processedSrc, setProcessedSrc] = useState<Partial<Record<ViewType, string>>>({});
   const selectedProduct = productTemplates.find((product) => product.name === selectedProductName) ?? productTemplates[0];
@@ -399,27 +405,67 @@ export default function EditorPage() {
   }, [catalogProducts, selectedProductName]);
 
   useEffect(() => {
+    const product = findCatalogProduct(catalogProducts, selectedProductName);
+    if (!product) {
+      setActiveColors(colors);
+      return;
+    }
+
+    let ignore = false;
+    getColorPaletteByProduct(product.id)
+      .then((palette) => {
+        if (ignore) return;
+        if (palette && palette.colors && palette.colors.length > 0) {
+          setActiveColors(palette.colors);
+          setSelectedColor((prev) => palette.colors.includes(prev) ? prev : palette.colors[0]);
+        } else {
+          const fallback = product.category === "merch" ? DEFAULT_MERCH_COLORS : colors;
+          setActiveColors(fallback);
+          setSelectedColor((prev) => fallback.includes(prev) ? prev : fallback[0]);
+        }
+      })
+      .catch(() => {
+        if (ignore) return;
+        const fallback = product.category === "merch" ? DEFAULT_MERCH_COLORS : colors;
+        setActiveColors(fallback);
+        setSelectedColor((prev) => fallback.includes(prev) ? prev : fallback[0]);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [catalogProducts, selectedProductName]);
+
+  useEffect(() => {
     if (views.length > 0 && !views.some((view) => view.key === selectedView)) {
       setSelectedView(views[0].key);
     }
   }, [selectedView, views]);
 
   useEffect(() => {
-    setProcessedSrc({});
-  }, [selectedColor, views]);
-
-  useEffect(() => {
-    if (!selectedViewSource) return;
+    if (views.length === 0) return;
 
     let ignore = false;
-    applyShirtColor(getOptimizedAssetUrl(selectedViewSource, 640), selectedColor).then(dataUrl => {
-      if (!ignore) setProcessedSrc(prev => ({ ...prev, [selectedView]: dataUrl }));
+    Promise.all(
+      views.map((view) =>
+        applyShirtColor(getOptimizedAssetUrl(view.src, 640), selectedColor).then((dataUrl) => ({
+          key: view.key,
+          dataUrl,
+        }))
+      )
+    ).then((results) => {
+      if (ignore) return;
+      const nextProcessed: Partial<Record<ViewType, string>> = {};
+      results.forEach(({ key, dataUrl }) => {
+        nextProcessed[key] = dataUrl;
+      });
+      setProcessedSrc(nextProcessed);
     });
 
     return () => {
       ignore = true;
     };
-  }, [selectedColor, selectedView, selectedViewSource]);
+  }, [selectedColor, views]);
 
   const [zoom, setZoom] = useState(100);
   const [elements, setElements] = useState<CanvasEl[]>([]);
@@ -1407,7 +1453,7 @@ export default function EditorPage() {
                     <span className="font-bold text-gray-800 text-sm tracking-wide">COLOR PALETTE</span>
                   </div>
                   <div className="grid grid-cols-7 gap-2">
-                    {colors.map((color) => (
+                    {activeColors.map((color) => (
                       <button
                         key={color}
                         onClick={() => setSelectedColor(color)}

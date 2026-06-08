@@ -93,3 +93,11 @@ export type CategoryItem = {
   image?: string;
   keywords?: string[];
 };
+
+export type ColorPalette = {
+  id: string;
+  product_id: string;
+  colors: string[];
+  created_at?: string;
+  updated_at?: string;
+};
