@@ -3,8 +3,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
 import JSZip from "jszip";
-import FontPicker from "react-fontpicker-ts";
-import "react-fontpicker-ts/dist/index.css";
 import OnboardingTour, { type TourStep } from "@/components/ui/OnboardingTour";
 import ViewportScaler from "@/components/ui/ViewportScaler";
 import { getExtraImages, getProducts, getSizeGuideByProduct, getColorPaletteByProduct, resolveAssetUrl } from "@/services/api";
@@ -19,6 +17,166 @@ const CANVAS = 520;
 const sizes: Size[] = ["S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"];
 const MIN_TEXT_FONT_SIZE = 8;
 const MAX_TEXT_FONT_SIZE = 180;
+
+const FONT_LIST = [
+  "Poppins", "Inter", "Roboto", "Open Sans", "Lato", "Montserrat", "Nunito",
+  "Raleway", "Oswald", "Playfair Display", "Merriweather", "Source Sans 3",
+  "Ubuntu", "PT Sans", "Noto Sans", "Work Sans", "Josefin Sans", "Quicksand",
+  "Mulish", "Barlow", "Outfit", "DM Sans", "Plus Jakarta Sans", "Figtree",
+  "Sora", "Lexend", "Manrope", "Space Grotesk", "Karla", "Cabin",
+  "Bebas Neue", "Anton", "Righteous", "Pacifico", "Dancing Script",
+  "Lobster", "Comfortaa", "Secular One", "Alfa Slab One", "Titan One",
+  "Permanent Marker", "Caveat", "Satisfy", "Sacramento", "Allura",
+  "Great Vibes", "Kaushan Script", "Amatic SC", "Special Elite",
+  "Abril Fatface", "Cinzel", "Cormorant Garamond", "EB Garamond",
+  "Libre Baskerville", "Crimson Text", "Spectral", "Lora", "Bitter",
+  "Zilla Slab", "Crete Round", "Vollkorn", "Arvo", "Rokkitt",
+  "Courier Prime", "Space Mono", "IBM Plex Mono", "Fira Code",
+  "Chakra Petch", "Orbitron", "Exo 2", "Rajdhani", "Saira",
+  "Noto Serif", "PT Serif", "Tinos", "Gentium Book Plus",
+];
+
+function loadGoogleFont(family: string) {
+  if (typeof document === "undefined") return;
+  const id = `gfont-${family.replace(/\s+/g, "-").toLowerCase()}`;
+  if (document.getElementById(id)) return;
+  const link = document.createElement("link");
+  link.id = id;
+  link.rel = "stylesheet";
+  link.href = `https://fonts.googleapis.com/css2?family=${family.replace(/\s+/g, "+").replace(/"/g, "")}:wght@400;700&display=swap`;
+  document.head.appendChild(link);
+}
+
+function FontSelector({ value, onChange }: { value: string; onChange: (font: string) => void }) {
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const filtered = useMemo(
+    () => FONT_LIST.filter(f => f.toLowerCase().includes(query.toLowerCase())),
+    [query]
+  );
+
+  // Load the currently selected font on mount / when value changes
+  useEffect(() => { loadGoogleFont(value); }, [value]);
+
+  // When dropdown opens, preload the first batch of filtered fonts
+  useEffect(() => {
+    if (!open) return;
+    filtered.slice(0, 20).forEach(loadGoogleFont);
+  }, [open, filtered]);
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+    function onDown(e: MouseEvent) {
+      if (!containerRef.current?.contains(e.target as Node)) {
+        setOpen(false);
+        setQuery("");
+      }
+    }
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [open]);
+
+  // Load fonts as user scrolls the list
+  function handleScroll() {
+    const el = listRef.current;
+    if (!el) return;
+    const items = el.querySelectorAll<HTMLElement>("[data-font]");
+    items.forEach(item => {
+      const rect = item.getBoundingClientRect();
+      const listRect = el.getBoundingClientRect();
+      if (rect.top < listRect.bottom + 120 && rect.bottom > listRect.top - 40) {
+        loadGoogleFont(item.dataset.font ?? "");
+      }
+    });
+  }
+
+  return (
+    <div ref={containerRef} className="relative w-full">
+      {/* Trigger button */}
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2.5 hover:border-[#e8734a] transition-colors group"
+      >
+        <span style={{ fontFamily: `"${value}", sans-serif` }} className="text-sm text-gray-800 truncate">
+          {value}
+        </span>
+        <svg
+          width="14" height="14" viewBox="0 0 24 24" fill="none"
+          stroke="#9ca3af" strokeWidth="2.5" strokeLinecap="round"
+          className={`shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+
+      {/* Dropdown panel */}
+      {open && (
+        <div className="absolute left-0 right-0 top-full mt-1.5 z-[9999] bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden">
+          {/* Search bar */}
+          <div className="p-2 border-b border-gray-100 bg-white sticky top-0">
+            <div className="flex items-center gap-2 bg-[#fdf8f4] border border-[#f0e4d8] rounded-lg px-2.5 py-1.5">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2.5" strokeLinecap="round" className="shrink-0">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input
+                autoFocus
+                value={query}
+                onChange={e => { setQuery(e.target.value); filtered.slice(0, 20).forEach(loadGoogleFont); }}
+                placeholder="Search fonts..."
+                className="flex-1 bg-transparent text-sm text-gray-700 placeholder-gray-400 outline-none min-w-0"
+                onClick={e => e.stopPropagation()}
+              />
+              {query && (
+                <button type="button" onClick={() => setQuery("")} className="shrink-0 text-gray-400 hover:text-gray-600 transition-colors">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Font list */}
+          <div ref={listRef} onScroll={handleScroll} className="overflow-y-auto" style={{ maxHeight: 220 }}>
+            {filtered.length === 0 && (
+              <p className="text-center text-sm text-gray-400 py-5">No fonts found</p>
+            )}
+            {filtered.map(font => (
+              <button
+                key={font}
+                type="button"
+                data-font={font}
+                onClick={() => { onChange(font); setOpen(false); setQuery(""); }}
+                className={`w-full flex items-center gap-2 px-3 py-2 text-left transition-colors ${
+                  font === value
+                    ? "bg-[#fff4ee] text-[#e8734a]"
+                    : "hover:bg-[#fdf6f0] text-gray-700"
+                }`}
+              >
+                <span className="shrink-0 w-4">
+                  {font === value && (
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#e8734a" strokeWidth="3" strokeLinecap="round">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  )}
+                </span>
+                <span style={{ fontFamily: `"${font}", sans-serif` }} className="text-sm leading-relaxed truncate">
+                  {font}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 const colors = [
   "#111111", "#d4c4a8", "#8b6340", "#2b5fd4", "#c41e3a", "#1a472a", "#64748b",
@@ -277,6 +435,24 @@ function getProductDescription(name: string): string {
   return "Handcrafted quality meets modern design. Tailored carefully using premium materials.";
 }
 
+function isClothingProduct(name: string): boolean {
+  const n = name.toLowerCase();
+  return (
+    n.includes("jersey") ||
+    n.includes("jacket") ||
+    n.includes("jaket") ||
+    n.includes("sweater") ||
+    n.includes("hoodie") ||
+    n.includes("t-shirt") ||
+    n.includes("tshirt") ||
+    n.includes("kaos") ||
+    n.includes("kemeja") ||
+    n.includes("pdh") ||
+    n.includes("vest") ||
+    n.includes("polo")
+  );
+}
+
 export default function EditorPage() {
   const [activeTab, setActiveTab] = useState<SidebarTab>(null);
   const [mobileSheetHeight, setMobileSheetHeight] = useState(55);
@@ -358,7 +534,12 @@ export default function EditorPage() {
 
   useEffect(() => {
     if (!activeTab || activeTab === "views" || window.innerWidth >= 1024) return;
-    setMobileSheetHeight(activeTab === "text" ? Math.min(72, getMaxSheetHeight()) : 55);
+    // text and upload get max sheet height for full editing space
+    if (activeTab === "text" || activeTab === "upload") {
+      setMobileSheetHeight(getMaxSheetHeight());
+    } else {
+      setMobileSheetHeight(55);
+    }
   }, [activeTab]);
 
   useEffect(() => {
@@ -712,11 +893,11 @@ export default function EditorPage() {
     setSelectedEl(id);
 
     const scale = zoom / 100;
-    const pz = printZone[el.view];
-    const zoneLeft   = (pz.x / 100) * CANVAS;
-    const zoneTop    = (pz.y / 100) * CANVAS;
-    const zoneRight  = ((pz.x + pz.w) / 100) * CANVAS;
-    const zoneBottom = ((pz.y + pz.h) / 100) * CANVAS;
+    // Allow full canvas movement — no zone restriction
+    const zoneLeft   = 0;
+    const zoneTop    = 0;
+    const zoneRight  = CANVAS;
+    const zoneBottom = CANVAS;
 
     function onMove(ev: PointerEvent) {
       if (!draggingRef.current) return;
@@ -787,11 +968,11 @@ export default function EditorPage() {
     if (gesture.cleanup) return;
 
     const scale = zoom / 100;
-    const pz = printZone[el.view];
-    const zoneLeft = (pz.x / 100) * CANVAS;
-    const zoneTop = (pz.y / 100) * CANVAS;
-    const zoneRight = ((pz.x + pz.w) / 100) * CANVAS;
-    const zoneBottom = ((pz.y + pz.h) / 100) * CANVAS;
+    // Allow full canvas movement — no zone restriction
+    const zoneLeft = 0;
+    const zoneTop = 0;
+    const zoneRight = CANVAS;
+    const zoneBottom = CANVAS;
 
     function onMove(ev: PointerEvent) {
       const current = imageGestureRef.current;
@@ -919,9 +1100,9 @@ export default function EditorPage() {
   }
 
   function getMaxFitFontSize(el: CanvasEl, desiredSize: number) {
-    const pz = printZone[el.view];
-    const availW = ((pz.x + pz.w) / 100) * CANVAS - el.x;
-    const availH = ((pz.y + pz.h) / 100) * CANVAS - el.y;
+    // Use full canvas space from the element's current position
+    const availW = CANVAS - el.x;
+    const availH = CANVAS - el.y;
     let size = clampTextFontSize(desiredSize);
     while (size > MIN_TEXT_FONT_SIZE && (measureTextWidth(el, size) > availW || size * 1.4 > availH)) {
       size -= 1;
@@ -993,11 +1174,11 @@ export default function EditorPage() {
     if (gesture.cleanup) return;
 
     const scale = zoom / 100;
-    const pz = printZone[el.view];
-    const zoneLeft = (pz.x / 100) * CANVAS;
-    const zoneTop = (pz.y / 100) * CANVAS;
-    const zoneRight = ((pz.x + pz.w) / 100) * CANVAS;
-    const zoneBottom = ((pz.y + pz.h) / 100) * CANVAS;
+    // Allow full canvas movement — no zone restriction
+    const zoneLeft = 0;
+    const zoneTop = 0;
+    const zoneRight = CANVAS;
+    const zoneBottom = CANVAS;
 
     function onMove(ev: PointerEvent) {
       const current = textGestureRef.current;
@@ -1095,11 +1276,11 @@ export default function EditorPage() {
     };
 
     const scale = zoom / 100;
-    const pz = printZone[el.view];
-    const zoneLeft   = (pz.x / 100) * CANVAS;
-    const zoneTop    = (pz.y / 100) * CANVAS;
-    const zoneRight  = ((pz.x + pz.w) / 100) * CANVAS;
-    const zoneBottom = ((pz.y + pz.h) / 100) * CANVAS;
+    // Allow full canvas resize — no zone restriction
+    const zoneLeft   = 0;
+    const zoneTop    = 0;
+    const zoneRight  = CANVAS;
+    const zoneBottom = CANVAS;
 
     function onMove(ev: PointerEvent) {
       if (!resizingRef.current) return;
@@ -1380,11 +1561,15 @@ export default function EditorPage() {
               "--mobile-sheet-height": mobileSheetHeightValue,
               "--mobile-sheet-max-height": mobileSheetMaxHeightPx > 0 ? `${mobileSheetMaxHeightPx}px` : "calc(100dvh - 7rem)",
             } as React.CSSProperties}
-            className={`fixed lg:relative inset-x-0 bottom-14 lg:bottom-auto z-40 lg:z-auto bg-white border-t border-gray-200 lg:border-t-0 lg:border-r rounded-t-2xl lg:rounded-none shadow-2xl lg:shadow-none lg:w-72 lg:flex-shrink-0 ${
+            className={`fixed lg:relative inset-x-0 bottom-14 lg:bottom-auto z-40 lg:z-auto bg-white border-t border-gray-200 lg:border-t-0 lg:border-r rounded-t-2xl lg:rounded-none shadow-2xl lg:shadow-none ${
+              activeTab === "text" || activeTab === "upload"
+                ? "lg:w-[440px]"
+                : "lg:w-72"
+            } lg:flex-shrink-0 ${
               activeTab === "text"
                 ? "flex flex-col overflow-hidden"
                 : "overflow-y-auto"
-            } h-[var(--mobile-sheet-height)] max-h-[var(--mobile-sheet-max-height)] lg:h-auto lg:max-h-none ${isDraggingSheet ? "" : "transition-[height] duration-300 ease-out"}`}
+            } h-[var(--mobile-sheet-height)] max-h-[var(--mobile-sheet-max-height)] lg:h-auto lg:max-h-none ${isDraggingSheet ? "" : "transition-[height,width] duration-300 ease-out"}`}
           >
             {/* Drag handle — mobile only */}
             <div
@@ -1432,6 +1617,7 @@ export default function EditorPage() {
                   </button>
                 </div>
 
+                {isClothingProduct(selectedProduct?.name ?? "") && (
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
@@ -1449,6 +1635,7 @@ export default function EditorPage() {
                   </div>
                   <p className="text-sm text-gray-700 font-medium">{sizes.join("-")}</p>
                 </div>
+                )}
 
                 <div className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100">
                   <div className="flex items-center justify-between mb-3">
@@ -1566,7 +1753,7 @@ export default function EditorPage() {
                     </div>
                     <span className="font-bold text-gray-800 text-xs tracking-widest">FILE GUIDELINES</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                     {[
                       { label: "Format", value: "JPG, PNG, SVG" },
                       { label: "Max Size", value: "10 MB" },
@@ -1584,7 +1771,7 @@ export default function EditorPage() {
                 {viewElements.filter(el => el.type === "image").length > 0 && (
                   <div>
                     <p className="text-xs font-bold text-gray-500 tracking-wider mb-2">DI CANVAS ({selectedView.toUpperCase()})</p>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-3 lg:grid-cols-4 gap-2">
                       {viewElements.filter(el => el.type === "image").map((el) => (
                         <button key={el.id} onClick={() => setSelectedEl(el.id === selectedEl ? null : el.id)}
                           className={`aspect-square rounded-xl overflow-hidden relative border-2 transition-all ${el.id === selectedEl ? "border-[#e8734a]" : "border-gray-100"}`}>
@@ -1631,7 +1818,7 @@ export default function EditorPage() {
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-[10px] font-bold text-gray-500 tracking-widest">FONT STYLE</span>
                     </div>
-                    <FontPicker defaultValue="Poppins" autoLoad value={(font) => setTdFont(font)} />
+                    <FontSelector value={tdFont} onChange={(font) => setTdFont(font)} />
                   </div>
 
                   <div className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100">
@@ -1716,7 +1903,7 @@ export default function EditorPage() {
                         className="w-0 flex-1 min-w-0 bg-[#fdf8f4] border border-[#f0e4d8] rounded-xl px-3 py-2 text-sm text-gray-600 font-mono outline-none focus:border-[#e8734a] transition-colors"
                       />
                     </div>
-                    <div className="grid grid-cols-8 gap-1.5">
+                    <div className="grid grid-cols-8 lg:grid-cols-10 gap-1.5">
                       {tdColors.map(c => (
                         <button key={c} onClick={() => setTdColor(c)}
                           className={`w-7 h-7 rounded-lg border-2 transition-all ${tdColor === c ? "border-[#e8734a] scale-105 shadow-md" : "border-gray-100 hover:scale-105"}`}
@@ -1863,10 +2050,25 @@ export default function EditorPage() {
                 )}
 
                 {selectedEl && viewElements.some(el => el.id === selectedEl) && (
-                  <div
-                    className="absolute border-2 border-dashed border-white/50 pointer-events-none"
-                    style={{ left: `${zone.x}%`, top: `${zone.y}%`, width: `${zone.w}%`, height: `${zone.h}%` }}
-                  />
+                  <>
+                    {/* Recommended print area — informational guide, does not restrict movement */}
+                    <div
+                      className="absolute pointer-events-none"
+                      style={{
+                        left: `${zone.x}%`, top: `${zone.y}%`,
+                        width: `${zone.w}%`, height: `${zone.h}%`,
+                        border: "1.5px dashed rgba(255,255,255,0.35)",
+                        borderRadius: 4,
+                      }}
+                    >
+                      <span
+                        className="absolute -top-5 left-0 text-[9px] font-semibold text-white/50 tracking-widest whitespace-nowrap select-none"
+                        style={{ textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}
+                      >
+                        PRINT AREA
+                      </span>
+                    </div>
+                  </>
                 )}
 
                 {viewElements.map((el) => {
