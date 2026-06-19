@@ -238,6 +238,12 @@ export default function CategoryPage() {
             {!query && (
               <div className="hidden md:flex gap-3 mt-1">
                 <button
+                  onClick={() => setActiveChip(null)}
+                  className={`rounded-full border-[1.5px] px-6 py-2 text-sm font-medium transition ${activeChip === null ? "border-[#3a5fcf] bg-[#3a5fcf] text-white" : "border-stone-200 bg-white text-stone-600 hover:border-[#3a5fcf] hover:text-[#3a5fcf]"}`}
+                >
+                  All Product
+                </button>
+                <button
                   onClick={() => setActiveChip(prev => prev === "pakaian" ? null : "pakaian")}
                   className={`rounded-full border-[1.5px] px-6 py-2 text-sm font-medium transition ${activeChip === "pakaian" ? "border-[#3a5fcf] bg-[#3a5fcf] text-white" : "border-stone-200 bg-white text-stone-600 hover:border-[#3a5fcf] hover:text-[#3a5fcf]"}`}
                 >
