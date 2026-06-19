@@ -83,7 +83,7 @@ export default function PartnershipPage() {
         {/* CTA Button */}
         <div className="flex justify-center">
           <a
-            href="https://wa.me/6281234567890"
+            href="https://wa.me/6285156043052"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 bg-[#D4A253] hover:bg-[#b8973a] text-white font-semibold text-base sm:text-lg rounded-full px-5 sm:px-6 py-4 transition-colors shadow-md"

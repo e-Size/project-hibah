@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import RippleLink from "../components/ui/RippleLink";
 import FadeInLeft from "../components/animation/FadeInLeft";
 import FadeInRight from "../components/animation/FadeInRight";
@@ -48,20 +47,20 @@ export default function Home() {
 
             {/* CTA buttons — one row on all sizes */}
             <div className="flex flex-row gap-2 md:gap-4">
-              <Link
+              <RippleLink
                 href="/category"
                 className="px-4 py-2 md:px-8 md:py-3 rounded-full bg-white text-gray-900 hover:bg-gray-100 transition-colors border border-[#C0980D] text-xs md:text-sm font-medium text-center"
               >
                 Lihat Produk
-              </Link>
-              <a
-                href="https://wa.me/6281223344556"
+              </RippleLink>
+              <RippleLink
+                href="https://wa.me/6285156043052"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-4 py-2 md:px-8 md:py-3 rounded-full bg-[#C0980D] text-white hover:bg-[#a07a0b] transition-colors text-xs md:text-sm font-medium text-center shadow-md"
               >
                 Pesan Sekarang
-              </a>
+              </RippleLink>
             </div>
 
             {/* Contact info — inline below CTAs on mobile only */}
@@ -200,7 +199,7 @@ export default function Home() {
                 terjaga, proses efisien, dan pengiriman tepat waktu dengan harga
                 bersahabat.
               </p>
-              <RippleLink href="/about" className="px-4 py-2 md:px-8 md:py-3 rounded-full text-white hover:bg-[#a07a0b] transition-colors text-xs md:text-sm font-medium text-center shadow-md">
+              <RippleLink href="/about" className="px-4 py-2 md:px-8 md:py-3 rounded-full bg-[#DFAA14] text-white hover:bg-[#a07a0b] transition-colors text-xs md:text-sm font-medium text-center shadow-md">
                 Selengkapnya →
               </RippleLink>
             </FadeInLeft>
@@ -294,7 +293,7 @@ export default function Home() {
             <CategoryCarousel />
           </div>
           <FadeInUp>
-            <RippleLink href="/category" className="px-4 py-2 md:px-8 md:py-3 rounded-full text-white hover:bg-[#a07a0b] transition-colors text-xs md:text-sm font-medium text-center shadow-md">
+            <RippleLink href="/category" className="px-4 py-2 md:px-8 md:py-3 rounded-full bg-[#DFAA14] text-white hover:bg-[#a07a0b] transition-colors text-xs md:text-sm font-medium text-center shadow-md">
               Lihat Semua Produk
             </RippleLink>
           </FadeInUp>
@@ -311,10 +310,10 @@ export default function Home() {
 
           <FadeInUp className="flex justify-center">
             <RippleLink
-              href="https://wa.me/6281223344556"
+              href="https://wa.me/6285156043052"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2 md:px-8 md:py-3 rounded-full text-white hover:bg-[#a07a0b] transition-colors text-xs md:text-sm font-medium text-center shadow-md"
+              className="px-4 py-2 md:px-8 md:py-3 rounded-full bg-[#DFAA14] text-white hover:bg-[#a07a0b] transition-colors text-xs md:text-sm font-medium text-center shadow-md"
             >
               Pesan Sekarang
             </RippleLink>

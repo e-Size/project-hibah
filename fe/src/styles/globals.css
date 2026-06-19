@@ -35,7 +35,6 @@ body {
     #C39244 calc(var(--ripple-size) - 1%),
     transparent var(--ripple-size)
   );
-  background-color: #DFAA14;
 }
 
 @keyframes spin-in {
@@ -71,4 +70,3 @@ body {
 .animate-fade-in-out {
   animation: fade-in-out 2.5s ease-in-out forwards;
 }
-

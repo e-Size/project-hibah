@@ -15,7 +15,7 @@ type Props = {
 };
 
 const DEFAULT_IMAGES = ["/baju.png"];
-const WHATSAPP_NUMBER = "6281385774811";
+const WHATSAPP_NUMBER = "6285156043052";
 const JERSEY_COLLAR_ORDER = [
   "V-Neck Biasa",
   "V-Neck Variasi",
@@ -63,6 +63,27 @@ function shouldShowExtraFee(type: string, item: ProductAddon) {
 
 function formatExtraFee(value: number) {
   return value > 0 ? `+${formatPrice(value)}` : formatPrice(value);
+}
+
+function formatAddonLabel(type: string) {
+  const labelMap: Record<string, string> = {
+    bahan: "Bahan",
+    cetak: "Cetak",
+    extra: "Extra",
+    jenis: "Jenis",
+    lebar: "Lebar",
+    model: "Model",
+    model_kerah: "Model Kerah",
+    paket: "Paket",
+    tipe: "Tipe",
+    ukuran: "Ukuran",
+    warna: "Warna",
+    jersey_type: "Jenis Jersey",
+  };
+
+  return labelMap[type] ?? type
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function isQuantityInTier(matrix: PriceMatrix, qty: number) {
@@ -597,11 +618,13 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
   }, [detail, isIdLanyard, qty, selectedAddons.paket?.id]);
   const selectedLines = Object.entries(selectedAddons)
     .filter(([, addon]) => Boolean(addon))
-    .map(([type, addon]) => `${type}: ${addon?.addon_name}`);
+    .map(([type, addon]) => `${formatAddonLabel(type)}: ${addon?.addon_name}`);
+  const whatsappProductName = displayProduct?.name || product.name;
   const whatsappText = encodeURIComponent(
     `Halo Esize! Saya ingin bertanya tentang produk:\n\n` +
-    `Produk: ${product.name}\n` +
+    `Produk: ${whatsappProductName}\n` +
     (selectedLines.length > 0 ? `${selectedLines.join("\n")}\n` : "") +
+    `Estimasi Harga: ${selectedPriceLabel}\n` +
     `Jumlah: ${qty} pcs\n\n` +
     `Mohon info harga dan proses pemesanannya. Terima kasih!`
   );
@@ -654,9 +677,9 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
         )}
       </div>
 
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-x-hidden overflow-y-visible pr-1 md:overflow-y-auto md:overscroll-contain">
+      <div ref={scrollRef} className="min-h-0 flex-1 pr-1 md:overflow-x-hidden md:overflow-y-auto md:overscroll-contain">
         <div className="flex flex-col gap-5">
-          <div className="md:sticky md:top-0 md:z-10 md:-mb-5 md:bg-[#fdf6f0] md:pb-5">
+          <div className="sticky top-0 z-10 -mb-5 bg-[#fdf6f0] pt-3 pb-5 md:pr-12">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#9F7A04]">
               {displayProduct?.category || product.category || "produk"}
             </p>
@@ -902,7 +925,7 @@ export default function ProductModal({ product, onClose, asPage = false }: Props
         <button
           onClick={onClose}
           aria-label="Tutup modal"
-          className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white text-xl leading-none text-gray-700 shadow hover:bg-gray-100"
+          className="absolute right-4 top-4 z-30 flex h-9 w-9 items-center justify-center rounded-full bg-white text-xl leading-none text-gray-700 shadow hover:bg-gray-100"
         >
           x
         </button>

@@ -251,7 +251,7 @@ export default function JacketModal({ onClose }: Props) {
 
           {/* CTA */}
           <a
-            href={`https://wa.me/6281385774811?text=${encodeURIComponent(
+            href={`https://wa.me/6285156043052?text=${encodeURIComponent(
               `Halo Esize! Saya ingin memesan:\n\n` +
               `*Produk:* ${selectedTipe} Jacket Premium\n` +
               `*Tipe:* ${selectedTipe}\n` +
